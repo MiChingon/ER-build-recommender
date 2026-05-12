@@ -53,7 +53,7 @@ import {
   isInfusable,
   recommend,
 } from "../lib/recommender";
-import { AFFINITIES, Affinity, DEFAULT_TARGET_LEVEL, MAX_TARGET_LEVEL, WeaponUpgrade } from "../lib/types";
+import { AFFINITIES, Affinity, DEFAULT_TARGET_LEVEL, MAX_TARGET_LEVEL } from "../lib/types";
 
 const STAT_COLORS: Record<Stat, string> = {
   vigor: "#e57373",
@@ -73,7 +73,6 @@ export default function BuildPicker() {
   const [classId, setClassId] = useState<string>(classes[0].id);
   const [targetLevel, setTargetLevel] = useState<number>(DEFAULT_TARGET_LEVEL);
   const [twoHand, setTwoHand] = useState(false);
-  const [upgrade, setUpgrade] = useState<WeaponUpgrade>("base");
   const [talismanIds, setTalismanIds] = useState<(string | null)[]>([null, null, null, null]);
   const [armorSelection, setArmorSelection] = useState<ArmorSelection>({ ...EMPTY_ARMOR_SELECTION });
 
@@ -229,6 +228,31 @@ export default function BuildPicker() {
                   getOptionLabel={(w) => w.name}
                   groupBy={(w) => (category === "all" ? w.category : "")}
                   isOptionEqualToValue={(a, b) => a.id === b.id}
+                  renderOption={(props, option) => (
+                    <Box component="li" {...props}>
+                      <Stack direction="row" spacing={1} sx={{ width: "100%", alignItems: "center" }}>
+                        {option.image ? (
+                          <Box
+                            component="img"
+                            src={option.image}
+                            alt=""
+                            loading="lazy"
+                            sx={{ width: 32, height: 32, objectFit: "contain", bgcolor: "action.hover", borderRadius: 0.5 }}
+                          />
+                        ) : (
+                          <Box sx={{ width: 32, height: 32 }} />
+                        )}
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Typography variant="body2" noWrap>
+                            {option.name}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>
+                            {option.category} · {option.weight} wgt
+                          </Typography>
+                        </Box>
+                      </Stack>
+                    </Box>
+                  )}
                   renderInput={(params) => (
                     <TextField
                       {...params}
@@ -249,6 +273,7 @@ export default function BuildPicker() {
                     label="Infusion (affinity)"
                     value={effectiveAffinity}
                     onChange={(e) => setAffinity(e.target.value as Affinity)}
+                    renderValue={(v) => (weapon && !weaponInfusable ? "Somber" : (v as string))}
                   >
                     {AFFINITIES.map((a) => (
                       <MenuItem key={a} value={a}>
@@ -265,16 +290,76 @@ export default function BuildPicker() {
                   </FormHelperText>
                 </FormControl>
 
-                <ArmorSlots
-                  selection={armorSelection}
-                  onChange={handleArmorChange}
-                />
+                {weapon && (
+                  <Paper variant="outlined" sx={{ p: 2 }}>
+                    <Stack direction="row" spacing={2} sx={{ alignItems: "flex-start" }}>
+                      {weapon.image && (
+                        <Box
+                          component="img"
+                          src={weapon.image}
+                          alt={`${weapon.name} icon`}
+                          loading="lazy"
+                          sx={{ width: 72, height: 72, objectFit: "contain", bgcolor: "action.hover", borderRadius: 0.5, flexShrink: 0 }}
+                        />
+                      )}
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography variant="subtitle2" gutterBottom>
+                          {weapon.name}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          {weapon.category} · {weapon.weight} weight · Skill: {weapon.skill}
+                        </Typography>
+                        {(() => {
+                          const maxScaling = weapon.scalingTable?.max[effectiveAffinity] ?? weapon.scaling;
+                          const baseScaling = weapon.scalingTable?.base;
+                          const allStats = new Set<Stat>([
+                            ...(Object.keys(weapon.requirements) as Stat[]),
+                            ...(Object.keys(maxScaling) as Stat[]),
+                            ...(baseScaling ? (Object.keys(baseScaling) as Stat[]) : []),
+                          ]);
+                          const upgradeLabel = weaponInfusable ? "+25" : "+10";
+                          return (
+                            <Stack direction="row" spacing={1} useFlexGap sx={{ mt: 1, flexWrap: "wrap" }}>
+                              {STAT_ORDER.filter((s) => allStats.has(s)).map((s) => {
+                                const req = weapon.requirements[s];
+                                const baseG = baseScaling?.[s];
+                                const maxG = maxScaling[s];
+                                const scalingLabel = baseG && maxG
+                                  ? ` (+0:${baseG}→${upgradeLabel}:${maxG})`
+                                  : maxG
+                                  ? ` (${maxG})`
+                                  : "";
+                                return (
+                                  <Tooltip
+                                    key={s}
+                                    title={
+                                      baseG && maxG
+                                        ? `${STAT_LABELS[s]} scaling — +0: ${baseG}, ${upgradeLabel} ${effectiveAffinity}: ${maxG}`
+                                        : `${STAT_LABELS[s]} scaling at ${upgradeLabel}: ${maxG ?? "—"}`
+                                    }
+                                  >
+                                    <Chip
+                                      size="small"
+                                      label={`${STAT_LABELS[s].slice(0, 3)} ${req ?? "—"}${scalingLabel}`}
+                                      sx={{ bgcolor: STAT_COLORS[s], color: "rgba(0,0,0,0.85)" }}
+                                    />
+                                  </Tooltip>
+                                );
+                              })}
+                            </Stack>
+                          );
+                        })()}
+                      </Box>
+                    </Stack>
+                  </Paper>
+                )}
 
-                <TalismanSlots
-                  talismanIds={talismanIds}
-                  onChange={handleTalismanChange}
-                  loadSummary={rec?.equipLoad ?? null}
-                />
+                <Tooltip title="Two-handing multiplies effective Strength by ×1.5, lowering both the Str requirement and the base Str needed to hit AP breakpoints.">
+                  <FormControlLabel
+                    control={<Switch checked={twoHand} onChange={(e) => handleTwoHandToggle(e.target.checked)} />}
+                    label="Two-hand this weapon (×1.5 Str)"
+                  />
+                </Tooltip>
 
                 <Box>
                   <Stack direction="row" spacing={2} sx={{ alignItems: "baseline", mb: 1 }}>
@@ -309,51 +394,16 @@ export default function BuildPicker() {
                   </FormHelperText>
                 </Box>
 
-                <Tooltip title="Two-handing multiplies effective Strength by ×1.5, lowering both the Str requirement and the base Str needed to hit AP breakpoints.">
-                  <FormControlLabel
-                    control={<Switch checked={twoHand} onChange={(e) => handleTwoHandToggle(e.target.checked)} />}
-                    label="Two-hand this weapon (×1.5 Str)"
-                  />
-                </Tooltip>
+                <ArmorSlots
+                  selection={armorSelection}
+                  onChange={handleArmorChange}
+                />
 
-                <Tooltip
-                  title={
-                    weapon
-                      ? `Maxed weapon: ${getMaxUpgradeLevel(weapon)} (${isInfusable(weapon) ? "regular smithing stones" : "somber smithing stones"})`
-                      : "Toggle weapon upgrade level"
-                  }
-                >
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={upgrade === "max"}
-                        onChange={(e) => setUpgrade(e.target.checked ? "max" : "base")}
-                      />
-                    }
-                    label={`Use maxed weapon ${weapon ? `(${getMaxUpgradeLevel(weapon)})` : "(+25 / +10)"}`}
-                  />
-                </Tooltip>
-
-                {weapon && (
-                  <Paper variant="outlined" sx={{ p: 2 }}>
-                    <Typography variant="subtitle2" gutterBottom>
-                      {weapon.name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      {weapon.category} · {weapon.weight} weight · Skill: {weapon.skill}
-                    </Typography>
-                    <Stack direction="row" spacing={1} useFlexGap sx={{ mt: 1, flexWrap: "wrap" }}>
-                      {STAT_ORDER.filter((s) => weapon.requirements[s]).map((s) => (
-                        <Chip
-                          key={s}
-                          size="small"
-                          label={`${STAT_LABELS[s].slice(0, 3)} ${weapon.requirements[s]}${weapon.scaling[s] ? ` (${weapon.scaling[s]})` : ""}`}
-                          sx={{ bgcolor: STAT_COLORS[s], color: "rgba(0,0,0,0.85)" }}
-                        />
-                      ))}
-                    </Stack>
-                  </Paper>
-                )}
+                <TalismanSlots
+                  talismanIds={talismanIds}
+                  onChange={handleTalismanChange}
+                  loadSummary={rec?.equipLoad ?? null}
+                />
               </Stack>
             </CardContent>
           </Card>
@@ -387,7 +437,6 @@ export default function BuildPicker() {
                     weapon={weapon!}
                     target={rec.target}
                     twoHand={twoHand}
-                    selectedUpgrade={upgrade}
                   />
 
                   <TargetStatsTable
@@ -665,12 +714,10 @@ function DamagePanel({
   weapon,
   target,
   twoHand,
-  selectedUpgrade,
 }: {
   weapon: Weapon;
   target: Record<Stat, number>;
   twoHand: boolean;
-  selectedUpgrade: WeaponUpgrade;
 }) {
   const baseEstimate = estimateAttackPower(weapon, target as never, "base", twoHand);
   const maxEstimate = estimateAttackPower(weapon, target as never, "max", twoHand);
@@ -681,17 +728,8 @@ function DamagePanel({
   const cell = (
     label: string,
     est: { base: number; scaling: number; total: number },
-    highlighted: boolean,
   ) => (
-    <Paper
-      variant="outlined"
-      sx={{
-        p: 2,
-        flex: 1,
-        borderColor: highlighted ? "primary.main" : undefined,
-        borderWidth: highlighted ? 2 : 1,
-      }}
-    >
+    <Paper variant="outlined" sx={{ p: 2, flex: 1 }}>
       <Typography variant="caption" color="text.secondary">
         {label}
       </Typography>
@@ -713,8 +751,8 @@ function DamagePanel({
         </Typography>
       </Stack>
       <Stack direction="row" spacing={2}>
-        {cell("Base (+0)", baseEstimate, selectedUpgrade === "base")}
-        {cell(`Maxed (${maxLabel})`, maxEstimate, selectedUpgrade === "max")}
+        {cell("Base (+0)", baseEstimate)}
+        {cell(`Maxed (${maxLabel})`, maxEstimate)}
       </Stack>
       <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
         Upgrading from +0 → {maxLabel}: +{gain} AP ({gainPct > 0 ? "+" : ""}
