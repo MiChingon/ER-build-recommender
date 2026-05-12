@@ -1,5 +1,6 @@
 import { StartingClass, Stat, StatVector } from "../data/classes";
 import { ScaleGrade } from "../data/weapons";
+import { ArmorSelection, EMPTY_ARMOR_SELECTION } from "../data/armor";
 
 export const SCALE_RANK: Record<ScaleGrade, number> = { S: 6, A: 5, B: 4, C: 3, D: 2, E: 1 };
 
@@ -78,13 +79,29 @@ export type RecommendOptions = {
   twoHand: boolean;
   affinity: Affinity;
   classId: string;
+  talismanIds: (string | null)[];
+  armorSelection: ArmorSelection;
 };
 
 export const DEFAULT_OPTIONS: RecommendOptions = {
   targetLevel: 125,
   twoHand: false,
   affinity: "Standard",
-  classId: ""
+  classId: "",
+  talismanIds: [null, null, null, null],
+  armorSelection: { ...EMPTY_ARMOR_SELECTION },
+};
+
+export type RollCategory = "light" | "medium" | "heavy" | "overloaded";
+
+export type EquipLoadSummary = {
+  weaponWeight: number;
+  talismanWeight: number;
+  armorWeight: number;
+  totalWeight: number;
+  maxLoad: number;
+  percent: number;
+  rollCategory: RollCategory;
 };
 
 export type Recommendation = {
@@ -95,6 +112,7 @@ export type Recommendation = {
   levelingPlan: LevelingStep[];
   effectiveStrRequirement: number;
   options: RecommendOptions;
+  equipLoad: EquipLoadSummary;
 };
 
 export type ClassMatch = {
