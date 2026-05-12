@@ -1,6 +1,17 @@
 import type { Stat } from "./classes";
+import type { Affinity } from "../lib/types";
+import { WEAPON_EXTRAS } from "./weapons-extras";
 
 export type ScaleGrade = "S" | "A" | "B" | "C" | "D" | "E";
+
+export type ScalingMap = Partial<Record<Stat, ScaleGrade>>;
+
+// Per-affinity scaling at the weapon's max upgrade (+25 for infusable, +10 for somber).
+// Only "Standard" is populated for unique/somber weapons.
+export type ScalingTable = {
+  base: ScalingMap; // scaling at +0 in the weapon's natural state
+  max: Partial<Record<Affinity, ScalingMap>>;
+};
 
 export type Weapon = {
   id: string;
@@ -8,10 +19,12 @@ export type Weapon = {
   category: WeaponCategory;
   weight: number;
   requirements: Partial<Record<Stat, number>>;
-  scaling: Partial<Record<Stat, ScaleGrade>>;
+  scaling: ScalingMap;
   skill: string;
   sote?: boolean;
   baseAP?: number;
+  image?: string;
+  scalingTable?: ScalingTable;
 };
 
 export type WeaponCategory =
@@ -44,7 +57,9 @@ export type WeaponCategory =
   | "Throwing Blade"
   | "Hand-to-Hand Art"
   | "Beast Claw"
-  | "Perfume Bottle";
+  | "Perfume Bottle"
+  | "Glintstone Staff"
+  | "Sacred Seal";
 
 export const CATEGORIES: WeaponCategory[] = [
   "Dagger", "Straight Sword", "Greatsword", "Colossal Sword",
@@ -54,6 +69,7 @@ export const CATEGORIES: WeaponCategory[] = [
   "Colossal Weapon",
   "Light Greatsword", "Great Katana", "Backhand Blade", "Throwing Blade",
   "Hand-to-Hand Art", "Beast Claw", "Perfume Bottle",
+  "Glintstone Staff", "Sacred Seal",
 ];
 
 export const CATEGORY_BASE_AP: Record<WeaponCategory, number> = {
@@ -87,6 +103,8 @@ export const CATEGORY_BASE_AP: Record<WeaponCategory, number> = {
   "Hand-to-Hand Art": 70,
   "Beast Claw": 95,
   "Perfume Bottle": 65,
+  "Glintstone Staff": 50,
+  "Sacred Seal": 40,
 };
 
 // Per-weapon base attack power at +0, summing all damage types (physical +
@@ -218,7 +236,7 @@ const w = (
   baseAP: baseAP ?? BASE_AP_BY_ID[id],
 });
 
-export const weapons: Weapon[] = [
+const baseWeapons: Weapon[] = [
   // Daggers
   w("dagger", "Dagger", "Dagger", 1.5, { strength: 5, dexterity: 9 }, { strength: "D", dexterity: "C" }, "Quickstep"),
   w("parrying-dagger", "Parrying Dagger", "Dagger", 1.5, { strength: 5, dexterity: 14 }, { strength: "E", dexterity: "C" }, "Parry"),
@@ -479,7 +497,49 @@ export const weapons: Weapon[] = [
   w("frenzyflame-perfume", "Frenzyflame Perfume Bottle", "Perfume Bottle", 1, { strength: 8, dexterity: 14, intelligence: 12, faith: 12 }, { strength: "E", dexterity: "C", intelligence: "D", faith: "D" }, "Kick", true),
   w("lightning-perfume", "Lightning Perfume Bottle", "Perfume Bottle", 1, { strength: 8, dexterity: 18, faith: 13 }, { dexterity: "C", faith: "C" }, "Kick", true),
   w("deadly-poison-perfume", "Deadly Poison Perfume Bottle", "Perfume Bottle", 1, { strength: 8, dexterity: 16, arcane: 13 }, { dexterity: "C", arcane: "C" }, "Deadly Poison Spray", true),
+
+  // Glintstone Staffs (sorcery catalysts) — all somber/unique, +10 max
+  w("staff-of-the-great-beyond", "Staff of the Great Beyond", "Glintstone Staff", 2.5, { strength: 7, intelligence: 27, faith: 27 }, { strength: "E", intelligence: "D", faith: "D" }, "No Skill"),
+  w("maternal-staff", "Maternal Staff", "Glintstone Staff", 2.5, { strength: 7, intelligence: 21, arcane: 21 }, { strength: "E", intelligence: "D", arcane: "C" }, "No Skill"),
+  w("astrologers-staff", "Astrologer's Staff", "Glintstone Staff", 3, { strength: 7, intelligence: 16 }, { strength: "E", intelligence: "C" }, "No Skill"),
+  w("glintstone-staff", "Glintstone Staff", "Glintstone Staff", 3, { strength: 6, intelligence: 10 }, { strength: "E", intelligence: "C" }, "No Skill"),
+  w("academy-glintstone-staff", "Academy Glintstone Staff", "Glintstone Staff", 3, { strength: 6, intelligence: 28 }, { strength: "E", intelligence: "B" }, "No Skill"),
+  w("diggers-staff", "Digger's Staff", "Glintstone Staff", 4.5, { strength: 8, intelligence: 12 }, { strength: "C", intelligence: "D" }, "No Skill"),
+  w("demi-human-queens-staff", "Demi-Human Queen's Staff", "Glintstone Staff", 3, { strength: 6, intelligence: 10 }, { strength: "D", intelligence: "C" }, "No Skill"),
+  w("azurs-glintstone-staff", "Azur's Glintstone Staff", "Glintstone Staff", 4, { strength: 10, intelligence: 52 }, { strength: "D", intelligence: "B" }, "No Skill"),
+  w("lusats-glintstone-staff", "Lusat's Glintstone Staff", "Glintstone Staff", 4, { strength: 10, intelligence: 52 }, { strength: "D", intelligence: "B" }, "No Skill"),
+  w("carian-glintstone-staff", "Carian Glintstone Staff", "Glintstone Staff", 3, { strength: 6, dexterity: 8, intelligence: 24 }, { strength: "E", intelligence: "C" }, "No Skill"),
+  w("carian-glintblade-staff", "Carian Glintblade Staff", "Glintstone Staff", 2.5, { strength: 6, dexterity: 12, intelligence: 22 }, { strength: "E", dexterity: "E", intelligence: "C" }, "No Skill"),
+  w("carian-regal-scepter", "Carian Regal Scepter", "Glintstone Staff", 3, { strength: 8, dexterity: 10, intelligence: 60 }, { strength: "E", dexterity: "E", intelligence: "B" }, "Spinning Weapon"),
+  w("albinauric-staff", "Albinauric Staff", "Glintstone Staff", 2.5, { strength: 6, intelligence: 10, arcane: 12 }, { strength: "E", intelligence: "D", arcane: "C" }, "No Skill"),
+  w("staff-of-loss", "Staff of Loss", "Glintstone Staff", 2.5, { strength: 6, dexterity: 12, intelligence: 14 }, { strength: "E", dexterity: "E", intelligence: "C" }, "No Skill"),
+  w("gelmir-glintstone-staff", "Gelmir Glintstone Staff", "Glintstone Staff", 2.5, { strength: 6, intelligence: 14, faith: 14 }, { strength: "E", intelligence: "D", faith: "D" }, "No Skill"),
+  w("crystal-staff", "Crystal Staff", "Glintstone Staff", 4.5, { strength: 8, intelligence: 48 }, { strength: "D", intelligence: "B" }, "No Skill"),
+  w("rotten-crystal-staff", "Rotten Crystal Staff", "Glintstone Staff", 4.5, { strength: 8, intelligence: 48 }, { strength: "D", intelligence: "B" }, "No Skill"),
+  w("meteorite-staff", "Meteorite Staff", "Glintstone Staff", 4.5, { strength: 6, intelligence: 18 }, { strength: "D", intelligence: "S" }, "No Skill"),
+  w("staff-of-the-guilty", "Staff of the Guilty", "Glintstone Staff", 4.5, { strength: 8, faith: 12 }, { strength: "D", faith: "C" }, "No Skill"),
+  w("prince-of-deaths-staff", "Prince of Death's Staff", "Glintstone Staff", 3, { strength: 6, intelligence: 18, faith: 18 }, { strength: "E", intelligence: "D", faith: "D" }, "No Skill"),
+
+  // Sacred Seals (incantation catalysts) — all somber/unique, +10 max
+  w("dryleaf-seal", "Dryleaf Seal", "Sacred Seal", 1.5, { strength: 8, faith: 27 }, { strength: "E", faith: "C" }, "No Skill", true),
+  w("fire-knights-seal", "Fire Knight's Seal", "Sacred Seal", 1.5, { strength: 8, faith: 23 }, { strength: "E", faith: "C" }, "No Skill", true),
+  w("spiraltree-seal", "Spiraltree Seal", "Sacred Seal", 1.5, { strength: 8, faith: 17 }, { strength: "E", faith: "C" }, "No Skill", true),
+  w("finger-seal", "Finger Seal", "Sacred Seal", 1.5, { strength: 4, faith: 10 }, { strength: "E", faith: "C" }, "No Skill"),
+  w("erdtree-seal", "Erdtree Seal", "Sacred Seal", 0, { faith: 40 }, { faith: "C" }, "No Skill"),
+  w("golden-order-seal", "Golden Order Seal", "Sacred Seal", 0, { intelligence: 17, faith: 17 }, { intelligence: "D", faith: "D" }, "No Skill"),
+  w("gravel-stone-seal", "Gravel Stone Seal", "Sacred Seal", 1.5, { strength: 4, faith: 18 }, { strength: "E", faith: "C" }, "No Skill"),
+  w("giants-seal", "Giant's Seal", "Sacred Seal", 1.5, { strength: 4, faith: 14 }, { strength: "E", faith: "D" }, "No Skill"),
+  w("godslayers-seal", "Godslayer's Seal", "Sacred Seal", 1.5, { strength: 4, faith: 27 }, { strength: "E", faith: "C" }, "No Skill"),
+  w("clawmark-seal", "Clawmark Seal", "Sacred Seal", 1.5, { strength: 4, faith: 10 }, { strength: "D", faith: "D" }, "No Skill"),
+  w("frenzied-flame-seal", "Frenzied Flame Seal", "Sacred Seal", 0, {}, { strength: "E", dexterity: "E", intelligence: "E", faith: "D" }, "No Skill"),
+  w("dragon-communion-seal", "Dragon Communion Seal", "Sacred Seal", 0, { faith: 10, arcane: 10 }, { faith: "D", arcane: "C" }, "No Skill"),
 ];
+
+
+export const weapons: Weapon[] = baseWeapons.map((w) => {
+  const extra = WEAPON_EXTRAS[w.id];
+  return extra ? { ...w, ...extra } : w;
+});
 
 export function getWeapon(id: string): Weapon | undefined {
   return weapons.find((w) => w.id === id);
