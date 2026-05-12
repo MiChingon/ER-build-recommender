@@ -11,6 +11,7 @@ import {
   FormControlLabel,
   FormHelperText,
   Grid,
+  IconButton,
   InputLabel,
   LinearProgress,
   MenuItem,
@@ -28,8 +29,21 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { classes, STAT_LABELS, STAT_ORDER, type Stat } from "../data/classes";
 import { CATEGORIES, weapons, type Weapon, type WeaponCategory } from "../data/weapons";
+import { talismans, talismanBaseName, type Talisman } from "../data/talismans";
+import {
+  ARMOR_SLOTS,
+  ARMOR_SLOT_LABELS,
+  armorBySlot,
+  findArmor,
+  type ArmorPiece,
+  type ArmorSelection,
+  type ArmorSlot,
+  EMPTY_ARMOR_SELECTION,
+} from "../data/armor";
 import {
   compareClassToTarget,
   estimateAttackPower,
@@ -56,10 +70,12 @@ export default function BuildPicker() {
   const [category, setCategory] = useState<WeaponCategory | "all">("all");
   const [weapon, setWeapon] = useState<Weapon | null>(null);
   const [affinity, setAffinity] = useState<Affinity>("Standard");
-  const [classId, setClassId] = useState<string>("");
+  const [classId, setClassId] = useState<string>(classes[0].id);
   const [targetLevel, setTargetLevel] = useState<number>(DEFAULT_TARGET_LEVEL);
   const [twoHand, setTwoHand] = useState(false);
   const [upgrade, setUpgrade] = useState<WeaponUpgrade>("base");
+  const [talismanIds, setTalismanIds] = useState<(string | null)[]>([null, null, null, null]);
+  const [armorSelection, setArmorSelection] = useState<ArmorSelection>({ ...EMPTY_ARMOR_SELECTION });
 
   const filteredWeapons = useMemo(
     () => (category === "all" ? weapons : weapons.filter((w) => w.category === category)),
@@ -74,9 +90,9 @@ export default function BuildPicker() {
   const minLevel = useMemo(() => {
     if (!weapon) return 1;
     return selectedClass
-      ? getMinFeasibleLevel(selectedClass, weapon, twoHand, effectiveAffinity)
+      ? getMinFeasibleLevel(selectedClass, weapon, twoHand, effectiveAffinity, talismanIds, armorSelection)
       : getMinLevelForWeapon(weapon, twoHand);
-  }, [weapon, twoHand, selectedClass, effectiveAffinity]);
+  }, [weapon, twoHand, selectedClass, effectiveAffinity, talismanIds, armorSelection]);
 
   const clampedTargetLevel = Math.max(minLevel, Math.min(MAX_TARGET_LEVEL, targetLevel));
 
@@ -87,10 +103,12 @@ export default function BuildPicker() {
             targetLevel: clampedTargetLevel,
             twoHand,
             affinity: effectiveAffinity,
-            classId: selectedClass?.id
+            classId: selectedClass?.id,
+            talismanIds,
+            armorSelection,
           })
         : null,
-    [weapon, clampedTargetLevel, twoHand, effectiveAffinity],
+    [weapon, clampedTargetLevel, twoHand, effectiveAffinity, talismanIds, armorSelection, selectedClass?.id],
   );
 
   const selectedClassMatch =
@@ -106,8 +124,31 @@ export default function BuildPicker() {
 
   const computeMinFor = (w: Weapon, th: boolean) =>
     selectedClass
-      ? getMinFeasibleLevel(selectedClass, w, th, effectiveAffinity)
+      ? getMinFeasibleLevel(selectedClass, w, th, effectiveAffinity, talismanIds, armorSelection)
       : getMinLevelForWeapon(w, th);
+
+  const handleTalismanChange = (slot: number, value: Talisman | null) => {
+    setTalismanIds((prev) => {
+      const next = [...prev];
+      next[slot] = value?.id ?? null;
+      return next;
+    });
+    if (weapon && selectedClass) {
+      const nextIds = [...talismanIds];
+      nextIds[slot] = value?.id ?? null;
+      const nextMin = getMinFeasibleLevel(selectedClass, weapon, twoHand, effectiveAffinity, nextIds, armorSelection);
+      if (targetLevel < nextMin) setTargetLevel(nextMin);
+    }
+  };
+
+  const handleArmorChange = (slot: ArmorSlot, value: ArmorPiece | null) => {
+    setArmorSelection((prev) => ({ ...prev, [slot]: value?.id ?? null }));
+    if (weapon && selectedClass) {
+      const nextSel: ArmorSelection = { ...armorSelection, [slot]: value?.id ?? null };
+      const nextMin = getMinFeasibleLevel(selectedClass, weapon, twoHand, effectiveAffinity, talismanIds, nextSel);
+      if (targetLevel < nextMin) setTargetLevel(nextMin);
+    }
+  };
 
   const handleWeaponChange = (next: Weapon | null) => {
     setWeapon(next);
@@ -136,7 +177,7 @@ export default function BuildPicker() {
     if (!weapon) return;
     const nextCls = classes.find((c) => c.id === nextId);
     const nextMin = nextCls
-      ? getMinFeasibleLevel(nextCls, weapon, twoHand, effectiveAffinity)
+      ? getMinFeasibleLevel(nextCls, weapon, twoHand, effectiveAffinity, talismanIds, armorSelection)
       : getMinLevelForWeapon(weapon, twoHand);
     if (targetLevel < nextMin) setTargetLevel(nextMin);
   };
@@ -160,29 +201,7 @@ export default function BuildPicker() {
               <Stack spacing={3}>
                 <Typography variant="h6">Pick your build</Typography>
 
-                <FormControl fullWidth required error={!classId}>
-                  <InputLabel id="class-label">Starting class</InputLabel>
-                  <Select
-                    labelId="class-label"
-                    label="Starting class"
-                    value={classId}
-                    onChange={(e) => handleClassChange(e.target.value)}
-                  >
-                    {classes.map((c) => (
-                      <MenuItem key={c.id} value={c.id}>
-                        {c.name}
-                        <Typography component="span" color="text.secondary" sx={{ ml: 1 }}>
-                          Lv {c.level}
-                        </Typography>
-                      </MenuItem>
-                    ))}
-                  </Select>
-                  <FormHelperText>
-                    {classId
-                      ? "Build is computed against this class's starting stats."
-                      : "Pick a starting class to see recommendations."}
-                  </FormHelperText>
-                </FormControl>
+                <ClassCarousel classId={classId} onChange={handleClassChange} />
 
                 <FormControl fullWidth>
                   <InputLabel id="category-label">Weapon category</InputLabel>
@@ -245,6 +264,17 @@ export default function BuildPicker() {
                       : "Affinity overrides the weapon's primary scaling stat."}
                   </FormHelperText>
                 </FormControl>
+
+                <ArmorSlots
+                  selection={armorSelection}
+                  onChange={handleArmorChange}
+                />
+
+                <TalismanSlots
+                  talismanIds={talismanIds}
+                  onChange={handleTalismanChange}
+                  loadSummary={rec?.equipLoad ?? null}
+                />
 
                 <Box>
                   <Stack direction="row" spacing={2} sx={{ alignItems: "baseline", mb: 1 }}>
@@ -350,6 +380,7 @@ export default function BuildPicker() {
                     weapon={weapon!}
                     bestClassName={rec.best.cls.name}
                     targetLevel={clampedTargetLevel}
+                    equipLoad={rec.equipLoad}
                   />
 
                   <DamagePanel
@@ -390,6 +421,243 @@ export default function BuildPicker() {
         </Grid>
       </Grid>
     </Stack>
+  );
+}
+
+function ArmorSlots({
+  selection,
+  onChange,
+}: {
+  selection: ArmorSelection;
+  onChange: (slot: ArmorSlot, value: ArmorPiece | null) => void;
+}) {
+  return (
+    <Box>
+      <Typography variant="subtitle2" gutterBottom>
+        Armor
+      </Typography>
+      <Stack spacing={1.5}>
+        {ARMOR_SLOTS.map((slot) => {
+          const currentId = selection[slot];
+          const current = findArmor(currentId) ?? null;
+          const options = armorBySlot[slot];
+          return (
+            <Autocomplete
+              key={slot}
+              size="small"
+              options={options}
+              value={current}
+              onChange={(_, v) => onChange(slot, v)}
+              getOptionLabel={(a) => `${a.name} (${a.weight})`}
+              isOptionEqualToValue={(a, b) => a.id === b.id}
+              renderOption={(props, option) => (
+                <Box component="li" {...props}>
+                  <Stack direction="row" spacing={1} sx={{ width: "100%", alignItems: "center" }}>
+                    <Box
+                      component="img"
+                      src={option.image}
+                      alt=""
+                      loading="lazy"
+                      sx={{ width: 32, height: 32, objectFit: "contain", bgcolor: "action.hover", borderRadius: 0.5 }}
+                    />
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography variant="body2" noWrap>
+                        {option.name}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>
+                        Phy {option.phy} · Poise {option.poise}
+                      </Typography>
+                    </Box>
+                    <Chip size="small" label={`${option.weight}`} />
+                  </Stack>
+                </Box>
+              )}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label={ARMOR_SLOT_LABELS[slot]}
+                  placeholder={`Search ${ARMOR_SLOT_LABELS[slot].toLowerCase()}`}
+                />
+              )}
+            />
+          );
+        })}
+      </Stack>
+    </Box>
+  );
+}
+
+function TalismanSlots({
+  talismanIds,
+  onChange,
+  loadSummary,
+}: {
+  talismanIds: (string | null)[];
+  onChange: (slot: number, value: Talisman | null) => void;
+  loadSummary: import("../lib/types").EquipLoadSummary | null;
+}) {
+  const selectedBaseNames = new Set(
+    talismanIds
+      .map((id) => (id ? talismans.find((t) => t.id === id) : null))
+      .filter((t): t is Talisman => Boolean(t))
+      .map((t) => talismanBaseName(t.name)),
+  );
+
+  return (
+    <Box>
+      <Stack direction="row" spacing={1} sx={{ alignItems: "baseline", mb: 1 }}>
+        <Typography variant="subtitle2">Talismans (up to 4)</Typography>
+        {loadSummary && (
+          <LoadChip summary={loadSummary} />
+        )}
+      </Stack>
+      <Stack spacing={1.5}>
+        {[0, 1, 2, 3].map((slot) => {
+          const currentId = talismanIds[slot];
+          const current = currentId ? talismans.find((t) => t.id === currentId) ?? null : null;
+          const currentBase = current ? talismanBaseName(current.name) : null;
+          const options = talismans.filter(
+            (t) =>
+              t.id === currentId ||
+              !selectedBaseNames.has(talismanBaseName(t.name)) ||
+              talismanBaseName(t.name) === currentBase,
+          );
+          return (
+            <Autocomplete
+              key={slot}
+              size="small"
+              options={options}
+              value={current}
+              onChange={(_, v) => onChange(slot, v)}
+              getOptionLabel={(t) => `${t.name} (${t.weight})`}
+              isOptionEqualToValue={(a, b) => a.id === b.id}
+              renderOption={(props, option) => (
+                <Box component="li" {...props}>
+                  <Stack direction="row" spacing={1} sx={{ width: "100%", alignItems: "center" }}>
+                    <Box
+                      component="img"
+                      src={option.image}
+                      alt=""
+                      loading="lazy"
+                      sx={{ width: 32, height: 32, objectFit: "contain", bgcolor: "action.hover", borderRadius: 0.5 }}
+                    />
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography variant="body2" noWrap>
+                        {option.name}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>
+                        {option.effect}
+                      </Typography>
+                    </Box>
+                    <Chip size="small" label={`${option.weight}`} />
+                  </Stack>
+                </Box>
+              )}
+              renderInput={(params) => (
+                <TextField {...params} label={`Slot ${slot + 1}`} placeholder="Search talismans" />
+              )}
+            />
+          );
+        })}
+      </Stack>
+    </Box>
+  );
+}
+
+function LoadChip({ summary }: { summary: import("../lib/types").EquipLoadSummary }) {
+  const color =
+    summary.rollCategory === "overloaded"
+      ? "error"
+      : summary.rollCategory === "heavy"
+      ? "warning"
+      : summary.rollCategory === "medium"
+      ? "primary"
+      : "success";
+  return (
+    <Tooltip
+      title={`Weapon ${summary.weaponWeight} + Talismans ${summary.talismanWeight} = ${summary.totalWeight} / ${summary.maxLoad} max equip load at target Endurance. Roll: ${summary.rollCategory}.`}
+    >
+      <Chip
+        size="small"
+        color={color}
+        label={`Load ${summary.percent.toFixed(0)}% · ${summary.rollCategory}`}
+      />
+    </Tooltip>
+  );
+}
+
+function ClassCarousel({
+  classId,
+  onChange,
+}: {
+  classId: string;
+  onChange: (id: string) => void;
+}) {
+  const currentIndex = Math.max(
+    0,
+    classes.findIndex((c) => c.id === classId),
+  );
+  const current = classes[currentIndex];
+
+  const go = (delta: number) => {
+    const next = (currentIndex + delta + classes.length) % classes.length;
+    onChange(classes[next].id);
+  };
+
+  return (
+    <Box>
+      <Typography variant="subtitle2" gutterBottom>
+        Starting class
+      </Typography>
+      <Paper variant="outlined" sx={{ p: 2 }}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+          <IconButton
+            aria-label="Previous class"
+            onClick={() => go(-1)}
+            size="large"
+          >
+            <ChevronLeftIcon />
+          </IconButton>
+          <Stack
+            spacing={1}
+            sx={{ flex: 1, alignItems: "center", textAlign: "center" }}
+          >
+            <Box
+              component="img"
+              src={current.image}
+              alt={`${current.name} portrait`}
+              loading="lazy"
+              sx={{
+                width: 160,
+                height: 260,
+                objectFit: "contain",
+                objectPosition: "center bottom",
+                borderRadius: 1,
+                bgcolor: "action.hover",
+                pt: 1,
+              }}
+            />
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              {current.name}
+            </Typography>
+            <Chip size="small" label={`Lv ${current.level}`} />
+            <Typography variant="caption" color="text.secondary">
+              {currentIndex + 1} / {classes.length}
+            </Typography>
+          </Stack>
+          <IconButton
+            aria-label="Next class"
+            onClick={() => go(1)}
+            size="large"
+          >
+            <ChevronRightIcon />
+          </IconButton>
+        </Stack>
+      </Paper>
+      <FormHelperText sx={{ mx: 1.75 }}>
+        Build is computed against this class's starting stats.
+      </FormHelperText>
+    </Box>
   );
 }
 
@@ -462,11 +730,21 @@ function RecommendationHeader({
   weapon,
   bestClassName,
   targetLevel,
+  equipLoad,
 }: {
   weapon: Weapon;
   bestClassName: string;
   targetLevel: number;
+  equipLoad: import("../lib/types").EquipLoadSummary;
 }) {
+  const loadColor =
+    equipLoad.rollCategory === "overloaded"
+      ? "error"
+      : equipLoad.rollCategory === "heavy"
+      ? "warning"
+      : equipLoad.rollCategory === "medium"
+      ? "primary"
+      : "success";
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
@@ -475,6 +753,15 @@ function RecommendationHeader({
       <Stack direction="row" spacing={2} useFlexGap sx={{ flexWrap: "wrap" }}>
         <Chip color="primary" label={`Best class: ${bestClassName}`} />
         <Chip label={`Target Soul Level: ${targetLevel}`} variant="outlined" />
+        <Tooltip
+          title={`Weapon ${equipLoad.weaponWeight} + Talismans ${equipLoad.talismanWeight} = ${equipLoad.totalWeight} / ${equipLoad.maxLoad} max equip load. Roll: ${equipLoad.rollCategory}.`}
+        >
+          <Chip
+            color={loadColor}
+            variant="outlined"
+            label={`Equip Load: ${equipLoad.totalWeight} / ${equipLoad.maxLoad} (${equipLoad.percent.toFixed(0)}%)`}
+          />
+        </Tooltip>
       </Stack>
     </Box>
   );

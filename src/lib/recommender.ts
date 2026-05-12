@@ -1,6 +1,8 @@
 import { classes, STAT_ORDER, type Stat, type StatVector, type StartingClass, getClass } from "../data/classes";
 import { CATEGORY_BASE_AP, type Weapon } from "../data/weapons";
-import { Affinity, AFFINITY_PRIMARIES, AFFINITY_REQ_FLOOR, ClassMatch, DEFAULT_OPTIONS, ELEMENTAL_AP_BREAKPOINT, ELEMENTAL_STATS, GENERIC_SKILLS, LevelingStep, MAX_UPGRADE_MULTIPLIER, PHYSICAL_AP_BREAKPOINT, Recommendation, RecommendOptions, SCALE_RANK, SCALING_FACTOR, SOFT_CAP_STAT_VALUE, TWO_HAND_STR_MULTIPLIER, WeaponUpgrade } from "./types";
+import { totalTalismanWeight } from "../data/talismans";
+import { totalArmorWeight, totalArmorStatBoosts } from "../data/armor";
+import { Affinity, AFFINITY_PRIMARIES, AFFINITY_REQ_FLOOR, ClassMatch, DEFAULT_OPTIONS, ELEMENTAL_AP_BREAKPOINT, ELEMENTAL_STATS, EquipLoadSummary, GENERIC_SKILLS, LevelingStep, MAX_UPGRADE_MULTIPLIER, PHYSICAL_AP_BREAKPOINT, Recommendation, RecommendOptions, RollCategory, SCALE_RANK, SCALING_FACTOR, SOFT_CAP_STAT_VALUE, TWO_HAND_STR_MULTIPLIER, WeaponUpgrade } from "./types";
 
 const VIGOR_ANCHORS: ReadonlyArray<readonly [number, number]> = [
   [1, 20], [50, 30], [80, 40], [100, 50], [125, 60],
@@ -96,6 +98,42 @@ export function getEnduranceTarget(level: number): number {
   return interpolateAnchors(level, ENDURANCE_ANCHORS);
 }
 
+const MAX_ENDURANCE = 99;
+
+const EQUIP_LOAD_ANCHORS: ReadonlyArray<readonly [number, number]> = [
+  [1, 45],
+  [8, 45],
+  [15, 54],
+  [25, 67],
+  [30, 75],
+  [40, 85],
+  [50, 95],
+  [60, 105],
+  [70, 117],
+  [80, 132],
+  [99, 160],
+];
+
+const TARGET_LOAD_RATIO = 0.99;
+
+export function getMaxEquipLoad(endurance: number): number {
+  return interpolateAnchors(endurance, EQUIP_LOAD_ANCHORS);
+}
+
+export function classifyLoad(percent: number): RollCategory {
+  if (percent >= 100) return "overloaded";
+  if (percent >= 70) return "heavy";
+  if (percent > 30) return "medium";
+  return "light";
+}
+
+function enduranceNeededFor(weight: number, ratio: number): number {
+  for (let end = 1; end <= MAX_ENDURANCE; end++) {
+    if (getMaxEquipLoad(end) * ratio >= weight) return end;
+  }
+  return MAX_ENDURANCE;
+}
+
 export type MindProfile = "melee" | "spellblade" | "caster";
 
 export function getMindTarget(level: number, profile: MindProfile): number {
@@ -164,6 +202,8 @@ export function getMinFeasibleLevel(
   weapon: Weapon,
   twoHand: boolean,
   affinity: Affinity,
+  talismanIds: (string | null)[] = [],
+  armorSelection: import("../data/armor").ArmorSelection = { helm: null, chest: null, gauntlets: null, legs: null },
 ): number {
   let lvl = getMinLevelForClassAndWeapon(cls, weapon, twoHand);
   for (let i = 0; i < 8; i++) {
@@ -172,6 +212,8 @@ export function getMinFeasibleLevel(
       twoHand,
       affinity,
       classId: cls.id,
+      talismanIds,
+      armorSelection,
     });
     const next = cls.level + computeDeficit(cls.stats, target);
     if (next <= lvl) return lvl;
@@ -275,6 +317,22 @@ export function getTargetStats(weapon: Weapon, opts: RecommendOptions): { target
   target.endurance = Math.max(target.endurance, enduranceTarget);
   rationale.push(`Endurance → ${enduranceTarget} (Stamina + Equip Load, scales with level)`);
 
+  const armorBoosts = totalArmorStatBoosts(opts.armorSelection);
+
+  const talismanWeight = totalTalismanWeight(opts.talismanIds);
+  const armorWeight = totalArmorWeight(opts.armorSelection);
+  const carriedWeight = weapon.weight + talismanWeight + armorWeight;
+  const enduranceForLoad = Math.max(
+    0,
+    enduranceNeededFor(carriedWeight, TARGET_LOAD_RATIO) - (armorBoosts.endurance ?? 0),
+  );
+  if (enduranceForLoad > target.endurance) {
+    target.endurance = Math.min(MAX_ENDURANCE, enduranceForLoad);
+    rationale.push(
+      `Endurance → ${target.endurance} (lifts weapon ${weapon.weight} + armor ${armorWeight.toFixed(1)} + talismans ${talismanWeight.toFixed(1)} without overload)`,
+    );
+  }
+
   const affinityAddsSpellScaling =
     opts.affinity === "Flame Art" ||
     opts.affinity === "Sacred" ||
@@ -306,6 +364,25 @@ export function getTargetStats(weapon: Weapon, opts: RecommendOptions): { target
     if (req === undefined) continue;
     const adjusted = stat === "strength" ? adjustStrForTwoHand(req, opts.twoHand, startingClass?.stats[stat] ?? 0) : req;
     if (adjusted > target[stat]) target[stat] = adjusted;
+  }
+
+  // Apply armor stat boosts last so they reduce the leveling investment for
+  // scaling breakpoints. They do NOT count toward weapon stat requirements —
+  // the player must invest enough on their own to wield the weapon at full AP.
+  for (const stat of STAT_ORDER) {
+    const bonus = armorBoosts[stat] ?? 0;
+    if (bonus <= 0) continue;
+    const before = target[stat];
+    const classBase = startingClass?.stats[stat] ?? 0;
+    const req = weapon.requirements[stat] ?? 0;
+    const reqAdj = stat === "strength" ? adjustStrForTwoHand(req, opts.twoHand, classBase) : req;
+    const floor = Math.max(classBase, reqAdj);
+    target[stat] = Math.max(floor, target[stat] - bonus);
+    if (target[stat] < before) {
+      rationale.push(
+        `${stat} → ${target[stat]} (helm grants +${bonus}, saves ${before - target[stat]} pts; requirement still met without helm)`,
+      );
+    }
   }
 
   return { target, rationale };
@@ -358,10 +435,27 @@ export function buildLevelingPlan(classBase: StatVector, target: StatVector): Le
 export function recommend(weapon: Weapon, opts: Partial<RecommendOptions> = {}): Recommendation {
   const fullOpts: RecommendOptions = { ...DEFAULT_OPTIONS, ...opts };
   const { target, rationale } = getTargetStats(weapon, fullOpts);
-  console.log('target', target)
   const ranking = rankClasses(target);
   const best = ranking[0];
   const levelingPlan = buildLevelingPlan(best.cls.stats, target);
+
+  const talismanWeight = totalTalismanWeight(fullOpts.talismanIds);
+  const armorWeight = totalArmorWeight(fullOpts.armorSelection);
+  const totalWeight = weapon.weight + talismanWeight + armorWeight;
+  const armorBoostsFinal = totalArmorStatBoosts(fullOpts.armorSelection);
+  const effectiveEndurance = Math.min(MAX_ENDURANCE, target.endurance + (armorBoostsFinal.endurance ?? 0));
+  const maxLoad = getMaxEquipLoad(effectiveEndurance);
+  const percent = maxLoad > 0 ? (totalWeight / maxLoad) * 100 : 100;
+  const equipLoad: EquipLoadSummary = {
+    weaponWeight: weapon.weight,
+    talismanWeight: Math.round(talismanWeight * 10) / 10,
+    armorWeight: Math.round(armorWeight * 10) / 10,
+    totalWeight: Math.round(totalWeight * 10) / 10,
+    maxLoad: Math.round(maxLoad * 10) / 10,
+    percent: Math.round(percent * 10) / 10,
+    rollCategory: classifyLoad(percent),
+  };
+
   return {
     target,
     rationale,
@@ -370,6 +464,7 @@ export function recommend(weapon: Weapon, opts: Partial<RecommendOptions> = {}):
     levelingPlan,
     effectiveStrRequirement: getEffectiveStrRequirement(weapon, fullOpts.twoHand, getClass(opts.classId ?? '')?.stats.strength ?? 0),
     options: fullOpts,
+    equipLoad,
   };
 }
 
