@@ -6,10 +6,8 @@ export type ScaleGrade = "S" | "A" | "B" | "C" | "D" | "E";
 
 export type ScalingMap = Partial<Record<Stat, ScaleGrade>>;
 
-// Per-affinity scaling at the weapon's max upgrade (+25 for infusable, +10 for somber).
-// Only "Standard" is populated for unique/somber weapons.
 export type ScalingTable = {
-  base: ScalingMap; // scaling at +0 in the weapon's natural state
+  base: ScalingMap;
   max: Partial<Record<Affinity, ScalingMap>>;
 };
 
@@ -114,12 +112,10 @@ export const CATEGORY_BASE_AP: Record<WeaponCategory, number> = {
 // in-game value at +0. Split-damage weapons (e.g. Carian Knight's Sword)
 // reflect the sum of physical + elemental columns at +0.
 const BASE_AP_BY_ID: Record<string, number> = {
-  // Daggers
   "dagger": 74, "parrying-dagger": 75, "great-knife": 75, "misericorde": 92,
   "wakizashi": 94, "bloodstained-dagger": 81, "reduvia": 79, "black-knife": 92,
   "blade-of-calling": 92, "glintstone-kris": 83, "main-gauche": 79,
   "fire-knights-shortsword": 100,
-  // Straight Swords
   "short-sword": 102, "longsword": 95, "broadsword": 117,
   "lordsworns-straight-sword": 99, "nobles-slender-sword": 101,
   "warhawks-talon": 101, "carian-knights-sword": 138, "crystal-sword": 152,
@@ -127,7 +123,6 @@ const BASE_AP_BY_ID: Record<string, number> = {
   "regalia-of-eochaid": 102, "coded-sword": 73, "sword-of-night-and-flame": 152,
   "sword-of-light": 130, "sword-of-darkness": 130, "velvet-sword-of-st-trina": 145,
   "stone-sheathed-sword": 119,
-  // Greatswords
   "bastard-sword": 102, "claymore": 105, "iron-greatsword": 111,
   "lordsworns-greatsword": 102, "knights-greatsword": 109,
   "banished-knights-greatsword": 108, "flamberge": 105, "gargoyles-greatsword": 110,
@@ -138,7 +133,6 @@ const BASE_AP_BY_ID: Record<string, number> = {
   "dark-moon-greatsword": 138, "sacred-relic-sword": 132,
   "lizard-greatsword": 115, "greatsword-of-damnation": 130,
   "greatsword-of-solitude": 132,
-  // Colossal Swords
   "zweihander": 121, "greatsword": 124, "watchdogs-greatsword": 128,
   "trolls-golden-sword": 144, "troll-knights-sword": 135, "royal-greatsword": 132,
   "grafted-blade-greatsword": 158, "ruins-greatsword": 145,
@@ -146,53 +140,39 @@ const BASE_AP_BY_ID: Record<string, number> = {
   "maliketh-black-blade": 150, "ancient-meteoric-ore-greatsword": 145,
   "fire-knights-greatsword": 145, "greatsword-of-radahn-light": 150,
   "greatsword-of-radahn-lord": 150, "moonrithylls-knight-sword": 145,
-  // Thrusting Swords
   "rapier": 68, "estoc": 82, "noble-estoc": 73, "cleanrot-knights-sword": 78,
   "rogiers-rapier": 80, "antspur-rapier": 76, "frozen-needle": 88,
   "carian-sorcery-sword": 110,
-  // Heavy Thrusting Swords
   "great-epee": 99, "godskin-stitcher": 95, "bloody-helice": 100,
   "dragon-king-cragblade": 115, "queelign-greatsword": 105, "sword-lance": 110,
-  // Curved Swords
   "scimitar": 80, "falchion": 84, "shamshir": 78,
   "bandits-curved-sword": 90, "shotel": 80, "scavengers-curved-sword": 80,
   "beastmans-curved-sword": 92, "magma-blade": 124,
   "wing-of-astel": 144, "eclipse-shotel": 152,
-  // Curved Greatswords
   "dismounter": 122, "monks-flameblade": 130, "bloodhounds-fang": 134,
   "onyx-lords-greatsword": 138, "magma-wyrm-scalesword": 138,
   "morgotts-cursed-sword": 130,
-  // Katanas
   "uchigatana": 115, "nagakiba": 110, "serpentbone-blade": 105,
   "meteoric-ore-blade": 138, "moonveil": 160, "rivers-of-blood": 152,
   "dragonscale-blade": 120, "hand-of-malenia": 124,
-  // Twinblades
   "twinblade": 75, "twinned-knight-swords": 88, "godskin-peeler": 84,
   "eleonoras-poleblade": 96,
-  // Axes
   "hand-axe": 89, "battle-axe": 98, "highland-axe": 99,
   "icerind-hatchet": 100, "stormhawk-axe": 98, "rosus-axe": 108,
-  // Greataxes
   "greataxe": 144, "crescent-moon-axe": 138, "executioners-greataxe": 145,
   "rusted-anchor": 138, "butchering-knife": 130, "axe-of-godrick": 158,
-  // Hammers
   "club": 90, "mace": 100, "morning-star": 95, "warpick": 80,
   "hammer": 92, "varres-bouquet": 95, "envoys-horn": 110,
   "marikas-hammer": 122,
-  // Great Hammers
   "great-club": 124, "pickaxe": 114, "brick-hammer": 116,
   "great-stars": 124, "devourers-scepter": 130,
-  // Flails
   "flail": 90, "nightrider-flail": 102, "chainlink-flail": 108,
   "family-heads": 95, "bastards-stars": 105,
-  // Spears
   "short-spear": 84, "spear": 92, "partisan": 105, "pike": 96,
   "cross-naginata": 108, "inquisitors-girandole": 116, "death-ritual-spear": 122,
   "bolt-of-gransax": 135,
-  // Great Spears
   "lance": 119, "treespear": 122, "vykes-war-spear": 124, "serpent-hunter": 124,
   "siluras-tree": 128, "mohgwyns-sacred-spear": 138,
-  // Halberds
   "halberd": 113, "banished-knights-halberd": 117, "lucerne": 107, "glaive": 113,
   "vulgar-militia-shotel": 110, "vulgar-militia-saw": 108,
   "guardians-swordspear": 110, "nightrider-glaive": 132, "pests-glaive": 105,
@@ -200,22 +180,16 @@ const BASE_AP_BY_ID: Record<string, number> = {
   "ripple-crescent-halberd": 108, "golden-halberd": 130, "dragon-halberd": 125,
   "loretta-war-sickle": 135, "commanders-standard": 122, "spirit-glaive": 130,
   "poleblade-of-the-bud": 138,
-  // Reapers
   "scythe": 105, "grave-scythe": 110, "halo-scythe": 130, "winged-scythe": 156,
-  // Whips
   "whip": 90, "thorned-whip": 92, "urumi": 100, "hoslows-petal-whip": 96,
   "magma-whip-candlestick": 124, "giants-red-braid": 130,
-  // Fists
   "caestus": 76, "spiked-caestus": 80, "katar": 82, "iron-ball": 90,
   "star-fist": 96, "clinging-bone": 90, "grafted-dragon": 100, "cipher-pata": 73,
-  // Claws
   "hookclaws": 70, "venomous-fang": 76, "bloodhound-claws": 80, "raptor-talons": 84,
-  // Colossal Weapons
   "giant-crusher": 116, "prelates-inferno-crozier": 140, "duelist-greataxe": 130,
   "rotten-greataxe": 130, "golems-halberd": 135, "troll-knight-great-club": 124,
   "dragon-greatclaw": 130, "staff-of-the-avatar": 145, "ghizas-wheel": 130,
   "fallingstar-beast-jaw": 145, "axe-of-godfrey": 155,
-  // SOTE-only categories
   "milady": 105, "ledas-sword": 115, "rellanas-twin-blades": 130,
   "great-katana": 130, "dragon-hunters-great-katana": 135, "rakshasas-great-katana": 130,
   "backhand-blade": 90, "smithscript-cirque": 95, "curseblades-cirque": 100,
@@ -237,7 +211,6 @@ const w = (
 });
 
 const baseWeapons: Weapon[] = [
-  // Daggers
   w("dagger", "Dagger", "Dagger", 1.5, { strength: 5, dexterity: 9 }, { strength: "D", dexterity: "C" }, "Quickstep"),
   w("parrying-dagger", "Parrying Dagger", "Dagger", 1.5, { strength: 5, dexterity: 14 }, { strength: "E", dexterity: "C" }, "Parry"),
   w("great-knife", "Great Knife", "Dagger", 1.5, { strength: 6, dexterity: 12 }, { strength: "E", dexterity: "C" }, "Quickstep"),
@@ -251,7 +224,6 @@ const baseWeapons: Weapon[] = [
   w("main-gauche", "Main-gauche", "Dagger", 2.5, { strength: 7, dexterity: 15 }, { strength: "D", dexterity: "D" }, "Parry", true),
   w("fire-knights-shortsword", "Fire Knight's Shortsword", "Dagger", 2.0, { strength: 8, dexterity: 13, faith: 12 }, { strength: "D", dexterity: "C", faith: "D" }, "Quickstep", true),
 
-  // Straight Swords
   w("short-sword", "Short Sword", "Straight Sword", 3, { strength: 8, dexterity: 10 }, { strength: "D", dexterity: "D" }, "Kick"),
   w("longsword", "Longsword", "Straight Sword", 3.5, { strength: 10, dexterity: 10 }, { strength: "D", dexterity: "D" }, "Square Off"),
   w("broadsword", "Broadsword", "Straight Sword", 4, { strength: 10, dexterity: 10 }, { strength: "D", dexterity: "E" }, "Square Off"),
@@ -268,7 +240,6 @@ const baseWeapons: Weapon[] = [
   w("sword-of-light", "Sword of Light", "Straight Sword", 4, { strength: 14, dexterity: 11, faith: 24 }, { strength: "D", dexterity: "E", faith: "E" }, "Light", true),
   w("sword-of-darkness", "Sword of Darkness", "Straight Sword", 4, { strength: 14, dexterity: 11, arcane: 24 }, { strength: "D", dexterity: "E", arcane: "E" }, "Darkness", true),
 
-  // Greatswords
   w("bastard-sword", "Bastard Sword", "Greatsword", 9, { strength: 16, dexterity: 10 }, { strength: "D", dexterity: "D" }, "Stamp (Upward Cut)"),
   w("claymore", "Claymore", "Greatsword", 9, { strength: 16, dexterity: 13 }, { strength: "D", dexterity: "D" }, "Lion's Claw"),
   w("iron-greatsword", "Iron Greatsword", "Greatsword", 12, { strength: 18, dexterity: 10 }, { strength: "C", dexterity: "E" }, "Stamp (Upward Cut)"),
@@ -281,7 +252,6 @@ const baseWeapons: Weapon[] = [
   w("sacred-relic-sword", "Sacred Relic Sword", "Greatsword", 11, { strength: 14, dexterity: 24, faith: 22 }, { strength: "E", dexterity: "D", faith: "D" }, "Wave of Gold"),
   w("marais-executioners-sword", "Marais Executioner's Sword", "Greatsword", 11.5, { strength: 24, dexterity: 14, arcane: 23 }, { strength: "C", dexterity: "E", arcane: "D" }, "Eochaid's Dancing Blade"),
 
-  // Colossal Swords
   w("zweihander", "Zweihander", "Colossal Sword", 15.5, { strength: 19, dexterity: 11 }, { strength: "D", dexterity: "D" }, "Stamp (Upward Cut)"),
   w("greatsword", "Greatsword", "Colossal Sword", 23, { strength: 31, dexterity: 12 }, { strength: "C", dexterity: "E" }, "Stamp (Upward Cut)"),
   w("watchdogs-greatsword", "Watchdog's Greatsword", "Colossal Sword", 22, { strength: 30, dexterity: 10 }, { strength: "C", dexterity: "E" }, "Stamp (Upward Cut)"),
@@ -299,7 +269,6 @@ const baseWeapons: Weapon[] = [
   w("greatsword-of-radahn-light", "Greatsword of Radahn (Light)", "Colossal Sword", 19, { strength: 32, dexterity: 24, intelligence: 15 }, { strength: "D", dexterity: "D", intelligence: "E" }, "Lightspeed Slash"),
   w("moonrithylls-knight-sword", "Moonrithyll's Knight Sword", "Colossal Sword", 18, { strength: 20, dexterity: 14, intelligence: 18 }, { strength: "D", dexterity: "D", intelligence: "D" }, "Tremendous Phalanx"),
 
-  // Thrusting Swords
   w("rapier", "Rapier", "Thrusting Sword", 2.5, { strength: 7, dexterity: 13 }, { strength: "E", dexterity: "C" }, "Impaling Thrust"),
   w("estoc", "Estoc", "Thrusting Sword", 4.5, { strength: 12, dexterity: 13 }, { strength: "E", dexterity: "C" }, "Impaling Thrust"),
   w("noble-estoc", "Noble's Estoc", "Thrusting Sword", 3.5, { strength: 9, dexterity: 10 }, { strength: "D", dexterity: "D" }, "Impaling Thrust"),
@@ -308,13 +277,11 @@ const baseWeapons: Weapon[] = [
   w("frozen-needle", "Frozen Needle", "Thrusting Sword", 2.5, { strength: 7, dexterity: 16, intelligence: 13 }, { strength: "E", dexterity: "D", intelligence: "D" }, "Impaling Thrust"),
   w("carian-sorcery-sword", "Carian Sorcery Sword", "Thrusting Sword", 2.5, { strength: 10, dexterity: 19, intelligence: 16 }, { strength: "E", dexterity: "D", intelligence: "D" }, "Impaling Thrust", true),
 
-  // Heavy Thrusting Swords
   w("great-epee", "Great Épée", "Heavy Thrusting Sword", 6.5, { strength: 16, dexterity: 14 }, { strength: "D", dexterity: "D" }, "Impaling Thrust"),
   w("godskin-stitcher", "Godskin Stitcher", "Heavy Thrusting Sword", 7, { strength: 14, dexterity: 17 }, { strength: "D", dexterity: "D" }, "Impaling Thrust"),
   w("bloody-helice", "Bloody Helice", "Heavy Thrusting Sword", 8, { strength: 16, dexterity: 18, arcane: 13 }, { strength: "E", dexterity: "D", arcane: "D" }, "Dynast's Finesse"),
   w("dragon-king-cragblade", "Dragon King's Cragblade", "Heavy Thrusting Sword", 8, { strength: 18, dexterity: 22 }, { strength: "E", dexterity: "D" }, "Thundercloud Form"),
 
-  // Curved Swords
   w("scimitar", "Scimitar", "Curved Sword", 3, { strength: 8, dexterity: 10 }, { strength: "D", dexterity: "D" }, "Spinning Slash"),
   w("falchion", "Falchion", "Curved Sword", 3.5, { strength: 10, dexterity: 13 }, { strength: "D", dexterity: "D" }, "Spinning Slash"),
   w("shamshir", "Shamshir", "Curved Sword", 3.5, { strength: 7, dexterity: 13 }, { strength: "D", dexterity: "D" }, "Spinning Slash"),
@@ -326,7 +293,6 @@ const baseWeapons: Weapon[] = [
   w("wing-of-astel", "Wing of Astel", "Curved Sword", 2.5, { strength: 7, dexterity: 17, intelligence: 20 }, { strength: "E", dexterity: "D", intelligence: "D" }, "Nebula"),
   w("eclipse-shotel", "Eclipse Shotel", "Curved Sword", 3, { strength: 14, dexterity: 24, faith: 25 }, { strength: "E", dexterity: "D", faith: "D" }, "Death Flare"),
 
-  // Curved Greatswords
   w("dismounter", "Dismounter", "Curved Greatsword", 6, { strength: 19, dexterity: 16 }, { strength: "D", dexterity: "D" }, "Spinning Slash"),
   w("monks-flameblade", "Monk's Flameblade", "Curved Greatsword", 9, { strength: 18, dexterity: 18 }, { strength: "D", dexterity: "D" }, "Spinning Slash"),
   w("bloodhounds-fang", "Bloodhound's Fang", "Curved Greatsword", 11.5, { strength: 18, dexterity: 17 }, { strength: "D", dexterity: "C" }, "Bloodhound's Finesse"),
@@ -334,7 +300,6 @@ const baseWeapons: Weapon[] = [
   w("magma-wyrm-scalesword", "Magma Wyrm's Scalesword", "Curved Greatsword", 15, { strength: 24, dexterity: 15, faith: 18 }, { strength: "C", dexterity: "D", faith: "D" }, "Magma Guillotine"),
   w("morgotts-cursed-sword", "Morgott's Cursed Sword", "Curved Greatsword", 7.5, { strength: 14, dexterity: 23, faith: 17 }, { strength: "E", dexterity: "C", faith: "D" }, "Cursed-Blood Slice"),
 
-  // Katanas
   w("uchigatana", "Uchigatana", "Katana", 5.5, { strength: 11, dexterity: 15 }, { strength: "D", dexterity: "D" }, "Unsheathe"),
   w("nagakiba", "Nagakiba", "Katana", 7, { strength: 18, dexterity: 22 }, { strength: "D", dexterity: "C" }, "Piercing Fang"),
   w("serpentbone-blade", "Serpentbone Blade", "Katana", 6, { strength: 11, dexterity: 22 }, { strength: "E", dexterity: "B" }, "Double Slash"),
@@ -344,13 +309,11 @@ const baseWeapons: Weapon[] = [
   w("dragonscale-blade", "Dragonscale Blade", "Katana", 5.5, { strength: 12, dexterity: 20 }, { strength: "D", dexterity: "C" }, "Ice Lightning Sword"),
   w("hand-of-malenia", "Hand of Malenia", "Katana", 7, { strength: 16, dexterity: 48 }, { strength: "E", dexterity: "C" }, "Waterfowl Dance"),
 
-  // Twinblades
   w("twinblade", "Twinblade", "Twinblade", 7, { strength: 10, dexterity: 18 }, { strength: "D", dexterity: "D" }, "Spinning Slash"),
   w("twinned-knight-swords", "Twinned Knight Swords", "Twinblade", 8, { strength: 16, dexterity: 18 }, { strength: "D", dexterity: "E" }, "Spinning Slash"),
   w("godskin-peeler", "Godskin Peeler", "Twinblade", 8, { strength: 17, dexterity: 22 }, { strength: "E", dexterity: "C" }, "Black Flame Tornado"),
   w("eleonoras-poleblade", "Eleonora's Poleblade", "Twinblade", 6, { strength: 12, dexterity: 21, arcane: 19 }, { strength: "E", dexterity: "D", arcane: "D" }, "Bloodblade Dance"),
 
-  // Axes
   w("hand-axe", "Hand Axe", "Axe", 3.5, { strength: 8, dexterity: 8 }, { strength: "D", dexterity: "D" }, "Quickstep"),
   w("battle-axe", "Battle Axe", "Axe", 4.5, { strength: 14, dexterity: 9 }, { strength: "D", dexterity: "D" }, "Wild Strikes"),
   w("highland-axe", "Highland Axe", "Axe", 4.5, { strength: 14, dexterity: 13 }, { strength: "D", dexterity: "D" }, "War Cry"),
@@ -358,7 +321,6 @@ const baseWeapons: Weapon[] = [
   w("stormhawk-axe", "Stormhawk Axe", "Axe", 5.5, { strength: 12, dexterity: 16 }, { strength: "D", dexterity: "D" }, "Thunderstorm"),
   w("rosus-axe", "Rosus' Axe", "Axe", 5.5, { strength: 18, dexterity: 10, intelligence: 18 }, { strength: "D", dexterity: "E", intelligence: "D" }, "Rosus's Summons"),
 
-  // Greataxes
   w("greataxe", "Greataxe", "Greataxe", 13, { strength: 30, dexterity: 8 }, { strength: "D", dexterity: "D" }, "Barbaric Roar"),
   w("crescent-moon-axe", "Crescent Moon Axe", "Greataxe", 12.5, { strength: 22, dexterity: 12, intelligence: 18 }, { strength: "D", dexterity: "D" }, "War Cry"),
   w("executioners-greataxe", "Executioner's Greataxe", "Greataxe", 15, { strength: 34, dexterity: 8 }, { strength: "C", dexterity: "E" }, "War Cry"),
@@ -366,7 +328,6 @@ const baseWeapons: Weapon[] = [
   w("butchering-knife", "Butchering Knife", "Greataxe", 8.5, { strength: 16, dexterity: 8 }, { strength: "E", dexterity: "C" }, "Barbaric Roar"),
   w("axe-of-godrick", "Axe of Godrick", "Greataxe", 11, { strength: 34, dexterity: 22 }, { strength: "D", dexterity: "D" }, "I Command Thee, Kneel!"),
 
-  // Hammers
   w("club", "Club", "Hammer", 3.5, { strength: 8 }, { strength: "C" }, "Kick"),
   w("mace", "Mace", "Hammer", 4.5, { strength: 14, dexterity: 8 }, { strength: "D", dexterity: "D" }, "Kick"),
   w("morning-star", "Morning Star", "Hammer", 5, { strength: 13, dexterity: 9 }, { strength: "D", dexterity: "D" }, "Kick"),
@@ -376,21 +337,18 @@ const baseWeapons: Weapon[] = [
   w("envoys-horn", "Envoy's Horn", "Hammer", 4, { strength: 10, dexterity: 12, faith: 16 }, { strength: "D", dexterity: "D", faith: "D" }, "Oracular Bubble"),
   w("marikas-hammer", "Marika's Hammer", "Hammer", 6, { strength: 20, dexterity: 12, faith: 19 }, { strength: "D", dexterity: "D", faith: "D" }, "Gold Breaker", true),
 
-  // Great Hammers
   w("great-club", "Great Club", "Great Hammer", 9, { strength: 30 }, { strength: "C" }, "Barbaric Roar"),
   w("pickaxe", "Pickaxe", "Great Hammer", 10, { strength: 24, dexterity: 10 }, { strength: "D", dexterity: "D" }, "Endure"),
   w("brick-hammer", "Brick Hammer", "Great Hammer", 12.5, { strength: 26 }, { strength: "B" }, "Barbaric Roar"),
   w("great-stars", "Great Stars", "Great Hammer", 10, { strength: 30, dexterity: 12 }, { strength: "D", dexterity: "D" }, "Endure"),
   w("devourers-scepter", "Devourer's Scepter", "Great Hammer", 11.5, { strength: 28, dexterity: 13, faith: 25 }, { strength: "D", dexterity: "D", faith: "D" }, "Devourer of Worlds"),
 
-  // Flails
   w("flail", "Flail", "Flail", 5, { strength: 9, dexterity: 13 }, { strength: "D", dexterity: "C" }, "Spinning Chain"),
   w("nightrider-flail", "Nightrider Flail", "Flail", 6, { strength: 14, dexterity: 13 }, { strength: "D", dexterity: "B" }, "Spinning Chain"),
   w("chainlink-flail", "Chainlink Flail", "Flail", 8, { strength: 13, dexterity: 12 }, { strength: "B", dexterity: "E" }, "Spinning Chain"),
   w("family-heads", "Family Heads", "Flail", 5.5, { strength: 8, dexterity: 18, intelligence: 16 }, { strength: "D", dexterity: "A", intelligence: "D" }, "Familial Rancor"),
   w("bastards-stars", "Bastard's Stars", "Flail", 5.5, { strength: 8, dexterity: 22, intelligence: 22 }, { strength: "D", dexterity: "C", intelligence: "A" }, "Nebula"),
 
-  // Spears
   w("short-spear", "Short Spear", "Spear", 4, { strength: 10, dexterity: 10 }, { strength: "D", dexterity: "D" }, "Impaling Thrust"),
   w("spear", "Spear", "Spear", 4.5, { strength: 10, dexterity: 12 }, { strength: "E", dexterity: "C" }, "Impaling Thrust"),
   w("partisan", "Partisan", "Spear", 6.5, { strength: 15, dexterity: 12 }, { strength: "D", dexterity: "D" }, "Impaling Thrust"),
@@ -400,7 +358,6 @@ const baseWeapons: Weapon[] = [
   w("death-ritual-spear", "Death Ritual Spear", "Spear", 6.5, { strength: 14, dexterity: 20, intelligence: 18 }, { strength: "E", dexterity: "D", intelligence: "D" }, "Spearcall Ritual"),
   w("bolt-of-gransax", "Bolt of Gransax", "Spear", 8.5, { strength: 20, dexterity: 40 }, { strength: "D", dexterity: "D" }, "Ancient Lightning Spear"),
 
-  // Great Spears
   w("lance", "Lance", "Great Spear", 9, { strength: 20, dexterity: 14 }, { strength: "D", dexterity: "D" }, "Charge Forth"),
   w("treespear", "Treespear", "Great Spear", 9.5, { strength: 20, dexterity: 16, faith: 18 }, { strength: "D", dexterity: "D", faith: "D" }, "Sacred Order"),
   w("vykes-war-spear", "Vyke's War Spear", "Great Spear", 8, { strength: 16, dexterity: 20, faith: 14 }, { strength: "E", dexterity: "B", faith: "C" }, "Frenzyflame Thrust"),
@@ -408,7 +365,6 @@ const baseWeapons: Weapon[] = [
   w("siluras-tree", "Siluria's Tree", "Great Spear", 10, { strength: 27, dexterity: 13, faith: 20 }, { strength: "D", dexterity: "E", faith: "D" }, "Siluria's Woe"),
   w("mohgwyns-sacred-spear", "Mohgwyn's Sacred Spear", "Great Spear", 10, { strength: 24, dexterity: 14, faith: 27, arcane: 10 }, { strength: "D", dexterity: "E", faith: "D", arcane: "C" }, "Bloodboon Ritual"),
 
-  // Halberds
   w("halberd", "Halberd", "Halberd", 8, { strength: 14, dexterity: 12 }, { strength: "D", dexterity: "D" }, "Charge Forth"),
   w("banished-knights-halberd", "Banished Knight's Halberd", "Halberd", 8, { strength: 14, dexterity: 12 }, { strength: "D", dexterity: "D" }, "Charge Forth"),
   w("lucerne", "Lucerne", "Halberd", 7, { strength: 15, dexterity: 12 }, { strength: "D", dexterity: "C" }, "Charge Forth"),
@@ -428,13 +384,11 @@ const baseWeapons: Weapon[] = [
   w("spirit-glaive", "Spirit Glaive", "Halberd", 6.5, { strength: 14, dexterity: 17, intelligence: 16 }, { strength: "D", dexterity: "C", intelligence: "D" }, "Rancor Slash"),
   w("poleblade-of-the-bud", "Poleblade of the Bud", "Halberd", 10, { strength: 14, dexterity: 22, arcane: 20 }, { strength: "E", dexterity: "D", arcane: "D" }, "Romina's Purification", true),
 
-  // Reapers
   w("scythe", "Scythe", "Reaper", 7.5, { strength: 14, dexterity: 17 }, { strength: "D", dexterity: "B" }, "Spinning Slash"),
   w("grave-scythe", "Grave Scythe", "Reaper", 9.5, { strength: 17, dexterity: 13 }, { strength: "D", dexterity: "D" }, "Spinning Slash"),
   w("halo-scythe", "Halo Scythe", "Reaper", 8.5, { strength: 13, dexterity: 16, faith: 16 }, { strength: "D", dexterity: "D", faith: "D" }, "Miquella's Ring of Light"),
   w("winged-scythe", "Winged Scythe", "Reaper", 7.5, { strength: 16, dexterity: 16, faith: 24 }, { strength: "E", dexterity: "D", faith: "D" }, "Angel's Wings"),
 
-  // Whips
   w("whip", "Whip", "Whip", 2, { strength: 7, dexterity: 15 }, { strength: "D", dexterity: "C" }, "Kick"),
   w("thorned-whip", "Thorned Whip", "Whip", 2.5, { strength: 7, dexterity: 15 }, { strength: "E", dexterity: "B" }, "Kick"),
   w("urumi", "Urumi", "Whip", 3, { strength: 11, dexterity: 22 }, { strength: "E", dexterity: "B" }, "Kick"),
@@ -442,7 +396,6 @@ const baseWeapons: Weapon[] = [
   w("magma-whip-candlestick", "Magma Whip Candlestick", "Whip", 2.5, { strength: 7, dexterity: 15, faith: 18 }, { strength: "E", dexterity: "D", faith: "D" }, "Sea of Magma"),
   w("giants-red-braid", "Giant's Red Braid", "Whip", 2.5, { strength: 12, dexterity: 15, faith: 21 }, { strength: "D", dexterity: "D", faith: "D" }, "Flame Dance"),
 
-  // Fists
   w("caestus", "Caestus", "Fist", 1.5, { strength: 8, dexterity: 8 }, { strength: "D", dexterity: "D" }, "Endure"),
   w("spiked-caestus", "Spiked Caestus", "Fist", 2, { strength: 8, dexterity: 10 }, { strength: "D", dexterity: "D" }, "Endure"),
   w("katar", "Katar", "Fist", 2.5, { strength: 8, dexterity: 10 }, { strength: "D", dexterity: "D" }, "Impaling Thrust"),
@@ -452,13 +405,11 @@ const baseWeapons: Weapon[] = [
   w("grafted-dragon", "Grafted Dragon", "Fist", 2.5, { strength: 14, dexterity: 9, faith: 12 }, { strength: "D", dexterity: "D", faith: "D" }, "Bear Witness!"),
   w("cipher-pata", "Cipher Pata", "Fist", 1.5, { faith: 30 }, { faith: "C" }, "Unblockable Blade"),
 
-  // Claws
   w("hookclaws", "Hookclaws", "Claw", 2, { strength: 6, dexterity: 12 }, { strength: "E", dexterity: "B" }, "Quickstep"),
   w("venomous-fang", "Venomous Fang", "Claw", 2.5, { strength: 7, dexterity: 13 }, { strength: "D", dexterity: "C" }, "Quickstep"),
   w("bloodhound-claws", "Bloodhound Claws", "Claw", 3, { strength: 9, dexterity: 16 }, { strength: "D", dexterity: "D" }, "Bloodhound's Step"),
   w("raptor-talons", "Raptor Talons", "Claw", 1.5, { strength: 9, dexterity: 20 }, { strength: "E", dexterity: "C" }, "Quickstep"),
 
-  // Colossal Weapons
   w("giant-crusher", "Giant-Crusher", "Colossal Weapon", 26.5, { strength: 60, dexterity: 12 }, { strength: "C" }, "Endure"),
   w("prelates-inferno-crozier", "Prelate's Inferno Crozier", "Colossal Weapon", 23.5, { strength: 38, dexterity: 15, faith: 14 }, { strength: "C", dexterity: "E" }, "Prelate's Charge"),
   w("duelist-greataxe", "Duelist Greataxe", "Colossal Weapon", 20, { strength: 23, dexterity: 14 }, { strength: "E", dexterity: "D" }, "Endure"),
@@ -471,7 +422,6 @@ const baseWeapons: Weapon[] = [
   w("fallingstar-beast-jaw", "Fallingstar Beast Jaw", "Colossal Weapon", 21.5, { strength: 34, dexterity: 12, intelligence: 20 }, { strength: "D", dexterity: "D", intelligence: "E" }, "Gravity Bolt"),
   w("axe-of-godfrey", "Axe of Godfrey", "Colossal Weapon", 18, { strength: 34, dexterity: 22 }, { strength: "D", dexterity: "D" }, "Regal Roar"),
 
-  // SOTE-only categories
   w("milady", "Milady", "Light Greatsword", 6.5, { strength: 10, dexterity: 15 }, { strength: "D", dexterity: "C" }, "Impaling Thrust", true),
   w("ledas-sword", "Leda's Sword", "Light Greatsword", 7.5, { strength: 11, dexterity: 22, faith: 19 }, { strength: "E", dexterity: "C", faith: "D" }, "Needle Piercer", true),
   w("rellanas-twin-blades", "Rellana's Twin Blades", "Light Greatsword", 8, { strength: 13, dexterity: 16, intelligence: 16, faith: 16 }, { strength: "D", dexterity: "D", intelligence: "D", faith: "D" }, "Moon-and-Fire Stance", true),
@@ -498,7 +448,6 @@ const baseWeapons: Weapon[] = [
   w("lightning-perfume", "Lightning Perfume Bottle", "Perfume Bottle", 1, { strength: 8, dexterity: 18, faith: 13 }, { dexterity: "C", faith: "C" }, "Kick", true),
   w("deadly-poison-perfume", "Deadly Poison Perfume Bottle", "Perfume Bottle", 1, { strength: 8, dexterity: 16, arcane: 13 }, { dexterity: "C", arcane: "C" }, "Deadly Poison Spray", true),
 
-  // Glintstone Staffs (sorcery catalysts) — all somber/unique, +10 max
   w("staff-of-the-great-beyond", "Staff of the Great Beyond", "Glintstone Staff", 2.5, { strength: 7, intelligence: 27, faith: 27 }, { strength: "E", intelligence: "D", faith: "D" }, "No Skill"),
   w("maternal-staff", "Maternal Staff", "Glintstone Staff", 2.5, { strength: 7, intelligence: 21, arcane: 21 }, { strength: "E", intelligence: "D", arcane: "C" }, "No Skill"),
   w("astrologers-staff", "Astrologer's Staff", "Glintstone Staff", 3, { strength: 7, intelligence: 16 }, { strength: "E", intelligence: "C" }, "No Skill"),
@@ -520,7 +469,6 @@ const baseWeapons: Weapon[] = [
   w("staff-of-the-guilty", "Staff of the Guilty", "Glintstone Staff", 4.5, { strength: 8, faith: 12 }, { strength: "D", faith: "C" }, "No Skill"),
   w("prince-of-deaths-staff", "Prince of Death's Staff", "Glintstone Staff", 3, { strength: 6, intelligence: 18, faith: 18 }, { strength: "E", intelligence: "D", faith: "D" }, "No Skill"),
 
-  // Sacred Seals (incantation catalysts) — all somber/unique, +10 max
   w("dryleaf-seal", "Dryleaf Seal", "Sacred Seal", 1.5, { strength: 8, faith: 27 }, { strength: "E", faith: "C" }, "No Skill", true),
   w("fire-knights-seal", "Fire Knight's Seal", "Sacred Seal", 1.5, { strength: 8, faith: 23 }, { strength: "E", faith: "C" }, "No Skill", true),
   w("spiraltree-seal", "Spiraltree Seal", "Sacred Seal", 1.5, { strength: 8, faith: 17 }, { strength: "E", faith: "C" }, "No Skill", true),
