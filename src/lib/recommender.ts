@@ -393,16 +393,20 @@ export function getMinFeasibleLevel(
 ): number {
   let lvl = getMinLevelForClassAndWeapon(cls, weapon, twoHand);
   for (let i = 0; i < 8; i++) {
-    const { target } = getTargetStats(weapon, {
-      targetLevel: lvl,
-      twoHand,
-      affinity,
-      classId: cls.id,
-      talismanIds,
-      armorSelection,
-      extraWeaponWeight: 0,
-      loadout,
-    });
+    const { target } = getTargetStats(
+      weapon,
+      {
+        targetLevel: lvl,
+        twoHand,
+        affinity,
+        classId: cls.id,
+        talismanIds,
+        armorSelection,
+        extraWeaponWeight: 0,
+        loadout,
+      },
+      { noScalingPush: true, noBudgetFit: true },
+    );
     const next = cls.level + computeDeficit(cls.stats, target);
     if (next <= lvl) return lvl;
     lvl = next;
@@ -443,7 +447,11 @@ export function getEffectiveStrRequirement(weapon: Weapon, twoHand: boolean, str
   return adjustStrForTwoHand(req, twoHand, strengthStartingValue);
 }
 
-export function getTargetStats(weapon: Weapon, opts: RecommendOptions): { target: StatVector; rationale: string[] } {
+export function getTargetStats(
+  weapon: Weapon,
+  opts: RecommendOptions,
+  internal?: { noScalingPush?: boolean; noBudgetFit?: boolean },
+): { target: StatVector; rationale: string[] } {
   const rationale: string[] = [];
   const startingClass = getClass(opts.classId);
   const target: StatVector = startingClass ? { ...startingClass.stats } : emptyVector();
@@ -489,28 +497,30 @@ export function getTargetStats(weapon: Weapon, opts: RecommendOptions): { target
     }
   }
 
-  for (const item of loadoutItems) {
-    if (SHIELD_CATEGORIES.has(item.weapon.category)) continue;
-    const wpnPrimaries = getPrimaryStats(item.weapon, item.affinity);
-    for (const stat of wpnPrimaries) {
-      const reqRaw = item.weapon.requirements[stat] ?? 0;
-      const elemental = isElemental(stat);
-      const rawTarget = getScalingTarget(reqRaw, elemental, opts.targetLevel);
-      const breakpoint =
-        stat === "strength"
-          ? adjustStrForTwoHand(rawTarget, opts.twoHand, startingClass?.stats[stat] ?? 0)
-          : rawTarget;
-      if (target[stat] < breakpoint) {
-        target[stat] = breakpoint;
-        const source =
-          item.affinity === "Standard"
-            ? `${item.weapon.scaling[stat] ?? "—"} scaling`
-            : `${item.affinity} affinity`;
-        const note =
-          stat === "strength" && opts.twoHand
-            ? `${stat} → ${breakpoint} (${item.weapon.name}: ${source}, level-${opts.targetLevel} target ÷${TWO_HAND_STR_MULTIPLIER} two-handed)`
-            : `${stat} → ${breakpoint} (${item.weapon.name}: ${source}, ${elemental ? "elemental" : "physical"} target at Lv ${opts.targetLevel})`;
-        rationale.push(note);
+  if (!internal?.noScalingPush) {
+    for (const item of loadoutItems) {
+      if (SHIELD_CATEGORIES.has(item.weapon.category)) continue;
+      const wpnPrimaries = getPrimaryStats(item.weapon, item.affinity);
+      for (const stat of wpnPrimaries) {
+        const reqRaw = item.weapon.requirements[stat] ?? 0;
+        const elemental = isElemental(stat);
+        const rawTarget = getScalingTarget(reqRaw, elemental, opts.targetLevel);
+        const breakpoint =
+          stat === "strength"
+            ? adjustStrForTwoHand(rawTarget, opts.twoHand, startingClass?.stats[stat] ?? 0)
+            : rawTarget;
+        if (target[stat] < breakpoint) {
+          target[stat] = breakpoint;
+          const source =
+            item.affinity === "Standard"
+              ? `${item.weapon.scaling[stat] ?? "—"} scaling`
+              : `${item.affinity} affinity`;
+          const note =
+            stat === "strength" && opts.twoHand
+              ? `${stat} → ${breakpoint} (${item.weapon.name}: ${source}, level-${opts.targetLevel} target ÷${TWO_HAND_STR_MULTIPLIER} two-handed)`
+              : `${stat} → ${breakpoint} (${item.weapon.name}: ${source}, ${elemental ? "elemental" : "physical"} target at Lv ${opts.targetLevel})`;
+          rationale.push(note);
+        }
       }
     }
   }
@@ -563,6 +573,67 @@ export function getTargetStats(weapon: Weapon, opts: RecommendOptions): { target
           ? adjustStrForTwoHand(req, opts.twoHand, startingClass?.stats[stat] ?? 0)
           : req;
       if (adjusted > target[stat]) target[stat] = adjusted;
+    }
+  }
+
+  // Fit scaling-stat overage to the available level budget. After all mandatory
+  // floors (Vigor, Endurance, Mind, every weapon's hard reqs, affinity floors)
+  // are set, any remaining budget is distributed proportionally across the
+  // primary-scaling stats. If the loadout demands more scaling than the level
+  // can fund, each scaling stat gets a proportional share of the remaining
+  // budget instead of overshooting the target Soul Level.
+  if (startingClass && !internal?.noBudgetFit) {
+    const maxPoints = Math.max(0, opts.targetLevel - startingClass.level);
+    const scalingStats: Stat[] = ["strength", "dexterity", "intelligence", "faith", "arcane"];
+    const scalingFloors: Record<Stat, number> = {
+      vigor: 0, mind: 0, endurance: 0, strength: 0, dexterity: 0, intelligence: 0, faith: 0, arcane: 0,
+    };
+    for (const s of scalingStats) {
+      let floor = startingClass.stats[s];
+      for (const item of loadoutItems) {
+        const req = item.weapon.requirements[s] ?? 0;
+        const adj = s === "strength" ? adjustStrForTwoHand(req, opts.twoHand, startingClass.stats.strength) : req;
+        if (adj > floor) floor = adj;
+        if (item.affinity !== "Standard") {
+          const affFloor = AFFINITY_REQ_FLOOR[item.affinity]?.[s];
+          if (affFloor !== undefined && affFloor > floor) floor = affFloor;
+        }
+      }
+      scalingFloors[s] = floor;
+    }
+    const overage = (s: Stat) => Math.max(0, target[s] - scalingFloors[s]);
+    const totalOverage = scalingStats.reduce((sum, s) => sum + overage(s), 0);
+    const currentDeficit = computeDeficit(startingClass.stats, target);
+    const mandatoryInv = Math.max(0, currentDeficit - totalOverage);
+    const availableForScaling = Math.max(0, maxPoints - mandatoryInv);
+    if (totalOverage > availableForScaling) {
+      const factor = availableForScaling / totalOverage;
+      let allocated = 0;
+      const cuts: Array<[Stat, number, number]> = [];
+      for (const s of scalingStats) {
+        const o = overage(s);
+        if (o <= 0) continue;
+        const newOverage = Math.floor(o * factor);
+        cuts.push([s, target[s], scalingFloors[s] + newOverage]);
+        target[s] = scalingFloors[s] + newOverage;
+        allocated += newOverage;
+      }
+      let leftover = availableForScaling - allocated;
+      const sortedByDesired = scalingStats
+        .map((s) => ({ s, desired: overage(s), current: target[s] - scalingFloors[s] }))
+        .filter((x) => x.desired > x.current)
+        .sort((a, b) => b.desired - a.desired);
+      for (const { s } of sortedByDesired) {
+        if (leftover <= 0) break;
+        target[s] += 1;
+        leftover -= 1;
+      }
+      const beforeAfter = cuts
+        .map(([s, before, after]) => `${s} ${before}→${after}`)
+        .join(", ");
+      rationale.push(
+        `Scaling reduced to fit Lv ${opts.targetLevel} budget (${availableForScaling} pts left after mandatory): ${beforeAfter}.`,
+      );
     }
   }
 
