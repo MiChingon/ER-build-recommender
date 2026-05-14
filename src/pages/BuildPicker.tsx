@@ -338,7 +338,8 @@ export default function BuildPicker() {
                   rightHand={rightHand}
                   leftHand={leftHand}
                   active={active}
-                  onActivate={(pos) => {
+                  onActivate={(pos) => setActive(pos)}
+                  onPickWeapon={(pos) => {
                     setActive(pos);
                     setWeaponPickerOpen(true);
                   }}
@@ -537,11 +538,8 @@ export default function BuildPicker() {
                     twoHand={twoHand}
                   />
 
-                  {weapon && rec.spellSuggestions.length > 0 && (
-                    <SpellRecommendations
-                      suggestions={rec.spellSuggestions}
-                      catalystName={weapon.name}
-                    />
+                  {rec.spellSuggestions.length > 0 && (
+                    <SpellRecommendations suggestions={rec.spellSuggestions} />
                   )}
 
                   <TargetStatsTable
@@ -583,12 +581,14 @@ function WeaponSlotsGrid({
   leftHand,
   active,
   onActivate,
+  onPickWeapon,
   onClear,
 }: {
   rightHand: WeaponSlot[];
   leftHand: WeaponSlot[];
   active: SlotPos;
   onActivate: (pos: SlotPos) => void;
+  onPickWeapon: (pos: SlotPos) => void;
   onClear: (pos: SlotPos) => void;
 }) {
   const row = (hand: Hand, slots: WeaponSlot[], label: string) => (
@@ -604,7 +604,7 @@ function WeaponSlotsGrid({
             <Paper
               key={idx}
               variant="outlined"
-              onClick={() => onActivate({ hand, idx })}
+              onClick={() => (slot.weapon ? onActivate({ hand, idx }) : onPickWeapon({ hand, idx }))}
               sx={{
                 flex: "1 1 0",
                 minWidth: 0,
@@ -653,14 +653,26 @@ function WeaponSlotsGrid({
                       {slot.affinity}
                     </Typography>
                   )}
-                  <IconButton
-                    size="small"
-                    aria-label="Clear slot"
-                    onClick={(e) => { e.stopPropagation(); onClear({ hand, idx }); }}
-                    sx={{ position: "absolute", top: 0, right: 0, p: 0.25 }}
-                  >
-                    <Typography variant="caption" sx={{ fontSize: "0.85rem", lineHeight: 1 }}>×</Typography>
-                  </IconButton>
+                  <Tooltip title="Change weapon">
+                    <IconButton
+                      size="small"
+                      aria-label="Change weapon"
+                      onClick={(e) => { e.stopPropagation(); onPickWeapon({ hand, idx }); }}
+                      sx={{ position: "absolute", top: 0, right: 18, p: 0.25 }}
+                    >
+                      <Typography variant="caption" sx={{ fontSize: "0.8rem", lineHeight: 1 }}>↻</Typography>
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Clear slot">
+                    <IconButton
+                      size="small"
+                      aria-label="Clear slot"
+                      onClick={(e) => { e.stopPropagation(); onClear({ hand, idx }); }}
+                      sx={{ position: "absolute", top: 0, right: 0, p: 0.25 }}
+                    >
+                      <Typography variant="caption" sx={{ fontSize: "0.85rem", lineHeight: 1 }}>×</Typography>
+                    </IconButton>
+                  </Tooltip>
                 </>
               ) : (
                 <Typography variant="caption" color="text.disabled">Empty</Typography>
@@ -1264,25 +1276,29 @@ function TargetStatsTable({
 
 function SpellRecommendations({
   suggestions,
-  catalystName,
 }: {
   suggestions: import("../lib/types").SpellSuggestion[];
-  catalystName: string;
 }) {
-  const sorceries = suggestions.filter((s) => s.spell.type === "sorcery");
-  const incantations = suggestions.filter((s) => s.spell.type === "incantation");
-  const label = sorceries.length > 0 ? "Suggested sorceries" : "Suggested incantations";
-  const list = sorceries.length > 0 ? sorceries : incantations;
+  const hasSorceries = suggestions.some((s) => s.spell.type === "sorcery");
+  const hasIncantations = suggestions.some((s) => s.spell.type === "incantation");
+  const label =
+    hasSorceries && hasIncantations
+      ? "Suggested spells"
+      : hasSorceries
+      ? "Suggested sorceries"
+      : "Suggested incantations";
+  const slotsUsed = suggestions.reduce((sum, s) => sum + s.spell.slots, 0);
   return (
     <Box>
-      <Stack direction="row" spacing={1} sx={{ alignItems: "baseline", mb: 1 }}>
+      <Stack direction="row" spacing={1} sx={{ alignItems: "baseline", mb: 1, flexWrap: "wrap" }} useFlexGap>
         <Typography variant="subtitle2">{label}</Typography>
         <Typography variant="caption" color="text.secondary">
-          castable with the recommended stats while wielding {catalystName}
+          castable with the recommended stats, fit within 10 memory slots
         </Typography>
+        <Chip size="small" variant="outlined" label={`${slotsUsed} / 10 memory slots`} />
       </Stack>
       <Stack spacing={1}>
-        {list.map(({ spell, boosted }) => {
+        {suggestions.map(({ spell, boosted }) => {
           const reqs = [
             spell.requirements.intelligence ? `Int ${spell.requirements.intelligence}` : null,
             spell.requirements.faith ? `Fai ${spell.requirements.faith}` : null,

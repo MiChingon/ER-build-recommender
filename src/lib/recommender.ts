@@ -1,7 +1,7 @@
 import { classes, STAT_ORDER, type Stat, type StatVector, type StartingClass, getClass } from "../data/classes";
 import { CATEGORY_BASE_AP, gradeOf, valueOf, type Weapon } from "../data/weapons";
 import { DAMAGE_DATA, type DamageType } from "../data/damage-types";
-import { spells, catalystBoosts, type SpellType } from "../data/spells";
+import { spells, catalystBoosts } from "../data/spells";
 
 export const DAMAGE_TYPE_LABELS: Record<DamageType, string> = {
   phy: "Physical",
@@ -703,13 +703,26 @@ export function buildLevelingPlan(classBase: StatVector, target: StatVector): Le
   return steps.sort((a, b) => b.points - a.points);
 }
 
-export function recommendSpells(target: StatVector, activeWeapon: Weapon | null, maxResults = 8): SpellSuggestion[] {
-  if (!activeWeapon || !isCatalyst(activeWeapon)) return [];
-  const wantType: SpellType = activeWeapon.category === "Glintstone Staff" ? "sorcery" : "incantation";
-  const boostedCategories = catalystBoosts[activeWeapon.id] ?? [];
+export const MAX_MEMORY_SLOTS = 10;
+
+export function recommendSpells(
+  target: StatVector,
+  loadout: LoadoutItem[],
+  maxMemorySlots = MAX_MEMORY_SLOTS,
+): SpellSuggestion[] {
+  const catalysts = loadout.filter((i) => isCatalyst(i.weapon));
+  if (catalysts.length === 0) return [];
+  const hasStaff = catalysts.some((i) => i.weapon.category === "Glintstone Staff");
+  const hasSeal = catalysts.some((i) => i.weapon.category === "Sacred Seal");
+
+  const boostedCategories = new Set<string>();
+  for (const item of catalysts) {
+    for (const c of catalystBoosts[item.weapon.id] ?? []) boostedCategories.add(c);
+  }
 
   const castable = spells.filter((s) => {
-    if (s.type !== wantType) return false;
+    if (s.type === "sorcery" && !hasStaff) return false;
+    if (s.type === "incantation" && !hasSeal) return false;
     const r = s.requirements;
     if ((r.intelligence ?? 0) > target.intelligence) return false;
     if ((r.faith ?? 0) > target.faith) return false;
@@ -722,11 +735,22 @@ export function recommendSpells(target: StatVector, activeWeapon: Weapon | null,
       (s.requirements.intelligence ?? 0) +
       (s.requirements.faith ?? 0) +
       (s.requirements.arcane ?? 0);
-    const boosted = boostedCategories.includes(s.category);
+    const boosted = boostedCategories.has(s.category);
     return { spell: s, boosted, score: (boosted ? 10000 : 0) + reqSum };
   });
   scored.sort((a, b) => b.score - a.score);
-  return scored.slice(0, maxResults).map(({ spell, boosted }) => ({ spell, boosted }));
+
+  // Greedy memory-slot fit: walk down the score-sorted list and pick each
+  // spell only if its memory-slot cost still fits under the cap.
+  const selected: SpellSuggestion[] = [];
+  let slotsUsed = 0;
+  for (const { spell, boosted } of scored) {
+    if (slotsUsed + spell.slots > maxMemorySlots) continue;
+    selected.push({ spell, boosted });
+    slotsUsed += spell.slots;
+    if (slotsUsed === maxMemorySlots) break;
+  }
+  return selected;
 }
 
 export function recommend(weapon: Weapon, opts: Partial<RecommendOptions> = {}): Recommendation {
@@ -763,7 +787,10 @@ export function recommend(weapon: Weapon, opts: Partial<RecommendOptions> = {}):
     effectiveStrRequirement: getEffectiveStrRequirement(weapon, fullOpts.twoHand, getClass(opts.classId ?? '')?.stats.strength ?? 0),
     options: fullOpts,
     equipLoad,
-    spellSuggestions: recommendSpells(target, weapon),
+    spellSuggestions: recommendSpells(
+      target,
+      fullOpts.loadout.length > 0 ? fullOpts.loadout : [{ weapon, affinity: fullOpts.affinity }],
+    ),
   };
 }
 
