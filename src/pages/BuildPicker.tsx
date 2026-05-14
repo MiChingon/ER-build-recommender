@@ -55,7 +55,7 @@ import {
   DAMAGE_TYPE_LABELS,
   type APEstimate,
 } from "../lib/recommender";
-import { AFFINITIES, Affinity, DEFAULT_TARGET_LEVEL, MAX_TARGET_LEVEL } from "../lib/types";
+import { AFFINITIES, Affinity, DEFAULT_TARGET_LEVEL, LoadoutItem, MAX_TARGET_LEVEL } from "../lib/types";
 
 const STAT_COLORS: Record<Stat, string> = {
   vigor: "#e57373",
@@ -122,14 +122,25 @@ export default function BuildPicker() {
   const weaponInfusable = weapon ? isInfusable(weapon) : false;
   const effectiveAffinity: Affinity = weaponInfusable ? affinity : "Standard";
 
+  const loadout = useMemo<LoadoutItem[]>(
+    () =>
+      allSlots
+        .filter((s): s is { weapon: Weapon; affinity: Affinity } => s.weapon !== null)
+        .map((s) => ({
+          weapon: s.weapon,
+          affinity: isInfusable(s.weapon) ? s.affinity : "Standard",
+        })),
+    [rightHand, leftHand],
+  );
+
   const selectedClass = classes.find((c) => c.id === classId);
 
   const minLevel = useMemo(() => {
     if (!weapon) return 1;
     return selectedClass
-      ? getMinFeasibleLevel(selectedClass, weapon, twoHand, effectiveAffinity, talismanIds, armorSelection)
+      ? getMinFeasibleLevel(selectedClass, weapon, twoHand, effectiveAffinity, talismanIds, armorSelection, loadout)
       : getMinLevelForWeapon(weapon, twoHand);
-  }, [weapon, twoHand, selectedClass, effectiveAffinity, talismanIds, armorSelection]);
+  }, [weapon, twoHand, selectedClass, effectiveAffinity, talismanIds, armorSelection, loadout]);
 
   const clampedTargetLevel = Math.max(minLevel, Math.min(MAX_TARGET_LEVEL, targetLevel));
 
@@ -144,9 +155,10 @@ export default function BuildPicker() {
             talismanIds,
             armorSelection,
             extraWeaponWeight,
+            loadout,
           })
         : null,
-    [weapon, clampedTargetLevel, twoHand, effectiveAffinity, talismanIds, armorSelection, selectedClass?.id, extraWeaponWeight],
+    [weapon, clampedTargetLevel, twoHand, effectiveAffinity, talismanIds, armorSelection, selectedClass?.id, extraWeaponWeight, loadout],
   );
 
   const selectedClassMatch =
@@ -162,7 +174,7 @@ export default function BuildPicker() {
 
   const computeMinFor = (w: Weapon, th: boolean) =>
     selectedClass
-      ? getMinFeasibleLevel(selectedClass, w, th, effectiveAffinity, talismanIds, armorSelection)
+      ? getMinFeasibleLevel(selectedClass, w, th, effectiveAffinity, talismanIds, armorSelection, loadout)
       : getMinLevelForWeapon(w, th);
 
   const handleTalismanChange = (slot: number, value: Talisman | null) => {
@@ -174,7 +186,7 @@ export default function BuildPicker() {
     if (weapon && selectedClass) {
       const nextIds = [...talismanIds];
       nextIds[slot] = value?.id ?? null;
-      const nextMin = getMinFeasibleLevel(selectedClass, weapon, twoHand, effectiveAffinity, nextIds, armorSelection);
+      const nextMin = getMinFeasibleLevel(selectedClass, weapon, twoHand, effectiveAffinity, nextIds, armorSelection, loadout);
       if (targetLevel < nextMin) setTargetLevel(nextMin);
     }
   };
@@ -183,7 +195,7 @@ export default function BuildPicker() {
     setArmorSelection((prev) => ({ ...prev, [slot]: value?.id ?? null }));
     if (weapon && selectedClass) {
       const nextSel: ArmorSelection = { ...armorSelection, [slot]: value?.id ?? null };
-      const nextMin = getMinFeasibleLevel(selectedClass, weapon, twoHand, effectiveAffinity, talismanIds, nextSel);
+      const nextMin = getMinFeasibleLevel(selectedClass, weapon, twoHand, effectiveAffinity, talismanIds, nextSel, loadout);
       if (targetLevel < nextMin) setTargetLevel(nextMin);
     }
   };
@@ -240,7 +252,13 @@ export default function BuildPicker() {
       ? newRight[firstFilled.idx].weapon
       : newLeft[firstFilled.idx].weapon;
     if (!activeWeapon || !nextCls) return;
-    const nextMin = getMinFeasibleLevel(nextCls, activeWeapon, twoHand, "Standard", talismanIds, armorSelection);
+    const nextLoadout: LoadoutItem[] = [...newRight, ...newLeft]
+      .filter((s): s is { weapon: Weapon; affinity: Affinity } => s.weapon !== null)
+      .map((s) => ({
+        weapon: s.weapon,
+        affinity: isInfusable(s.weapon) ? s.affinity : "Standard",
+      }));
+    const nextMin = getMinFeasibleLevel(nextCls, activeWeapon, twoHand, "Standard", talismanIds, armorSelection, nextLoadout);
     if (targetLevel < nextMin) setTargetLevel(nextMin);
   };
 

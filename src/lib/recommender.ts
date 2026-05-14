@@ -12,7 +12,7 @@ export const DAMAGE_TYPE_LABELS: Record<DamageType, string> = {
 const DAMAGE_TYPE_ORDER: DamageType[] = ["phy", "mag", "fir", "lit", "hol"];
 import { totalTalismanWeight } from "../data/talismans";
 import { totalArmorWeight, totalArmorStatBoosts } from "../data/armor";
-import { Affinity, AFFINITY_PRIMARIES, AFFINITY_REQ_FLOOR, ClassMatch, DEFAULT_OPTIONS, ELEMENTAL_AP_BREAKPOINT, ELEMENTAL_STATS, EquipLoadSummary, GENERIC_SKILLS, LevelingStep, MAX_UPGRADE_MULTIPLIER, PHYSICAL_AP_BREAKPOINT, Recommendation, RecommendOptions, RollCategory, SCALE_RANK, SCALING_FACTOR, TWO_HAND_STR_MULTIPLIER, WeaponUpgrade } from "./types";
+import { Affinity, AFFINITY_PRIMARIES, AFFINITY_REQ_FLOOR, ClassMatch, DEFAULT_OPTIONS, ELEMENTAL_AP_BREAKPOINT, ELEMENTAL_STATS, EquipLoadSummary, GENERIC_SKILLS, LevelingStep, LoadoutItem, MAX_UPGRADE_MULTIPLIER, PHYSICAL_AP_BREAKPOINT, Recommendation, RecommendOptions, RollCategory, SCALE_RANK, SCALING_FACTOR, TWO_HAND_STR_MULTIPLIER, WeaponUpgrade } from "./types";
 
 const VIGOR_ANCHORS: ReadonlyArray<readonly [number, number]> = [
   [1, 20], [50, 30], [80, 40], [100, 50], [125, 60],
@@ -23,7 +23,7 @@ const ENDURANCE_ANCHORS: ReadonlyArray<readonly [number, number]> = [
 ];
 
 const MIND_ANCHORS_MELEE: ReadonlyArray<readonly [number, number]> = [
-  [1, 10], [50, 12], [100, 15], [200, 20],
+  [1, 10], [125, 12], [200, 15],
 ];
 
 const MIND_ANCHORS_SPELLBLADE: ReadonlyArray<readonly [number, number]> = [
@@ -145,6 +145,34 @@ export function estimateAttackPower(
 
 export function isInfusable(weapon: Weapon): boolean {
   return GENERIC_SKILLS.has(weapon.skill);
+}
+
+export function isCatalyst(weapon: Weapon): boolean {
+  return weapon.category === "Glintstone Staff" || weapon.category === "Sacred Seal";
+}
+
+function affinityAddsSpellScaling(affinity: Affinity): boolean {
+  return (
+    affinity === "Flame Art" ||
+    affinity === "Sacred" ||
+    affinity === "Magic" ||
+    affinity === "Cold"
+  );
+}
+
+function determineLoadoutProfile(items: LoadoutItem[]): MindProfile {
+  if (items.length === 0) return "melee";
+  const catalysts = items.filter((i) => isCatalyst(i.weapon));
+  if (catalysts.length > 0) {
+    return items.every((i) => isCatalyst(i.weapon)) ? "caster" : "spellblade";
+  }
+  const usesSpellScaling = items.some(
+    (i) =>
+      affinityAddsSpellScaling(i.affinity) ||
+      i.weapon.scaling.intelligence !== undefined ||
+      i.weapon.scaling.faith !== undefined,
+  );
+  return usesSpellScaling ? "spellblade" : "melee";
 }
 
 function isElemental(stat: Stat): boolean {
@@ -339,6 +367,7 @@ export function getMinFeasibleLevel(
   affinity: Affinity,
   talismanIds: (string | null)[] = [],
   armorSelection: import("../data/armor").ArmorSelection = { helm: null, chest: null, gauntlets: null, legs: null },
+  loadout: LoadoutItem[] = [],
 ): number {
   let lvl = getMinLevelForClassAndWeapon(cls, weapon, twoHand);
   for (let i = 0; i < 8; i++) {
@@ -350,6 +379,7 @@ export function getMinFeasibleLevel(
       talismanIds,
       armorSelection,
       extraWeaponWeight: 0,
+      loadout,
     });
     const next = cls.level + computeDeficit(cls.stats, target);
     if (next <= lvl) return lvl;
@@ -396,30 +426,44 @@ export function getTargetStats(weapon: Weapon, opts: RecommendOptions): { target
   const startingClass = getClass(opts.classId);
   const target: StatVector = startingClass ? { ...startingClass.stats } : emptyVector();
 
-  for (const stat of STAT_ORDER) {
-    const req = weapon.requirements[stat] ?? 0;
-    if (req <= 0) continue;
-    const adjusted =
-      stat === "strength"
-        ? adjustStrForTwoHand(req, opts.twoHand, startingClass?.stats.strength ?? 0)
-        : req;
-    if (target[stat] < adjusted) target[stat] = adjusted;
+  const loadoutItems: LoadoutItem[] =
+    opts.loadout && opts.loadout.length > 0 ? opts.loadout : [{ weapon, affinity: opts.affinity }];
+
+  for (const item of loadoutItems) {
+    const isActiveItem = item.weapon.id === weapon.id;
+    for (const stat of STAT_ORDER) {
+      const req = item.weapon.requirements[stat] ?? 0;
+      if (req <= 0) continue;
+      const adjusted =
+        stat === "strength" && isActiveItem
+          ? adjustStrForTwoHand(req, opts.twoHand, startingClass?.stats.strength ?? 0)
+          : req;
+      if (target[stat] < adjusted) target[stat] = adjusted;
+    }
   }
   if (opts.twoHand && (weapon.requirements.strength ?? 0) > 0) {
     rationale.push(
       `Strength req ${weapon.requirements.strength} → ${target.strength} (two-handed: ÷${TWO_HAND_STR_MULTIPLIER})`,
     );
   }
+  if (loadoutItems.length > 1) {
+    const otherNames = loadoutItems
+      .filter((i) => i.weapon.id !== weapon.id)
+      .map((i) => i.weapon.name);
+    if (otherNames.length > 0) {
+      rationale.push(`Requirements aggregated across loadout: ${otherNames.join(", ")}`);
+    }
+  }
 
-  if (opts.affinity !== "Standard") {
-    const floor = AFFINITY_REQ_FLOOR[opts.affinity];
-    if (floor) {
-      for (const stat of STAT_ORDER) {
-        const f = floor[stat];
-        if (f !== undefined && target[stat] < f) {
-          target[stat] = f;
-          rationale.push(`${stat} → ${f} (${opts.affinity} infusion floor)`);
-        }
+  for (const item of loadoutItems) {
+    if (item.affinity === "Standard") continue;
+    const floor = AFFINITY_REQ_FLOOR[item.affinity];
+    if (!floor) continue;
+    for (const stat of STAT_ORDER) {
+      const f = floor[stat];
+      if (f !== undefined && target[stat] < f) {
+        target[stat] = f;
+        rationale.push(`${stat} → ${f} (${item.affinity} infusion floor on ${item.weapon.name})`);
       }
     }
   }
@@ -471,37 +515,30 @@ export function getTargetStats(weapon: Weapon, opts: RecommendOptions): { target
     );
   }
 
-  const affinityAddsSpellScaling =
-    opts.affinity === "Flame Art" ||
-    opts.affinity === "Sacred" ||
-    opts.affinity === "Magic" ||
-    opts.affinity === "Cold";
-  const usesSpellScaling =
-    weapon.scaling.intelligence !== undefined ||
-    weapon.scaling.faith !== undefined ||
-    affinityAddsSpellScaling;
-  const isPureCaster =
-    (weapon.requirements.intelligence !== undefined ||
-      weapon.requirements.faith !== undefined) &&
-    !weapon.scaling.strength &&
-    !weapon.scaling.dexterity;
-
-  const mindProfile: MindProfile = isPureCaster
-    ? "caster"
-    : usesSpellScaling
-    ? "spellblade"
-    : "melee";
+  const mindProfile: MindProfile = determineLoadoutProfile(loadoutItems);
   const mindTarget = getMindTarget(opts.targetLevel, mindProfile);
   target.mind = Math.max(target.mind, mindTarget);
+  const profileReason =
+    mindProfile === "caster"
+      ? "all wielded items are catalysts — FP for spellcasting"
+      : mindProfile === "spellblade"
+      ? "loadout mixes melee + spell scaling — moderate FP for buffs/incantations"
+      : "loadout is pure melee — minimum FP, points prioritized for AP";
   rationale.push(
-    `Mind → ${mindTarget} (${mindProfile} profile at Lv ${opts.targetLevel})`,
+    `Mind → ${mindTarget} (${mindProfile} profile at Lv ${opts.targetLevel}; ${profileReason})`,
   );
 
-  for (const stat of STAT_ORDER) {
-    const req = weapon.requirements[stat];
-    if (req === undefined) continue;
-    const adjusted = stat === "strength" ? adjustStrForTwoHand(req, opts.twoHand, startingClass?.stats[stat] ?? 0) : req;
-    if (adjusted > target[stat]) target[stat] = adjusted;
+  for (const item of loadoutItems) {
+    const isActiveItem = item.weapon.id === weapon.id;
+    for (const stat of STAT_ORDER) {
+      const req = item.weapon.requirements[stat];
+      if (req === undefined) continue;
+      const adjusted =
+        stat === "strength" && isActiveItem
+          ? adjustStrForTwoHand(req, opts.twoHand, startingClass?.stats[stat] ?? 0)
+          : req;
+      if (adjusted > target[stat]) target[stat] = adjusted;
+    }
   }
 
   // Apply armor stat boosts last so they reduce the leveling investment for

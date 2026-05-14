@@ -1,5 +1,5 @@
 import { StartingClass, Stat, StatVector } from "../data/classes";
-import { ScaleGrade } from "../data/weapons";
+import { ScaleGrade, Weapon } from "../data/weapons";
 import { ArmorSelection, EMPTY_ARMOR_SELECTION } from "../data/armor";
 
 export const SCALE_RANK: Record<ScaleGrade, number> = { S: 6, A: 5, B: 4, C: 3, D: 2, E: 1 };
@@ -74,6 +74,8 @@ export const GENERIC_SKILLS = new Set([
   "Bloody Slash", "Storm Kick", "Thunderstorm",
 ]);
 
+export type LoadoutItem = { weapon: Weapon; affinity: Affinity };
+
 export type RecommendOptions = {
   targetLevel: number;
   twoHand: boolean;
@@ -82,6 +84,7 @@ export type RecommendOptions = {
   talismanIds: (string | null)[];
   armorSelection: ArmorSelection;
   extraWeaponWeight: number;
+  loadout: LoadoutItem[];
 };
 
 export const DEFAULT_OPTIONS: RecommendOptions = {
@@ -92,6 +95,7 @@ export const DEFAULT_OPTIONS: RecommendOptions = {
   talismanIds: [null, null, null, null],
   armorSelection: { ...EMPTY_ARMOR_SELECTION },
   extraWeaponWeight: 0,
+  loadout: [],
 };
 
 export type RollCategory = "light" | "medium" | "heavy" | "overloaded";
