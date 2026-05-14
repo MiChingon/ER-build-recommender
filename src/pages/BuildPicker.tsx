@@ -60,7 +60,6 @@ import {
   isInfusable,
   recommend,
   DAMAGE_TYPE_LABELS,
-  type APEstimate,
 } from "../lib/recommender";
 import { AFFINITIES, Affinity, DEFAULT_TARGET_LEVEL, LoadoutItem, MAX_TARGET_LEVEL } from "../lib/types";
 
@@ -141,6 +140,29 @@ export default function BuildPicker() {
         })),
     [rightHand, leftHand],
   );
+
+  const displayLoadout = useMemo(() => {
+    const out: { pos: SlotPos; weapon: Weapon; affinity: Affinity }[] = [];
+    rightHand.forEach((s, i) => {
+      if (s.weapon) {
+        out.push({
+          pos: { hand: "right", idx: i },
+          weapon: s.weapon,
+          affinity: isInfusable(s.weapon) ? s.affinity : "Standard",
+        });
+      }
+    });
+    leftHand.forEach((s, i) => {
+      if (s.weapon) {
+        out.push({
+          pos: { hand: "left", idx: i },
+          weapon: s.weapon,
+          affinity: isInfusable(s.weapon) ? s.affinity : "Standard",
+        });
+      }
+    });
+    return out;
+  }, [rightHand, leftHand]);
 
   const selectedClass = classes.find((c) => c.id === classId);
 
@@ -507,11 +529,11 @@ export default function BuildPicker() {
                     equipLoad={rec.equipLoad}
                   />
 
-                  <DamagePanel
-                    weapon={weapon!}
+                  <LoadoutDamagePanel
+                    loadout={displayLoadout}
+                    active={active}
                     target={rec.target}
                     twoHand={twoHand}
-                    affinity={effectiveAffinity}
                   />
 
                   <TargetStatsTable
@@ -996,56 +1018,17 @@ const DAMAGE_TYPE_COLORS: Record<string, string> = {
   hol: "#ffcc99",
 };
 
-function DamagePanel({
-  weapon,
+function LoadoutDamagePanel({
+  loadout,
+  active,
   target,
   twoHand,
-  affinity,
 }: {
-  weapon: Weapon;
+  loadout: { pos: SlotPos; weapon: Weapon; affinity: Affinity }[];
+  active: SlotPos;
   target: Record<Stat, number>;
   twoHand: boolean;
-  affinity: Affinity;
 }) {
-  const baseEstimate = estimateAttackPower(weapon, target as never, "base", twoHand, affinity);
-  const maxEstimate = estimateAttackPower(weapon, target as never, "max", twoHand, affinity);
-  const maxLabel = getMaxUpgradeLevel(weapon);
-  const gain = maxEstimate.total - baseEstimate.total;
-  const gainPct = baseEstimate.total > 0 ? Math.round((gain / baseEstimate.total) * 100) : 0;
-
-  const cell = (label: string, est: APEstimate) => (
-    <Paper variant="outlined" sx={{ p: 2, flex: 1 }}>
-      <Typography variant="caption" color="text.secondary">
-        {label}
-      </Typography>
-      <Typography variant="h5" sx={{ fontWeight: 600, mt: 0.5 }}>
-        {est.total}
-      </Typography>
-      <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
-        Base {est.base} + Scaling {est.scaling}
-      </Typography>
-      <Stack spacing={0.25} sx={{ mt: 0.5 }}>
-        {est.breakdown.map((b) => (
-          <Stack key={b.type} direction="row" spacing={1} sx={{ alignItems: "center" }}>
-            <Box
-              sx={{
-                width: 8, height: 8, borderRadius: "50%",
-                bgcolor: DAMAGE_TYPE_COLORS[b.type] ?? "text.secondary",
-                flexShrink: 0,
-              }}
-            />
-            <Typography variant="caption" sx={{ minWidth: 56, color: DAMAGE_TYPE_COLORS[b.type] ?? "text.primary" }}>
-              {DAMAGE_TYPE_LABELS[b.type]}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {b.base} + {b.scaling} = <b style={{ color: "var(--mui-palette-text-primary, #fff)" }}>{b.total}</b>
-            </Typography>
-          </Stack>
-        ))}
-      </Stack>
-    </Paper>
-  );
-
   return (
     <Box>
       <Stack direction="row" spacing={1} sx={{ alignItems: "baseline", mb: 1 }}>
@@ -1054,16 +1037,105 @@ function DamagePanel({
           at target stats{twoHand ? ", two-handed" : ""}
         </Typography>
       </Stack>
-      <Stack direction="row" spacing={2}>
-        {cell("Base (+0)", baseEstimate)}
-        {cell(`Maxed (${maxLabel})`, maxEstimate)}
-      </Stack>
-      <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
-        Upgrading from +0 → {maxLabel}: +{gain} AP ({gainPct > 0 ? "+" : ""}
-        {gainPct}%). Per-damage-type values include each type's base AP plus the scaling
-        contribution from stats that apply to that damage type.
-      </Typography>
+      {loadout.length === 0 ? (
+        <Typography variant="body2" color="text.secondary">
+          No weapons selected.
+        </Typography>
+      ) : (
+        <Stack spacing={1}>
+          {loadout.map(({ pos, weapon, affinity }) => (
+            <WeaponDamageRow
+              key={`${pos.hand}-${pos.idx}`}
+              pos={pos}
+              weapon={weapon}
+              affinity={affinity}
+              target={target}
+              twoHand={twoHand}
+              isActive={pos.hand === active.hand && pos.idx === active.idx}
+            />
+          ))}
+        </Stack>
+      )}
     </Box>
+  );
+}
+
+function WeaponDamageRow({
+  pos,
+  weapon,
+  affinity,
+  target,
+  twoHand,
+  isActive,
+}: {
+  pos: SlotPos;
+  weapon: Weapon;
+  affinity: Affinity;
+  target: Record<Stat, number>;
+  twoHand: boolean;
+  isActive: boolean;
+}) {
+  const baseEstimate = estimateAttackPower(weapon, target as never, "base", twoHand, affinity);
+  const maxEstimate = estimateAttackPower(weapon, target as never, "max", twoHand, affinity);
+  const maxLabel = getMaxUpgradeLevel(weapon);
+  const slotLabel = `${pos.hand === "right" ? "R" : "L"}${pos.idx + 1}`;
+  return (
+    <Paper
+      variant="outlined"
+      sx={{
+        p: 1.5,
+        borderColor: isActive ? "primary.main" : undefined,
+        borderWidth: isActive ? 2 : 1,
+        bgcolor: isActive ? "rgba(212,175,55,0.08)" : undefined,
+      }}
+    >
+      <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+        <Chip size="small" label={slotLabel} variant={isActive ? "filled" : "outlined"} color={isActive ? "primary" : "default"} />
+        {weapon.image ? (
+          <Box
+            component="img"
+            src={weapon.image}
+            alt=""
+            loading="lazy"
+            sx={{ width: 40, height: 40, objectFit: "contain", bgcolor: "action.hover", borderRadius: 0.5, flexShrink: 0 }}
+          />
+        ) : (
+          <Box sx={{ width: 40, height: 40, bgcolor: "action.hover", borderRadius: 0.5, flexShrink: 0 }} />
+        )}
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography variant="body2" noWrap sx={{ fontWeight: 600 }}>
+            {weapon.name}
+          </Typography>
+          <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>
+            {weapon.category} · {affinity}
+          </Typography>
+        </Box>
+        <Box sx={{ textAlign: "right", flexShrink: 0, minWidth: 90 }}>
+          <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
+            +0 · {baseEstimate.total}
+          </Typography>
+          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+            {maxLabel} · {maxEstimate.total}
+          </Typography>
+        </Box>
+      </Stack>
+      <Stack direction="row" spacing={1} useFlexGap sx={{ mt: 1, flexWrap: "wrap" }}>
+        {maxEstimate.breakdown.map((b) => (
+          <Stack key={b.type} direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
+            <Box
+              sx={{
+                width: 8, height: 8, borderRadius: "50%",
+                bgcolor: DAMAGE_TYPE_COLORS[b.type] ?? "text.secondary",
+                flexShrink: 0,
+              }}
+            />
+            <Typography variant="caption" color="text.secondary">
+              {DAMAGE_TYPE_LABELS[b.type]} {b.total}
+            </Typography>
+          </Stack>
+        ))}
+      </Stack>
+    </Paper>
   );
 }
 
