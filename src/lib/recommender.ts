@@ -364,15 +364,12 @@ export function getMinLevelForClassAndWeapon(
   let deficit = 0;
   for (const stat of STAT_ORDER) {
     const req = weapon.requirements[stat] ?? 0;
-    console.log('req', req)
     if (req <= 0) continue
     const adjusted =
       stat === "strength" ? adjustStrForTwoHand(req, twoHand, cls.stats.strength) : req;
     const gap = adjusted - cls.stats[stat];
     if (gap > 0) deficit += gap;
   }
-  console.log(cls.level)
-  console.log('CALCULATED DEFICIT', deficit)
   return cls.level + deficit;
 }
 

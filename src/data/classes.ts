@@ -1,3 +1,5 @@
+import { ArmorSelection } from "./armor";
+
 export type Stat =
   | "vigor"
   | "mind"
@@ -19,6 +21,7 @@ export type StartingClass = {
   startingEquipment: string[];
   image: string;
   starting?: { right?: string[]; left?: string[] };
+  armor: ArmorSelection
 };
 
 const CLASS_IMAGE_BASE =
@@ -59,6 +62,12 @@ export const classes: StartingClass[] = [
     startingEquipment: ["Longsword", "Halberd", "Heater Shield", "Vagabond Knight armor set"],
     image: classImage("vagabond"),
     starting: { right: ["longsword", "halberd"], left: ["heater-shield"] },
+    armor: {
+      helm: "h-vagabond-knight-helm",
+      chest: "c-vagabond-knight-armor",
+      gauntlets: "g-vagabond-knight-gauntlets",
+      legs: "l-vagabond-knight-greaves",
+    }
   },
   {
     id: "warrior",
@@ -69,6 +78,12 @@ export const classes: StartingClass[] = [
     startingEquipment: ["Scimitar (x2)", "Riveted Wooden Shield", "Blue Cloth Cowl set"],
     image: classImage("warrior"),
     starting: { right: ["scimitar"], left: ["scimitar", "riveted-wooden-shield"] },
+    armor: {
+      helm: "h-blue-cloth-cowl",
+      chest: "c-blue-cloth-vest",
+      gauntlets: "g-warrior-gauntlets",
+      legs: "l-warrior-greaves",
+    }
   },
   {
     id: "hero",
@@ -79,6 +94,12 @@ export const classes: StartingClass[] = [
     startingEquipment: ["Battle Axe", "Large Leather Shield", "Champion set"],
     image: classImage("hero"),
     starting: { right: ["battle-axe"], left: ["large-leather-shield"] },
+    armor: {
+      chest: "c-champion-pauldron",
+      gauntlets: "g-champion-bracers",
+      legs: "l-champion-gaiters",
+      helm: "h-champion-headband",
+    }
   },
   {
     id: "bandit",
@@ -89,6 +110,12 @@ export const classes: StartingClass[] = [
     startingEquipment: ["Great Knife", "Shortbow", "Buckler", "Bandit set", "Bone Arrow (Fletched) x30"],
     image: classImage("bandit"),
     starting: { right: ["great-knife", "shortbow"], left: ["buckler"] },
+    armor: {
+      helm: "h-bandit-mask",
+      chest: "c-bandit-garb",
+      gauntlets: "g-bandit-manchettes",
+      legs: "l-bandit-boots"
+    }
   },
   {
     id: "astrologer",
@@ -99,6 +126,12 @@ export const classes: StartingClass[] = [
     startingEquipment: ["Short Sword", "Astrologer's Staff", "Scripture Wooden Shield", "Astrologer set", "Glintstone Pebble", "Glintstone Arc"],
     image: classImage("astrologer"),
     starting: { right: ["short-sword", "astrologers-staff"], left: ["scripture-wooden-shield"] },
+    armor: {
+      helm: "h-astrologer-hood",
+      chest: "c-astrologer-robe",
+      gauntlets: "g-astrologer-gloves",
+      legs: "l-astrologer-trousers"
+    }
   },
   {
     id: "prophet",
@@ -109,6 +142,12 @@ export const classes: StartingClass[] = [
     startingEquipment: ["Short Spear", "Finger Seal", "Rickety Shield", "Prophet set", "Heal", "Catch Flame"],
     image: classImage("prophet"),
     starting: { right: ["short-spear", "finger-seal"], left: ["rickety-shield"] },
+    armor: {
+      helm: "h-prophet-blindfold",
+      chest: "c-prophet-robe",
+      gauntlets: null,
+      legs: "l-prophet-trousers"
+    }
   },
   {
     id: "samurai",
@@ -119,6 +158,12 @@ export const classes: StartingClass[] = [
     startingEquipment: ["Uchigatana", "Longbow", "Red Thorn Roundshield", "Land of Reeds set", "Arrow x20", "Fire Arrow x10"],
     image: classImage("samurai"),
     starting: { right: ["uchigatana", "longbow"], left: ["red-thorn-roundshield"] },
+    armor: {
+      helm: "h-land-of-reeds-helm",
+      chest: "c-land-of-reeds-armor-altered",
+      gauntlets: "g-land-of-reeds-gauntlets",
+      legs: "l-land-of-reeds-greaves"
+    }
   },
   {
     id: "prisoner",
@@ -129,6 +174,12 @@ export const classes: StartingClass[] = [
     startingEquipment: ["Estoc", "Glintstone Staff", "Rift Shield", "Prisoner set", "Magic Glintblade"],
     image: classImage("prisoner"),
     starting: { right: ["estoc", "glintstone-staff"], left: ["rift-shield"] },
+    armor: {
+      helm: "h-prisoner-iron-mask",
+      chest: "c-prisoner-clothing",
+      gauntlets: null,
+      legs: "l-prisoner-trousers"
+    }
   },
   {
     id: "confessor",
@@ -139,6 +190,12 @@ export const classes: StartingClass[] = [
     startingEquipment: ["Broadsword", "Finger Seal", "Blue Crest Heater Shield", "Confessor set", "Urgent Heal", "Assassin's Approach"],
     image: classImage("confessor"),
     starting: { right: ["broadsword", "finger-seal"], left: ["blue-crest-heater-shield"] },
+    armor: {
+      helm: "h-confessor-hood",
+      chest: "c-confessor-armor",
+      gauntlets: "g-confessor-gloves",
+      legs: "l-confessor-boots"
+    }
   },
   {
     id: "wretch",
@@ -149,6 +206,12 @@ export const classes: StartingClass[] = [
     startingEquipment: ["Club"],
     image: classImage("wretch"),
     starting: { right: ["club"] },
+    armor: {
+      helm: "h-wretch's-hood",
+      chest: "c-wretch's-armor",
+      gauntlets: "g-wretch's-gauntlets",
+      legs: "l-wretch's-trousers"
+    }
   },
 ];
 
