@@ -1,11 +1,13 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
-  Autocomplete,
   Box,
   Card,
   CardContent,
   Chip,
+  Dialog,
+  DialogContent,
+  DialogTitle,
   Divider,
   FormControl,
   FormControlLabel,
@@ -14,6 +16,10 @@ import {
   IconButton,
   InputLabel,
   LinearProgress,
+  List,
+  ListItemAvatar,
+  ListItemButton,
+  ListItemText,
   MenuItem,
   Paper,
   Select,
@@ -50,6 +56,7 @@ import {
   getMaxUpgradeLevel,
   getMinFeasibleLevel,
   getMinLevelForWeapon,
+  getUpgradeType,
   isInfusable,
   recommend,
   DAMAGE_TYPE_LABELS,
@@ -90,6 +97,7 @@ export default function BuildPicker() {
   const [rightHand, setRightHand] = useState<WeaponSlot[]>(initialHands.right);
   const [leftHand, setLeftHand] = useState<WeaponSlot[]>(initialHands.left);
   const [active, setActive] = useState<SlotPos>({ hand: "right", idx: 0 });
+  const [weaponPickerOpen, setWeaponPickerOpen] = useState(false);
   const [classId, setClassId] = useState<string>(classes[0].id);
   const [targetLevel, setTargetLevel] = useState<number>(DEFAULT_TARGET_LEVEL);
   const [twoHand, setTwoHand] = useState(false);
@@ -119,7 +127,8 @@ export default function BuildPicker() {
     Math.round(allSlots.reduce((sum, s) => sum + (s.weapon?.weight ?? 0), 0) * 10) / 10;
   const extraWeaponWeight = Math.max(0, totalWeaponWeight - (weapon?.weight ?? 0));
 
-  const weaponInfusable = weapon ? isInfusable(weapon) : false;
+  const weaponUpgradeType = weapon ? getUpgradeType(weapon) : null;
+  const weaponInfusable = weaponUpgradeType === "infusable";
   const effectiveAffinity: Affinity = weaponInfusable ? affinity : "Standard";
 
   const loadout = useMemo<LoadoutItem[]>(
@@ -306,53 +315,20 @@ export default function BuildPicker() {
                   rightHand={rightHand}
                   leftHand={leftHand}
                   active={active}
-                  onActivate={setActive}
+                  onActivate={(pos) => {
+                    setActive(pos);
+                    setWeaponPickerOpen(true);
+                  }}
                   onClear={(pos) => updateSlot(pos, { weapon: null, affinity: "Standard" })}
                 />
 
-                <Autocomplete
+                <GearPicker
+                  open={weaponPickerOpen}
+                  title={`Select weapon — ${active.hand === "right" ? "R" : "L"}${active.idx + 1}`}
                   options={filteredWeapons}
-                  value={weapon}
-                  onChange={(_, v) => handleWeaponChange(v)}
-                  getOptionLabel={(w) => w.name}
-                  groupBy={(w) => (category === "all" ? w.category : "")}
-                  isOptionEqualToValue={(a, b) => a.id === b.id}
-                  renderOption={(props, option) => (
-                    <Box component="li" {...props}>
-                      <Stack direction="row" spacing={1} sx={{ width: "100%", alignItems: "center" }}>
-                        {option.image ? (
-                          <Box
-                            component="img"
-                            src={option.image}
-                            alt=""
-                            loading="lazy"
-                            sx={{ width: 32, height: 32, objectFit: "contain", bgcolor: "action.hover", borderRadius: 0.5 }}
-                          />
-                        ) : (
-                          <Box sx={{ width: 32, height: 32 }} />
-                        )}
-                        <Box sx={{ flex: 1, minWidth: 0 }}>
-                          <Typography variant="body2" noWrap>
-                            {option.name}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>
-                            {option.category} · {option.weight} wgt
-                          </Typography>
-                        </Box>
-                      </Stack>
-                    </Box>
-                  )}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label={`Weapon — ${active.hand === "right" ? "R" : "L"}${active.idx + 1}`}
-                      placeholder={
-                        category === "all"
-                          ? "Search across all melee weapons"
-                          : `Search within ${category}`
-                      }
-                    />
-                  )}
+                  onSelect={(w) => handleWeaponChange(w)}
+                  onClose={() => setWeaponPickerOpen(false)}
+                  secondary={(w) => `${w.category} · ${w.weight} wgt`}
                 />
 
                 <FormControl fullWidth disabled={!weapon || !weaponInfusable}>
@@ -362,7 +338,12 @@ export default function BuildPicker() {
                     label="Infusion (affinity)"
                     value={effectiveAffinity}
                     onChange={(e) => setAffinity(e.target.value as Affinity)}
-                    renderValue={(v) => (weapon && !weaponInfusable ? "Somber" : (v as string))}
+                    renderValue={(v) => {
+                      if (!weapon) return v as string;
+                      if (weaponUpgradeType === "somber") return "Somber";
+                      if (weaponUpgradeType === "standard-fixed") return "Standard";
+                      return v as string;
+                    }}
                   >
                     {AFFINITIES.map((a) => (
                       <MenuItem key={a} value={a}>
@@ -373,8 +354,10 @@ export default function BuildPicker() {
                   <FormHelperText>
                     {!weapon
                       ? "Pick a weapon first."
-                      : !weaponInfusable
-                      ? "This weapon has a unique skill and cannot be infused."
+                      : weaponUpgradeType === "somber"
+                      ? "Somber weapon (+10 max) — affinity cannot be changed."
+                      : weaponUpgradeType === "standard-fixed"
+                      ? "Standard weapon with a fixed Ash of War — affinity cannot be changed."
                       : "Affinity overrides the weapon's primary scaling stat."}
                   </FormHelperText>
                 </FormControl>
@@ -593,7 +576,9 @@ function WeaponSlotsGrid({
               variant="outlined"
               onClick={() => onActivate({ hand, idx })}
               sx={{
-                flex: 1,
+                flex: "1 1 0",
+                minWidth: 0,
+                overflow: "hidden",
                 p: 1,
                 cursor: "pointer",
                 borderColor: isActive ? "primary.main" : undefined,
@@ -622,11 +607,17 @@ function WeaponSlotsGrid({
                     src={w.image}
                     alt=""
                     loading="lazy"
-                    sx={{ width: 48, height: 48, objectFit: "contain", bgcolor: "action.hover", borderRadius: 0.5 }}
+                    sx={{ width: 48, height: 48, objectFit: "contain", bgcolor: "action.hover", borderRadius: 0.5, flexShrink: 0 }}
                   />
-                  <Typography variant="caption" sx={{ mt: 0.5, textAlign: "center", lineHeight: 1.2 }} noWrap>
-                    {w.name}
-                  </Typography>
+                  <Tooltip title={w.name}>
+                    <Typography
+                      variant="caption"
+                      sx={{ mt: 0.5, textAlign: "center", lineHeight: 1.2, width: "100%", display: "block" }}
+                      noWrap
+                    >
+                      {w.name}
+                    </Typography>
+                  </Tooltip>
                   {slot.affinity !== "Standard" && isInfusable(w) && (
                     <Typography variant="caption" color="primary.main" sx={{ fontSize: "0.65rem" }}>
                       {slot.affinity}
@@ -665,58 +656,35 @@ function ArmorSlots({
   selection: ArmorSelection;
   onChange: (slot: ArmorSlot, value: ArmorPiece | null) => void;
 }) {
+  const [openSlot, setOpenSlot] = useState<ArmorSlot | null>(null);
   return (
     <Box>
       <Typography variant="subtitle2" gutterBottom>
         Armor
       </Typography>
-      <Stack spacing={1.5}>
+      <Stack direction="row" spacing={1}>
         {ARMOR_SLOTS.map((slot) => {
-          const currentId = selection[slot];
-          const current = findArmor(currentId) ?? null;
-          const options = armorBySlot[slot];
+          const current = findArmor(selection[slot]) ?? null;
           return (
-            <Autocomplete
+            <GearTile
               key={slot}
-              size="small"
-              options={options}
-              value={current}
-              onChange={(_, v) => onChange(slot, v)}
-              getOptionLabel={(a) => `${a.name} (${a.weight})`}
-              isOptionEqualToValue={(a, b) => a.id === b.id}
-              renderOption={(props, option) => (
-                <Box component="li" {...props}>
-                  <Stack direction="row" spacing={1} sx={{ width: "100%", alignItems: "center" }}>
-                    <Box
-                      component="img"
-                      src={option.image}
-                      alt=""
-                      loading="lazy"
-                      sx={{ width: 32, height: 32, objectFit: "contain", bgcolor: "action.hover", borderRadius: 0.5 }}
-                    />
-                    <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Typography variant="body2" noWrap>
-                        {option.name}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>
-                        Phy {option.phy} · Poise {option.poise}
-                      </Typography>
-                    </Box>
-                    <Chip size="small" label={`${option.weight}`} />
-                  </Stack>
-                </Box>
-              )}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label={ARMOR_SLOT_LABELS[slot]}
-                  placeholder={`Search ${ARMOR_SLOT_LABELS[slot].toLowerCase()}`}
-                />
-              )}
+              label={ARMOR_SLOT_LABELS[slot]}
+              image={current?.image ?? null}
+              name={current?.name ?? null}
+              onClick={() => setOpenSlot(slot)}
+              onClear={() => onChange(slot, null)}
             />
           );
         })}
       </Stack>
+      <GearPicker
+        open={openSlot !== null}
+        title={openSlot ? `Select ${ARMOR_SLOT_LABELS[openSlot]}` : ""}
+        options={openSlot ? armorBySlot[openSlot] : []}
+        onSelect={(item) => openSlot && onChange(openSlot, item)}
+        onClose={() => setOpenSlot(null)}
+        secondary={(o) => `Phy ${o.phy} · Poise ${o.poise} · Wgt ${o.weight}`}
+      />
     </Box>
   );
 }
@@ -730,71 +698,218 @@ function TalismanSlots({
   onChange: (slot: number, value: Talisman | null) => void;
   loadSummary: import("../lib/types").EquipLoadSummary | null;
 }) {
+  const [openSlot, setOpenSlot] = useState<number | null>(null);
   const selectedBaseNames = new Set(
     talismanIds
       .map((id) => (id ? talismans.find((t) => t.id === id) : null))
       .filter((t): t is Talisman => Boolean(t))
       .map((t) => talismanBaseName(t.name)),
   );
+  const pickerOptions = useMemo(() => {
+    if (openSlot === null) return [] as Talisman[];
+    const currentId = talismanIds[openSlot];
+    const current = currentId ? talismans.find((t) => t.id === currentId) ?? null : null;
+    const currentBase = current ? talismanBaseName(current.name) : null;
+    return talismans.filter(
+      (t) =>
+        t.id === currentId ||
+        !selectedBaseNames.has(talismanBaseName(t.name)) ||
+        talismanBaseName(t.name) === currentBase,
+    );
+  }, [openSlot, talismanIds, selectedBaseNames]);
 
   return (
     <Box>
       <Stack direction="row" spacing={1} sx={{ alignItems: "baseline", mb: 1 }}>
         <Typography variant="subtitle2">Talismans (up to 4)</Typography>
-        {loadSummary && (
-          <LoadChip summary={loadSummary} />
-        )}
+        {loadSummary && <LoadChip summary={loadSummary} />}
       </Stack>
-      <Stack spacing={1.5}>
+      <Stack direction="row" spacing={1}>
         {[0, 1, 2, 3].map((slot) => {
           const currentId = talismanIds[slot];
           const current = currentId ? talismans.find((t) => t.id === currentId) ?? null : null;
-          const currentBase = current ? talismanBaseName(current.name) : null;
-          const options = talismans.filter(
-            (t) =>
-              t.id === currentId ||
-              !selectedBaseNames.has(talismanBaseName(t.name)) ||
-              talismanBaseName(t.name) === currentBase,
-          );
           return (
-            <Autocomplete
+            <GearTile
               key={slot}
-              size="small"
-              options={options}
-              value={current}
-              onChange={(_, v) => onChange(slot, v)}
-              getOptionLabel={(t) => `${t.name} (${t.weight})`}
-              isOptionEqualToValue={(a, b) => a.id === b.id}
-              renderOption={(props, option) => (
-                <Box component="li" {...props}>
-                  <Stack direction="row" spacing={1} sx={{ width: "100%", alignItems: "center" }}>
-                    <Box
-                      component="img"
-                      src={option.image}
-                      alt=""
-                      loading="lazy"
-                      sx={{ width: 32, height: 32, objectFit: "contain", bgcolor: "action.hover", borderRadius: 0.5 }}
-                    />
-                    <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Typography variant="body2" noWrap>
-                        {option.name}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>
-                        {option.effect}
-                      </Typography>
-                    </Box>
-                    <Chip size="small" label={`${option.weight}`} />
-                  </Stack>
-                </Box>
-              )}
-              renderInput={(params) => (
-                <TextField {...params} label={`Slot ${slot + 1}`} placeholder="Search talismans" />
-              )}
+              label={`T${slot + 1}`}
+              image={current?.image ?? null}
+              name={current?.name ?? null}
+              onClick={() => setOpenSlot(slot)}
+              onClear={() => onChange(slot, null)}
             />
           );
         })}
       </Stack>
+      <GearPicker
+        open={openSlot !== null}
+        title={openSlot !== null ? `Select talisman (T${openSlot + 1})` : ""}
+        options={pickerOptions}
+        onSelect={(item) => openSlot !== null && onChange(openSlot, item)}
+        onClose={() => setOpenSlot(null)}
+        secondary={(o) => `${o.effect} · Wgt ${o.weight}`}
+      />
     </Box>
+  );
+}
+
+function GearTile({
+  label,
+  image,
+  name,
+  onClick,
+  onClear,
+}: {
+  label: string;
+  image: string | null;
+  name: string | null;
+  onClick: () => void;
+  onClear: () => void;
+}) {
+  return (
+    <Paper
+      variant="outlined"
+      onClick={onClick}
+      sx={{
+        flex: "1 1 0",
+        minWidth: 0,
+        overflow: "hidden",
+        p: 1,
+        cursor: "pointer",
+        position: "relative",
+        minHeight: 96,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        "&:hover": { borderColor: "primary.light" },
+      }}
+    >
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        sx={{ position: "absolute", top: 2, left: 6, fontSize: "0.65rem" }}
+      >
+        {label}
+      </Typography>
+      {image ? (
+        <>
+          <Box
+            component="img"
+            src={image}
+            alt=""
+            loading="lazy"
+            sx={{ width: 48, height: 48, objectFit: "contain", bgcolor: "action.hover", borderRadius: 0.5, flexShrink: 0 }}
+          />
+          {name && (
+            <Tooltip title={name}>
+              <Typography
+                variant="caption"
+                sx={{ mt: 0.5, textAlign: "center", lineHeight: 1.2, width: "100%", display: "block" }}
+                noWrap
+              >
+                {name}
+              </Typography>
+            </Tooltip>
+          )}
+          <IconButton
+            size="small"
+            aria-label="Clear slot"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClear();
+            }}
+            sx={{ position: "absolute", top: 0, right: 0, p: 0.25 }}
+          >
+            <Typography variant="caption" sx={{ fontSize: "0.85rem", lineHeight: 1 }}>
+              ×
+            </Typography>
+          </IconButton>
+        </>
+      ) : (
+        <Typography variant="caption" color="text.disabled">
+          Empty
+        </Typography>
+      )}
+    </Paper>
+  );
+}
+
+type GearOption = { id: string; name: string; image?: string };
+
+function GearPicker<T extends GearOption>({
+  open,
+  title,
+  options,
+  onSelect,
+  onClose,
+  secondary,
+}: {
+  open: boolean;
+  title: string;
+  options: T[];
+  onSelect: (item: T) => void;
+  onClose: () => void;
+  secondary?: (item: T) => string;
+}) {
+  const [query, setQuery] = useState("");
+  useEffect(() => {
+    if (!open) setQuery("");
+  }, [open]);
+  const q = query.trim().toLowerCase();
+  const filtered = q
+    ? options.filter((o) => o.name.toLowerCase().includes(q))
+    : options;
+  return (
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle>{title}</DialogTitle>
+      <DialogContent dividers>
+        <TextField
+          fullWidth
+          autoFocus
+          size="small"
+          placeholder="Search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          sx={{ mb: 1 }}
+        />
+        <List dense sx={{ maxHeight: 420, overflow: "auto" }}>
+          {filtered.length === 0 ? (
+            <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: "center" }}>
+              No matches
+            </Typography>
+          ) : (
+            filtered.map((o) => (
+              <ListItemButton
+                key={o.id}
+                onClick={() => {
+                  onSelect(o);
+                  onClose();
+                }}
+              >
+                <ListItemAvatar>
+                  {o.image ? (
+                    <Box
+                      component="img"
+                      src={o.image}
+                      alt=""
+                      loading="lazy"
+                      sx={{ width: 36, height: 36, objectFit: "contain", bgcolor: "action.hover", borderRadius: 0.5 }}
+                    />
+                  ) : (
+                    <Box sx={{ width: 36, height: 36, bgcolor: "action.hover", borderRadius: 0.5 }} />
+                  )}
+                </ListItemAvatar>
+                <ListItemText
+                  primary={o.name}
+                  secondary={secondary ? secondary(o) : undefined}
+                  slotProps={{ secondary: { noWrap: true } }}
+                />
+              </ListItemButton>
+            ))
+          )}
+        </List>
+      </DialogContent>
+    </Dialog>
   );
 }
 

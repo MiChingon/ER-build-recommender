@@ -34,8 +34,25 @@ const MIND_ANCHORS_CASTER: ReadonlyArray<readonly [number, number]> = [
   [1, 15], [50, 20], [80, 28], [125, 35], [200, 45],
 ];
 
+export type UpgradeType = "infusable" | "somber" | "standard-fixed";
+
+export function getUpgradeType(weapon: Weapon): UpgradeType {
+  const maxTable = weapon.scalingTable?.max;
+  if (maxTable) {
+    const keys = Object.keys(maxTable);
+    if (keys.length > 1) return "infusable";
+    if (keys.length === 1 && keys[0] === "Standard") {
+      const standard = maxTable["Standard"];
+      const hasNumeric =
+        !!standard && Object.values(standard).some((v) => Array.isArray(v));
+      return hasNumeric ? "somber" : "standard-fixed";
+    }
+  }
+  return GENERIC_SKILLS.has(weapon.skill) ? "infusable" : "somber";
+}
+
 export function getMaxUpgradeLevel(weapon: Weapon): "+25" | "+10" {
-  return isInfusable(weapon) ? "+25" : "+10";
+  return getUpgradeType(weapon) === "somber" ? "+10" : "+25";
 }
 
 export type DamageBreakdown = {
@@ -144,7 +161,7 @@ export function estimateAttackPower(
 }
 
 export function isInfusable(weapon: Weapon): boolean {
-  return GENERIC_SKILLS.has(weapon.skill);
+  return getUpgradeType(weapon) === "infusable";
 }
 
 export function isCatalyst(weapon: Weapon): boolean {
