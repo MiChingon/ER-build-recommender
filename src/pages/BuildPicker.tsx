@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   Alert,
   Box,
@@ -329,38 +329,39 @@ export default function BuildPicker() {
                   onSelect={(w) => handleWeaponChange(w)}
                   onClose={() => setWeaponPickerOpen(false)}
                   secondary={(w) => `${w.category} · ${w.weight} wgt`}
+                  header={
+                    <FormControl fullWidth size="small" disabled={!weapon || !weaponInfusable}>
+                      <InputLabel id="affinity-label">Infusion (affinity)</InputLabel>
+                      <Select
+                        labelId="affinity-label"
+                        label="Infusion (affinity)"
+                        value={effectiveAffinity}
+                        onChange={(e) => setAffinity(e.target.value as Affinity)}
+                        renderValue={(v) => {
+                          if (!weapon) return v as string;
+                          if (weaponUpgradeType === "somber") return "Somber";
+                          if (weaponUpgradeType === "standard-fixed") return "Standard";
+                          return v as string;
+                        }}
+                      >
+                        {AFFINITIES.map((a) => (
+                          <MenuItem key={a} value={a}>
+                            {a}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      <FormHelperText>
+                        {!weapon
+                          ? "Pick a weapon first."
+                          : weaponUpgradeType === "somber"
+                          ? "Somber weapon (+10 max) — affinity cannot be changed."
+                          : weaponUpgradeType === "standard-fixed"
+                          ? "Standard weapon with a fixed Ash of War — affinity cannot be changed."
+                          : "Affinity overrides the weapon's primary scaling stat."}
+                      </FormHelperText>
+                    </FormControl>
+                  }
                 />
-
-                <FormControl fullWidth disabled={!weapon || !weaponInfusable}>
-                  <InputLabel id="affinity-label">Infusion (affinity)</InputLabel>
-                  <Select
-                    labelId="affinity-label"
-                    label="Infusion (affinity)"
-                    value={effectiveAffinity}
-                    onChange={(e) => setAffinity(e.target.value as Affinity)}
-                    renderValue={(v) => {
-                      if (!weapon) return v as string;
-                      if (weaponUpgradeType === "somber") return "Somber";
-                      if (weaponUpgradeType === "standard-fixed") return "Standard";
-                      return v as string;
-                    }}
-                  >
-                    {AFFINITIES.map((a) => (
-                      <MenuItem key={a} value={a}>
-                        {a}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                  <FormHelperText>
-                    {!weapon
-                      ? "Pick a weapon first."
-                      : weaponUpgradeType === "somber"
-                      ? "Somber weapon (+10 max) — affinity cannot be changed."
-                      : weaponUpgradeType === "standard-fixed"
-                      ? "Standard weapon with a fixed Ash of War — affinity cannot be changed."
-                      : "Affinity overrides the weapon's primary scaling stat."}
-                  </FormHelperText>
-                </FormControl>
 
                 {weapon && (
                   <Paper variant="outlined" sx={{ p: 2 }}>
@@ -428,10 +429,10 @@ export default function BuildPicker() {
                   </Paper>
                 )}
 
-                <Tooltip title="Two-handing multiplies effective Strength by ×1.5, lowering both the Str requirement and the base Str needed to hit AP breakpoints.">
+                <Tooltip title="Two-handing multiplies effective Strength by ×1.5, lowering both the Str requirement and the base Str needed to hit AP breakpoints. Applies to every weapon in the loadout.">
                   <FormControlLabel
                     control={<Switch checked={twoHand} onChange={(e) => handleTwoHandToggle(e.target.checked)} />}
-                    label="Two-hand this weapon (×1.5 Str)"
+                    label="Two-hand weapons (×1.5 Str)"
                   />
                 </Tooltip>
 
@@ -476,7 +477,6 @@ export default function BuildPicker() {
                 <TalismanSlots
                   talismanIds={talismanIds}
                   onChange={handleTalismanChange}
-                  loadSummary={rec?.equipLoad ?? null}
                 />
               </Stack>
             </CardContent>
@@ -692,11 +692,9 @@ function ArmorSlots({
 function TalismanSlots({
   talismanIds,
   onChange,
-  loadSummary,
 }: {
   talismanIds: (string | null)[];
   onChange: (slot: number, value: Talisman | null) => void;
-  loadSummary: import("../lib/types").EquipLoadSummary | null;
 }) {
   const [openSlot, setOpenSlot] = useState<number | null>(null);
   const selectedBaseNames = new Set(
@@ -720,10 +718,9 @@ function TalismanSlots({
 
   return (
     <Box>
-      <Stack direction="row" spacing={1} sx={{ alignItems: "baseline", mb: 1 }}>
-        <Typography variant="subtitle2">Talismans (up to 4)</Typography>
-        {loadSummary && <LoadChip summary={loadSummary} />}
-      </Stack>
+      <Typography variant="subtitle2" gutterBottom>
+        Talismans (up to 4)
+      </Typography>
       <Stack direction="row" spacing={1}>
         {[0, 1, 2, 3].map((slot) => {
           const currentId = talismanIds[slot];
@@ -843,6 +840,7 @@ function GearPicker<T extends GearOption>({
   onSelect,
   onClose,
   secondary,
+  header,
 }: {
   open: boolean;
   title: string;
@@ -850,6 +848,7 @@ function GearPicker<T extends GearOption>({
   onSelect: (item: T) => void;
   onClose: () => void;
   secondary?: (item: T) => string;
+  header?: ReactNode;
 }) {
   const [query, setQuery] = useState("");
   useEffect(() => {
@@ -863,6 +862,7 @@ function GearPicker<T extends GearOption>({
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>{title}</DialogTitle>
       <DialogContent dividers>
+        {header ? <Box sx={{ mb: 1.5 }}>{header}</Box> : null}
         <TextField
           fullWidth
           autoFocus
@@ -910,28 +910,6 @@ function GearPicker<T extends GearOption>({
         </List>
       </DialogContent>
     </Dialog>
-  );
-}
-
-function LoadChip({ summary }: { summary: import("../lib/types").EquipLoadSummary }) {
-  const color =
-    summary.rollCategory === "overloaded"
-      ? "error"
-      : summary.rollCategory === "heavy"
-      ? "warning"
-      : summary.rollCategory === "medium"
-      ? "primary"
-      : "success";
-  return (
-    <Tooltip
-      title={`Weapon ${summary.weaponWeight} + Talismans ${summary.talismanWeight} = ${summary.totalWeight} / ${summary.maxLoad} max equip load at target Endurance. Roll: ${summary.rollCategory}.`}
-    >
-      <Chip
-        size="small"
-        color={color}
-        label={`Load ${summary.percent.toFixed(0)}% · ${summary.rollCategory}`}
-      />
-    </Tooltip>
   );
 }
 

@@ -447,12 +447,11 @@ export function getTargetStats(weapon: Weapon, opts: RecommendOptions): { target
     opts.loadout && opts.loadout.length > 0 ? opts.loadout : [{ weapon, affinity: opts.affinity }];
 
   for (const item of loadoutItems) {
-    const isActiveItem = item.weapon.id === weapon.id;
     for (const stat of STAT_ORDER) {
       const req = item.weapon.requirements[stat] ?? 0;
       if (req <= 0) continue;
       const adjusted =
-        stat === "strength" && isActiveItem
+        stat === "strength"
           ? adjustStrForTwoHand(req, opts.twoHand, startingClass?.stats.strength ?? 0)
           : req;
       if (target[stat] < adjusted) target[stat] = adjusted;
@@ -546,12 +545,11 @@ export function getTargetStats(weapon: Weapon, opts: RecommendOptions): { target
   );
 
   for (const item of loadoutItems) {
-    const isActiveItem = item.weapon.id === weapon.id;
     for (const stat of STAT_ORDER) {
       const req = item.weapon.requirements[stat];
       if (req === undefined) continue;
       const adjusted =
-        stat === "strength" && isActiveItem
+        stat === "strength"
           ? adjustStrForTwoHand(req, opts.twoHand, startingClass?.stats[stat] ?? 0)
           : req;
       if (adjusted > target[stat]) target[stat] = adjusted;
