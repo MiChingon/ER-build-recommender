@@ -40,6 +40,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { classes, STAT_LABELS, STAT_ORDER, type Stat } from "../data/classes";
 import { CATEGORIES, weapons, gradeOf, valueOf, type Weapon, type WeaponCategory } from "../data/weapons";
 import { talismans, talismanBaseName, type Talisman } from "../data/talismans";
+import { spellImageUrl } from "../data/spells";
 import {
   ARMOR_SLOTS,
   ARMOR_SLOT_LABELS,
@@ -535,6 +536,13 @@ export default function BuildPicker() {
                     target={rec.target}
                     twoHand={twoHand}
                   />
+
+                  {weapon && rec.spellSuggestions.length > 0 && (
+                    <SpellRecommendations
+                      suggestions={rec.spellSuggestions}
+                      catalystName={weapon.name}
+                    />
+                  )}
 
                   <TargetStatsTable
                     target={rec.target}
@@ -1250,6 +1258,87 @@ function TargetStatsTable({
           })}
         </TableBody>
       </Table>
+    </Box>
+  );
+}
+
+function SpellRecommendations({
+  suggestions,
+  catalystName,
+}: {
+  suggestions: import("../lib/types").SpellSuggestion[];
+  catalystName: string;
+}) {
+  const sorceries = suggestions.filter((s) => s.spell.type === "sorcery");
+  const incantations = suggestions.filter((s) => s.spell.type === "incantation");
+  const label = sorceries.length > 0 ? "Suggested sorceries" : "Suggested incantations";
+  const list = sorceries.length > 0 ? sorceries : incantations;
+  return (
+    <Box>
+      <Stack direction="row" spacing={1} sx={{ alignItems: "baseline", mb: 1 }}>
+        <Typography variant="subtitle2">{label}</Typography>
+        <Typography variant="caption" color="text.secondary">
+          castable with the recommended stats while wielding {catalystName}
+        </Typography>
+      </Stack>
+      <Stack spacing={1}>
+        {list.map(({ spell, boosted }) => {
+          const reqs = [
+            spell.requirements.intelligence ? `Int ${spell.requirements.intelligence}` : null,
+            spell.requirements.faith ? `Fai ${spell.requirements.faith}` : null,
+            spell.requirements.arcane ? `Arc ${spell.requirements.arcane}` : null,
+          ]
+            .filter(Boolean)
+            .join(" · ");
+          return (
+            <Paper
+              key={spell.id}
+              variant="outlined"
+              sx={{
+                p: 1.25,
+                borderColor: boosted ? "primary.main" : undefined,
+                borderWidth: boosted ? 2 : 1,
+                bgcolor: boosted ? "rgba(212,175,55,0.08)" : undefined,
+              }}
+            >
+              <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+                <Box
+                  component="img"
+                  src={spellImageUrl(spell)}
+                  alt=""
+                  loading="lazy"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).style.visibility = "hidden";
+                  }}
+                  sx={{ width: 40, height: 40, objectFit: "contain", bgcolor: "action.hover", borderRadius: 0.5, flexShrink: 0 }}
+                />
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }} useFlexGap>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {spell.name}
+                    </Typography>
+                    <Chip size="small" variant="outlined" label={spell.category} />
+                    {boosted && (
+                      <Chip size="small" color="primary" label="Boosted by this catalyst" />
+                    )}
+                  </Stack>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.25 }}>
+                    {spell.effect}
+                  </Typography>
+                </Box>
+                <Box sx={{ textAlign: "right", flexShrink: 0, minWidth: 90 }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
+                    {reqs || "—"}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
+                    FP {spell.fpCost} · {spell.slots} slot{spell.slots === 1 ? "" : "s"}
+                  </Typography>
+                </Box>
+              </Stack>
+            </Paper>
+          );
+        })}
+      </Stack>
     </Box>
   );
 }

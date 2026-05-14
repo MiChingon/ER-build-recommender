@@ -1,6 +1,7 @@
 import { StartingClass, Stat, StatVector } from "../data/classes";
 import { ScaleGrade, Weapon } from "../data/weapons";
 import { ArmorSelection, EMPTY_ARMOR_SELECTION } from "../data/armor";
+import { Spell } from "../data/spells";
 
 export const SCALE_RANK: Record<ScaleGrade, number> = { S: 6, A: 5, B: 4, C: 3, D: 2, E: 1 };
 
@@ -110,6 +111,11 @@ export type EquipLoadSummary = {
   rollCategory: RollCategory;
 };
 
+export type SpellSuggestion = {
+  spell: Spell;
+  boosted: boolean;
+};
+
 export type Recommendation = {
   target: StatVector;
   rationale: string[];
@@ -119,6 +125,7 @@ export type Recommendation = {
   effectiveStrRequirement: number;
   options: RecommendOptions;
   equipLoad: EquipLoadSummary;
+  spellSuggestions: SpellSuggestion[];
 };
 
 export type ClassMatch = {

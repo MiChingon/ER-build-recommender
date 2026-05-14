@@ -1,6 +1,7 @@
 import { classes, STAT_ORDER, type Stat, type StatVector, type StartingClass, getClass } from "../data/classes";
 import { CATEGORY_BASE_AP, gradeOf, valueOf, type Weapon } from "../data/weapons";
 import { DAMAGE_DATA, type DamageType } from "../data/damage-types";
+import { spells, catalystBoosts, type SpellType } from "../data/spells";
 
 export const DAMAGE_TYPE_LABELS: Record<DamageType, string> = {
   phy: "Physical",
@@ -12,7 +13,7 @@ export const DAMAGE_TYPE_LABELS: Record<DamageType, string> = {
 const DAMAGE_TYPE_ORDER: DamageType[] = ["phy", "mag", "fir", "lit", "hol"];
 import { totalTalismanWeight } from "../data/talismans";
 import { totalArmorWeight, totalArmorStatBoosts } from "../data/armor";
-import { Affinity, AFFINITY_PRIMARIES, AFFINITY_REQ_FLOOR, ClassMatch, DEFAULT_OPTIONS, ELEMENTAL_AP_BREAKPOINT, ELEMENTAL_STATS, EquipLoadSummary, GENERIC_SKILLS, LevelingStep, LoadoutItem, MAX_UPGRADE_MULTIPLIER, PHYSICAL_AP_BREAKPOINT, Recommendation, RecommendOptions, RollCategory, SCALE_RANK, SCALING_FACTOR, TWO_HAND_STR_MULTIPLIER, WeaponUpgrade } from "./types";
+import { Affinity, AFFINITY_PRIMARIES, AFFINITY_REQ_FLOOR, ClassMatch, DEFAULT_OPTIONS, ELEMENTAL_AP_BREAKPOINT, ELEMENTAL_STATS, EquipLoadSummary, GENERIC_SKILLS, LevelingStep, LoadoutItem, MAX_UPGRADE_MULTIPLIER, PHYSICAL_AP_BREAKPOINT, Recommendation, RecommendOptions, RollCategory, SCALE_RANK, SCALING_FACTOR, SpellSuggestion, TWO_HAND_STR_MULTIPLIER, WeaponUpgrade } from "./types";
 
 const VIGOR_ANCHORS: ReadonlyArray<readonly [number, number]> = [
   [1, 20], [50, 30], [80, 40], [100, 50], [125, 60],
@@ -167,6 +168,10 @@ export function isInfusable(weapon: Weapon): boolean {
 export function isCatalyst(weapon: Weapon): boolean {
   return weapon.category === "Glintstone Staff" || weapon.category === "Sacred Seal";
 }
+
+// Shields contribute requirement floors and equip-load weight but their scaling
+// is too minor to justify pushing the player's primary stat to its soft cap.
+const SHIELD_CATEGORIES = new Set(["Small Shield", "Medium Shield", "Greatshield"]);
 
 function affinityAddsSpellScaling(affinity: Affinity): boolean {
   return (
@@ -484,24 +489,29 @@ export function getTargetStats(weapon: Weapon, opts: RecommendOptions): { target
     }
   }
 
-  const primaryStats = getPrimaryStats(weapon, opts.affinity);
-  for (const stat of primaryStats) {
-    const reqRaw = weapon.requirements[stat] ?? 0;
-    const elemental = isElemental(stat);
-    const rawTarget = getScalingTarget(reqRaw, elemental, opts.targetLevel);
-    const breakpoint =
-      stat === "strength" ? adjustStrForTwoHand(rawTarget, opts.twoHand, startingClass?.stats[stat] ?? 0) : rawTarget;
-    if (target[stat] < breakpoint) {
-      target[stat] = breakpoint;
-      const source =
-        opts.affinity === "Standard"
-          ? `${weapon.scaling[stat] ?? "—"} scaling`
-          : `${opts.affinity} affinity`;
-      const note =
-        stat === "strength" && opts.twoHand
-          ? `${stat} → ${breakpoint} (${source}, level-${opts.targetLevel} target ÷${TWO_HAND_STR_MULTIPLIER} two-handed)`
-          : `${stat} → ${breakpoint} (${source}, ${elemental ? "elemental" : "physical"} target at Lv ${opts.targetLevel})`;
-      rationale.push(note);
+  for (const item of loadoutItems) {
+    if (SHIELD_CATEGORIES.has(item.weapon.category)) continue;
+    const wpnPrimaries = getPrimaryStats(item.weapon, item.affinity);
+    for (const stat of wpnPrimaries) {
+      const reqRaw = item.weapon.requirements[stat] ?? 0;
+      const elemental = isElemental(stat);
+      const rawTarget = getScalingTarget(reqRaw, elemental, opts.targetLevel);
+      const breakpoint =
+        stat === "strength"
+          ? adjustStrForTwoHand(rawTarget, opts.twoHand, startingClass?.stats[stat] ?? 0)
+          : rawTarget;
+      if (target[stat] < breakpoint) {
+        target[stat] = breakpoint;
+        const source =
+          item.affinity === "Standard"
+            ? `${item.weapon.scaling[stat] ?? "—"} scaling`
+            : `${item.affinity} affinity`;
+        const note =
+          stat === "strength" && opts.twoHand
+            ? `${stat} → ${breakpoint} (${item.weapon.name}: ${source}, level-${opts.targetLevel} target ÷${TWO_HAND_STR_MULTIPLIER} two-handed)`
+            : `${stat} → ${breakpoint} (${item.weapon.name}: ${source}, ${elemental ? "elemental" : "physical"} target at Lv ${opts.targetLevel})`;
+        rationale.push(note);
+      }
     }
   }
 
@@ -622,6 +632,32 @@ export function buildLevelingPlan(classBase: StatVector, target: StatVector): Le
   return steps.sort((a, b) => b.points - a.points);
 }
 
+export function recommendSpells(target: StatVector, activeWeapon: Weapon | null, maxResults = 8): SpellSuggestion[] {
+  if (!activeWeapon || !isCatalyst(activeWeapon)) return [];
+  const wantType: SpellType = activeWeapon.category === "Glintstone Staff" ? "sorcery" : "incantation";
+  const boostedCategories = catalystBoosts[activeWeapon.id] ?? [];
+
+  const castable = spells.filter((s) => {
+    if (s.type !== wantType) return false;
+    const r = s.requirements;
+    if ((r.intelligence ?? 0) > target.intelligence) return false;
+    if ((r.faith ?? 0) > target.faith) return false;
+    if ((r.arcane ?? 0) > target.arcane) return false;
+    return true;
+  });
+
+  const scored = castable.map((s) => {
+    const reqSum =
+      (s.requirements.intelligence ?? 0) +
+      (s.requirements.faith ?? 0) +
+      (s.requirements.arcane ?? 0);
+    const boosted = boostedCategories.includes(s.category);
+    return { spell: s, boosted, score: (boosted ? 10000 : 0) + reqSum };
+  });
+  scored.sort((a, b) => b.score - a.score);
+  return scored.slice(0, maxResults).map(({ spell, boosted }) => ({ spell, boosted }));
+}
+
 export function recommend(weapon: Weapon, opts: Partial<RecommendOptions> = {}): Recommendation {
   const fullOpts: RecommendOptions = { ...DEFAULT_OPTIONS, ...opts };
   const { target, rationale } = getTargetStats(weapon, fullOpts);
@@ -656,6 +692,7 @@ export function recommend(weapon: Weapon, opts: Partial<RecommendOptions> = {}):
     effectiveStrRequirement: getEffectiveStrRequirement(weapon, fullOpts.twoHand, getClass(opts.classId ?? '')?.stats.strength ?? 0),
     options: fullOpts,
     equipLoad,
+    spellSuggestions: recommendSpells(target, weapon),
   };
 }
 
