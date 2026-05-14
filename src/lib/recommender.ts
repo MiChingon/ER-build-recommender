@@ -1,8 +1,18 @@
 import { classes, STAT_ORDER, type Stat, type StatVector, type StartingClass, getClass } from "../data/classes";
-import { CATEGORY_BASE_AP, type Weapon } from "../data/weapons";
+import { CATEGORY_BASE_AP, gradeOf, valueOf, type Weapon } from "../data/weapons";
+import { DAMAGE_DATA, type DamageType } from "../data/damage-types";
+
+export const DAMAGE_TYPE_LABELS: Record<DamageType, string> = {
+  phy: "Physical",
+  mag: "Magic",
+  fir: "Fire",
+  lit: "Lightning",
+  hol: "Holy",
+};
+const DAMAGE_TYPE_ORDER: DamageType[] = ["phy", "mag", "fir", "lit", "hol"];
 import { totalTalismanWeight } from "../data/talismans";
 import { totalArmorWeight, totalArmorStatBoosts } from "../data/armor";
-import { Affinity, AFFINITY_PRIMARIES, AFFINITY_REQ_FLOOR, ClassMatch, DEFAULT_OPTIONS, ELEMENTAL_AP_BREAKPOINT, ELEMENTAL_STATS, EquipLoadSummary, GENERIC_SKILLS, LevelingStep, MAX_UPGRADE_MULTIPLIER, PHYSICAL_AP_BREAKPOINT, Recommendation, RecommendOptions, RollCategory, SCALE_RANK, SCALING_FACTOR, SOFT_CAP_STAT_VALUE, TWO_HAND_STR_MULTIPLIER, WeaponUpgrade } from "./types";
+import { Affinity, AFFINITY_PRIMARIES, AFFINITY_REQ_FLOOR, ClassMatch, DEFAULT_OPTIONS, ELEMENTAL_AP_BREAKPOINT, ELEMENTAL_STATS, EquipLoadSummary, GENERIC_SKILLS, LevelingStep, MAX_UPGRADE_MULTIPLIER, PHYSICAL_AP_BREAKPOINT, Recommendation, RecommendOptions, RollCategory, SCALE_RANK, SCALING_FACTOR, TWO_HAND_STR_MULTIPLIER, WeaponUpgrade } from "./types";
 
 const VIGOR_ANCHORS: ReadonlyArray<readonly [number, number]> = [
   [1, 20], [50, 30], [80, 40], [100, 50], [125, 60],
@@ -28,32 +38,108 @@ export function getMaxUpgradeLevel(weapon: Weapon): "+25" | "+10" {
   return isInfusable(weapon) ? "+25" : "+10";
 }
 
+export type DamageBreakdown = {
+  type: DamageType;
+  base: number;
+  scaling: number;
+  total: number;
+};
+
+export type APEstimate = {
+  base: number;
+  scaling: number;
+  total: number;
+  breakdown: DamageBreakdown[];
+};
+
 export function estimateAttackPower(
   weapon: Weapon,
   stats: StatVector,
   upgrade: WeaponUpgrade,
   twoHand: boolean,
-): { base: number; scaling: number; total: number } {
-  const baseAP = weapon.baseAP ?? CATEGORY_BASE_AP[weapon.category];
-  const upgradeMult = upgrade === "max" ? MAX_UPGRADE_MULTIPLIER : 1.0;
-  const adjustedBase = baseAP * upgradeMult;
+  affinity: Affinity = "Standard",
+): APEstimate {
+  const dmgInfo = DAMAGE_DATA.byWeaponId[weapon.id]?.[affinity];
+  const aec = dmgInfo ? DAMAGE_DATA.aec[dmgInfo.aecId] : null;
+  const reinforce = dmgInfo ? DAMAGE_DATA.reinforce[dmgInfo.reinforceId] : null;
 
-  let scalingBonus = 0;
+  const scalingMap =
+    upgrade === "base"
+      ? weapon.scalingTable?.base ?? weapon.scaling
+      : weapon.scalingTable?.max[affinity] ?? weapon.scaling;
+  const curveOverride = weapon.scalingTable?.curve?.[affinity];
+
+  // Pre-compute per-stat effective scaling (numeric multiplier) and correction
+  const statContribution: Record<Stat, number> = {
+    vigor: 0, mind: 0, endurance: 0,
+    strength: 0, dexterity: 0, intelligence: 0, faith: 0, arcane: 0,
+  };
   for (const stat of STAT_ORDER) {
-    const grade = weapon.scaling[stat];
+    const entry = scalingMap[stat];
+    const grade = gradeOf(entry);
     if (!grade) continue;
     let statValue = stats[stat];
-    if (stat === "strength" && twoHand) {
-      statValue = Math.floor(statValue * 1.5);
-    }
-    const correction = Math.min(statValue / SOFT_CAP_STAT_VALUE, 1.25);
-    scalingBonus += adjustedBase * SCALING_FACTOR[grade] * correction;
+    if (stat === "strength" && twoHand) statValue = Math.floor(statValue * 1.5);
+    const customCurve = curveOverride?.[stat];
+    const correction = customCurve
+      ? interpolateFloat(statValue, customCurve)
+      : scalingCorrection(stat, statValue);
+    const numeric = valueOf(entry);
+    const factor = numeric !== undefined ? numeric / 100 : SCALING_FACTOR[grade];
+    statContribution[stat] = factor * correction;
   }
 
+  // Build per-damage-type breakdown when we have regulation data
+  const breakdown: DamageBreakdown[] = [];
+  if (dmgInfo && aec) {
+    for (const dt of DAMAGE_TYPE_ORDER) {
+      const baseAtZero = dmgInfo.attack[dt];
+      if (!baseAtZero) continue;
+      const attackMult = upgrade === "max" && reinforce
+        ? reinforce.attack[String(DAMAGE_TYPE_ORDER.indexOf(dt))] ?? 1
+        : 1;
+      const scalingMult = upgrade === "max" && reinforce ? 1 : 1; // numeric already includes reinforce in max
+      const applicableStats = aec[dt] ?? [];
+      const effectiveBase = baseAtZero * attackMult;
+      let mult = 1;
+      for (const statName of applicableStats) {
+        const stat = statName as Stat;
+        mult += statContribution[stat] * scalingMult;
+      }
+      const total = effectiveBase * mult;
+      breakdown.push({
+        type: dt,
+        base: Math.round(effectiveBase),
+        scaling: Math.round(total - effectiveBase),
+        total: Math.round(total),
+      });
+    }
+  }
+
+  // Fallback path (no regulation data): use legacy single-phy calculation
+  if (breakdown.length === 0) {
+    const baseAP = weapon.baseAP ?? CATEGORY_BASE_AP[weapon.category];
+    const upgradeMult = upgrade === "max" ? MAX_UPGRADE_MULTIPLIER : 1.0;
+    const adjustedBase = baseAP * upgradeMult;
+    let scalingBonus = 0;
+    for (const stat of STAT_ORDER) {
+      scalingBonus += adjustedBase * statContribution[stat];
+    }
+    breakdown.push({
+      type: "phy",
+      base: Math.round(adjustedBase),
+      scaling: Math.round(scalingBonus),
+      total: Math.round(adjustedBase + scalingBonus),
+    });
+  }
+
+  const totalBase = breakdown.reduce((s, b) => s + b.base, 0);
+  const totalScaling = breakdown.reduce((s, b) => s + b.scaling, 0);
   return {
-    base: Math.round(adjustedBase),
-    scaling: Math.round(scalingBonus),
-    total: Math.round(adjustedBase + scalingBonus),
+    base: totalBase,
+    scaling: totalScaling,
+    total: totalBase + totalScaling,
+    breakdown,
   };
 }
 
@@ -88,6 +174,55 @@ function interpolateAnchors(
     }
   }
   return anchors[anchors.length - 1][1];
+}
+
+function interpolateFloat(
+  level: number,
+  anchors: ReadonlyArray<readonly [number, number]>,
+): number {
+  if (level <= anchors[0][0]) return anchors[0][1];
+  if (level >= anchors[anchors.length - 1][0]) return anchors[anchors.length - 1][1];
+  for (let i = 1; i < anchors.length; i++) {
+    const [lo, vlo] = anchors[i - 1];
+    const [hi, vhi] = anchors[i];
+    if (level <= hi) {
+      const frac = (level - lo) / (hi - lo);
+      return vlo + frac * (vhi - vlo);
+    }
+  }
+  return anchors[anchors.length - 1][1];
+}
+
+// Calc Correct Graph anchors from the game's regulation data. Each anchor is
+// [statValue, growValue, adjPt]. adjPt > 0 makes the segment from this anchor
+// to the next concave (slow start, fast end), < 0 makes it convex.
+type Anchor3 = readonly [number, number, number];
+const GRAPH_PHYSICAL: ReadonlyArray<Anchor3> = [
+  [1, 0, 1.2], [18, 0.25, -1.2], [60, 0.75, 1], [80, 0.9, 1], [150, 1.1, 1],
+];
+const GRAPH_ELEMENTAL: ReadonlyArray<Anchor3> = [
+  [1, 0, 1], [20, 0.4, 1], [50, 0.8, 1], [80, 0.95, 1], [99, 1.0, 1],
+];
+
+function interpolateGameGraph(value: number, anchors: ReadonlyArray<Anchor3>): number {
+  if (value <= anchors[0][0]) return anchors[0][1];
+  if (value >= anchors[anchors.length - 1][0]) return anchors[anchors.length - 1][1];
+  for (let i = 1; i < anchors.length; i++) {
+    const [lo, vlo, adj] = anchors[i - 1];
+    const [hi, vhi] = anchors[i];
+    if (value <= hi) {
+      let frac = Math.max(0, Math.min(1, (value - lo) / (hi - lo)));
+      if (adj > 0) frac = frac ** adj;
+      else if (adj < 0) frac = 1 - (1 - frac) ** -adj;
+      return vlo + (vhi - vlo) * frac;
+    }
+  }
+  return anchors[anchors.length - 1][1];
+}
+
+function scalingCorrection(stat: Stat, value: number): number {
+  const anchors = ELEMENTAL_STATS.includes(stat) ? GRAPH_ELEMENTAL : GRAPH_PHYSICAL;
+  return interpolateGameGraph(value, anchors);
 }
 
 export function getVigorTarget(level: number): number {
@@ -214,6 +349,7 @@ export function getMinFeasibleLevel(
       classId: cls.id,
       talismanIds,
       armorSelection,
+      extraWeaponWeight: 0,
     });
     const next = cls.level + computeDeficit(cls.stats, target);
     if (next <= lvl) return lvl;
@@ -233,15 +369,15 @@ function getPrimaryStats(weapon: Weapon, affinity: Affinity): Stat[] {
       const reqBest = weapon.requirements[best] ?? 0;
       const reqCur = weapon.requirements[cur] ?? 0;
       if (reqCur !== reqBest) return reqCur > reqBest ? cur : best;
-      const gradeBest = SCALE_RANK[weapon.scaling[best]!];
-      const gradeCur = SCALE_RANK[weapon.scaling[cur]!];
+      const gradeBest = SCALE_RANK[gradeOf(weapon.scaling[best])!];
+      const gradeCur = SCALE_RANK[gradeOf(weapon.scaling[cur])!];
       return gradeCur > gradeBest ? cur : best;
     });
     return [dominant];
   }
 
-  const bestRank = Math.max(...scalingStats.map((s) => SCALE_RANK[weapon.scaling[s]!]));
-  return scalingStats.filter((s) => SCALE_RANK[weapon.scaling[s]!] === bestRank);
+  const bestRank = Math.max(...scalingStats.map((s) => SCALE_RANK[gradeOf(weapon.scaling[s])!]));
+  return scalingStats.filter((s) => SCALE_RANK[gradeOf(weapon.scaling[s])!] === bestRank);
 }
 
 function adjustStrForTwoHand(value: number, twoHand: boolean, strengthStartingValue: number): number {
@@ -321,7 +457,9 @@ export function getTargetStats(weapon: Weapon, opts: RecommendOptions): { target
 
   const talismanWeight = totalTalismanWeight(opts.talismanIds);
   const armorWeight = totalArmorWeight(opts.armorSelection);
-  const carriedWeight = weapon.weight + talismanWeight + armorWeight;
+  const extraWpn = opts.extraWeaponWeight ?? 0;
+  const totalWeaponWeight = weapon.weight + extraWpn;
+  const carriedWeight = totalWeaponWeight + talismanWeight + armorWeight;
   const enduranceForLoad = Math.max(
     0,
     enduranceNeededFor(carriedWeight, TARGET_LOAD_RATIO) - (armorBoosts.endurance ?? 0),
@@ -329,7 +467,7 @@ export function getTargetStats(weapon: Weapon, opts: RecommendOptions): { target
   if (enduranceForLoad > target.endurance) {
     target.endurance = Math.min(MAX_ENDURANCE, enduranceForLoad);
     rationale.push(
-      `Endurance → ${target.endurance} (lifts weapon ${weapon.weight} + armor ${armorWeight.toFixed(1)} + talismans ${talismanWeight.toFixed(1)} without overload)`,
+      `Endurance → ${target.endurance} (lifts weapons ${totalWeaponWeight.toFixed(1)} + armor ${armorWeight.toFixed(1)} + talismans ${talismanWeight.toFixed(1)} without overload)`,
     );
   }
 
@@ -441,13 +579,14 @@ export function recommend(weapon: Weapon, opts: Partial<RecommendOptions> = {}):
 
   const talismanWeight = totalTalismanWeight(fullOpts.talismanIds);
   const armorWeight = totalArmorWeight(fullOpts.armorSelection);
-  const totalWeight = weapon.weight + talismanWeight + armorWeight;
+  const totalWpn = weapon.weight + (fullOpts.extraWeaponWeight ?? 0);
+  const totalWeight = totalWpn + talismanWeight + armorWeight;
   const armorBoostsFinal = totalArmorStatBoosts(fullOpts.armorSelection);
   const effectiveEndurance = Math.min(MAX_ENDURANCE, target.endurance + (armorBoostsFinal.endurance ?? 0));
   const maxLoad = getMaxEquipLoad(effectiveEndurance);
   const percent = maxLoad > 0 ? (totalWeight / maxLoad) * 100 : 100;
   const equipLoad: EquipLoadSummary = {
-    weaponWeight: weapon.weight,
+    weaponWeight: Math.round(totalWpn * 10) / 10,
     talismanWeight: Math.round(talismanWeight * 10) / 10,
     armorWeight: Math.round(armorWeight * 10) / 10,
     totalWeight: Math.round(totalWeight * 10) / 10,

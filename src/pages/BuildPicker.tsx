@@ -32,7 +32,7 @@ import {
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { classes, STAT_LABELS, STAT_ORDER, type Stat } from "../data/classes";
-import { CATEGORIES, weapons, type Weapon, type WeaponCategory } from "../data/weapons";
+import { CATEGORIES, weapons, gradeOf, valueOf, type Weapon, type WeaponCategory } from "../data/weapons";
 import { talismans, talismanBaseName, type Talisman } from "../data/talismans";
 import {
   ARMOR_SLOTS,
@@ -52,6 +52,8 @@ import {
   getMinLevelForWeapon,
   isInfusable,
   recommend,
+  DAMAGE_TYPE_LABELS,
+  type APEstimate,
 } from "../lib/recommender";
 import { AFFINITIES, Affinity, DEFAULT_TARGET_LEVEL, MAX_TARGET_LEVEL } from "../lib/types";
 
@@ -66,10 +68,28 @@ const STAT_COLORS: Record<Stat, string> = {
   arcane: "#ba68c8",
 };
 
+type Hand = "right" | "left";
+type SlotPos = { hand: Hand; idx: number };
+type WeaponSlot = { weapon: Weapon | null; affinity: Affinity };
+
+const emptySlot = (): WeaponSlot => ({ weapon: null, affinity: "Standard" });
+
 export default function BuildPicker() {
   const [category, setCategory] = useState<WeaponCategory | "all">("all");
-  const [weapon, setWeapon] = useState<Weapon | null>(null);
-  const [affinity, setAffinity] = useState<Affinity>("Standard");
+  const initialHands = useMemo(() => {
+    const cls = classes[0];
+    const build = (ids: string[] | undefined): WeaponSlot[] => {
+      const out: WeaponSlot[] = [emptySlot(), emptySlot(), emptySlot()];
+      (ids ?? []).slice(0, 3).forEach((wid, i) => {
+        out[i] = { weapon: weapons.find((x) => x.id === wid) ?? null, affinity: "Standard" };
+      });
+      return out;
+    };
+    return { right: build(cls.starting?.right), left: build(cls.starting?.left) };
+  }, []);
+  const [rightHand, setRightHand] = useState<WeaponSlot[]>(initialHands.right);
+  const [leftHand, setLeftHand] = useState<WeaponSlot[]>(initialHands.left);
+  const [active, setActive] = useState<SlotPos>({ hand: "right", idx: 0 });
   const [classId, setClassId] = useState<string>(classes[0].id);
   const [targetLevel, setTargetLevel] = useState<number>(DEFAULT_TARGET_LEVEL);
   const [twoHand, setTwoHand] = useState(false);
@@ -80,6 +100,24 @@ export default function BuildPicker() {
     () => (category === "all" ? weapons : weapons.filter((w) => w.category === category)),
     [category],
   );
+
+  const slotsFor = (hand: Hand) => (hand === "right" ? rightHand : leftHand);
+  const setSlotsFor = (hand: Hand) => (hand === "right" ? setRightHand : setLeftHand);
+  const activeSlotData = slotsFor(active.hand)[active.idx];
+  const weapon = activeSlotData.weapon;
+  const affinity = activeSlotData.affinity;
+
+  const updateSlot = (pos: SlotPos, update: Partial<WeaponSlot>) => {
+    const setter = setSlotsFor(pos.hand);
+    setter((prev) => prev.map((s, i) => (i === pos.idx ? { ...s, ...update } : s)));
+  };
+  const setWeapon = (w: Weapon | null) => updateSlot(active, { weapon: w, affinity: "Standard" });
+  const setAffinity = (a: Affinity) => updateSlot(active, { affinity: a });
+
+  const allSlots = [...rightHand, ...leftHand];
+  const totalWeaponWeight =
+    Math.round(allSlots.reduce((sum, s) => sum + (s.weapon?.weight ?? 0), 0) * 10) / 10;
+  const extraWeaponWeight = Math.max(0, totalWeaponWeight - (weapon?.weight ?? 0));
 
   const weaponInfusable = weapon ? isInfusable(weapon) : false;
   const effectiveAffinity: Affinity = weaponInfusable ? affinity : "Standard";
@@ -105,9 +143,10 @@ export default function BuildPicker() {
             classId: selectedClass?.id,
             talismanIds,
             armorSelection,
+            extraWeaponWeight,
           })
         : null,
-    [weapon, clampedTargetLevel, twoHand, effectiveAffinity, talismanIds, armorSelection, selectedClass?.id],
+    [weapon, clampedTargetLevel, twoHand, effectiveAffinity, talismanIds, armorSelection, selectedClass?.id, extraWeaponWeight],
   );
 
   const selectedClassMatch =
@@ -173,11 +212,35 @@ export default function BuildPicker() {
 
   const handleClassChange = (nextId: string) => {
     setClassId(nextId);
-    if (!weapon) return;
     const nextCls = classes.find((c) => c.id === nextId);
-    const nextMin = nextCls
-      ? getMinFeasibleLevel(nextCls, weapon, twoHand, effectiveAffinity, talismanIds, armorSelection)
-      : getMinLevelForWeapon(weapon, twoHand);
+
+    // Preset weapon slots from the class's starting equipment
+    const buildSlots = (ids: string[] | undefined): WeaponSlot[] => {
+      const out: WeaponSlot[] = [emptySlot(), emptySlot(), emptySlot()];
+      (ids ?? []).slice(0, 3).forEach((wid, i) => {
+        const w = weapons.find((x) => x.id === wid) ?? null;
+        out[i] = { weapon: w, affinity: "Standard" };
+      });
+      return out;
+    };
+    const newRight = buildSlots(nextCls?.starting?.right);
+    const newLeft = buildSlots(nextCls?.starting?.left);
+    setRightHand(newRight);
+    setLeftHand(newLeft);
+
+    // Active = first non-empty slot (prefer R1)
+    const firstFilled = (() => {
+      for (let i = 0; i < 3; i++) if (newRight[i].weapon) return { hand: "right" as const, idx: i };
+      for (let i = 0; i < 3; i++) if (newLeft[i].weapon) return { hand: "left" as const, idx: i };
+      return { hand: "right" as const, idx: 0 };
+    })();
+    setActive(firstFilled);
+
+    const activeWeapon = firstFilled.hand === "right"
+      ? newRight[firstFilled.idx].weapon
+      : newLeft[firstFilled.idx].weapon;
+    if (!activeWeapon || !nextCls) return;
+    const nextMin = getMinFeasibleLevel(nextCls, activeWeapon, twoHand, "Standard", talismanIds, armorSelection);
     if (targetLevel < nextMin) setTargetLevel(nextMin);
   };
 
@@ -221,6 +284,14 @@ export default function BuildPicker() {
                   </Select>
                 </FormControl>
 
+                <WeaponSlotsGrid
+                  rightHand={rightHand}
+                  leftHand={leftHand}
+                  active={active}
+                  onActivate={setActive}
+                  onClear={(pos) => updateSlot(pos, { weapon: null, affinity: "Standard" })}
+                />
+
                 <Autocomplete
                   options={filteredWeapons}
                   value={weapon}
@@ -256,7 +327,7 @@ export default function BuildPicker() {
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      label="Weapon"
+                      label={`Weapon — ${active.hand === "right" ? "R" : "L"}${active.idx + 1}`}
                       placeholder={
                         category === "all"
                           ? "Search across all melee weapons"
@@ -322,20 +393,22 @@ export default function BuildPicker() {
                             <Stack direction="row" spacing={1} useFlexGap sx={{ mt: 1, flexWrap: "wrap" }}>
                               {STAT_ORDER.filter((s) => allStats.has(s)).map((s) => {
                                 const req = weapon.requirements[s];
-                                const baseG = baseScaling?.[s];
-                                const maxG = maxScaling[s];
-                                const scalingLabel = baseG && maxG
-                                  ? ` (+0:${baseG}→${upgradeLabel}:${maxG})`
-                                  : maxG
-                                  ? ` (${maxG})`
+                                const baseG = gradeOf(baseScaling?.[s]);
+                                const maxG = gradeOf(maxScaling[s]);
+                                const maxN = valueOf(maxScaling[s]);
+                                const maxLabel = maxG ? (maxN !== undefined ? `${maxG}(${maxN})` : maxG) : null;
+                                const scalingLabel = baseG && maxLabel
+                                  ? ` (+0:${baseG}→${upgradeLabel}:${maxLabel})`
+                                  : maxLabel
+                                  ? ` (${maxLabel})`
                                   : "";
                                 return (
                                   <Tooltip
                                     key={s}
                                     title={
-                                      baseG && maxG
-                                        ? `${STAT_LABELS[s]} scaling — +0: ${baseG}, ${upgradeLabel} ${effectiveAffinity}: ${maxG}`
-                                        : `${STAT_LABELS[s]} scaling at ${upgradeLabel}: ${maxG ?? "—"}`
+                                      baseG && maxLabel
+                                        ? `${STAT_LABELS[s]} scaling — +0: ${baseG}, ${upgradeLabel} ${effectiveAffinity}: ${maxLabel}`
+                                        : `${STAT_LABELS[s]} scaling at ${upgradeLabel}: ${maxLabel ?? "—"}`
                                     }
                                   >
                                     <Chip
@@ -437,6 +510,7 @@ export default function BuildPicker() {
                     weapon={weapon!}
                     target={rec.target}
                     twoHand={twoHand}
+                    affinity={effectiveAffinity}
                   />
 
                   <TargetStatsTable
@@ -469,6 +543,99 @@ export default function BuildPicker() {
           )}
         </Grid>
       </Grid>
+    </Stack>
+  );
+}
+
+function WeaponSlotsGrid({
+  rightHand,
+  leftHand,
+  active,
+  onActivate,
+  onClear,
+}: {
+  rightHand: WeaponSlot[];
+  leftHand: WeaponSlot[];
+  active: SlotPos;
+  onActivate: (pos: SlotPos) => void;
+  onClear: (pos: SlotPos) => void;
+}) {
+  const row = (hand: Hand, slots: WeaponSlot[], label: string) => (
+    <Box>
+      <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
+        {label}
+      </Typography>
+      <Stack direction="row" spacing={1}>
+        {slots.map((slot, idx) => {
+          const isActive = active.hand === hand && active.idx === idx;
+          const w = slot.weapon;
+          return (
+            <Paper
+              key={idx}
+              variant="outlined"
+              onClick={() => onActivate({ hand, idx })}
+              sx={{
+                flex: 1,
+                p: 1,
+                cursor: "pointer",
+                borderColor: isActive ? "primary.main" : undefined,
+                borderWidth: isActive ? 2 : 1,
+                bgcolor: isActive ? "rgba(212,175,55,0.08)" : undefined,
+                position: "relative",
+                minHeight: 96,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                "&:hover": { borderColor: isActive ? "primary.main" : "primary.light" },
+              }}
+            >
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ position: "absolute", top: 2, left: 6, fontSize: "0.65rem" }}
+              >
+                {hand === "right" ? "R" : "L"}{idx + 1}
+              </Typography>
+              {w ? (
+                <>
+                  <Box
+                    component="img"
+                    src={w.image}
+                    alt=""
+                    loading="lazy"
+                    sx={{ width: 48, height: 48, objectFit: "contain", bgcolor: "action.hover", borderRadius: 0.5 }}
+                  />
+                  <Typography variant="caption" sx={{ mt: 0.5, textAlign: "center", lineHeight: 1.2 }} noWrap>
+                    {w.name}
+                  </Typography>
+                  {slot.affinity !== "Standard" && isInfusable(w) && (
+                    <Typography variant="caption" color="primary.main" sx={{ fontSize: "0.65rem" }}>
+                      {slot.affinity}
+                    </Typography>
+                  )}
+                  <IconButton
+                    size="small"
+                    aria-label="Clear slot"
+                    onClick={(e) => { e.stopPropagation(); onClear({ hand, idx }); }}
+                    sx={{ position: "absolute", top: 0, right: 0, p: 0.25 }}
+                  >
+                    <Typography variant="caption" sx={{ fontSize: "0.85rem", lineHeight: 1 }}>×</Typography>
+                  </IconButton>
+                </>
+              ) : (
+                <Typography variant="caption" color="text.disabled">Empty</Typography>
+              )}
+            </Paper>
+          );
+        })}
+      </Stack>
+    </Box>
+  );
+  return (
+    <Stack spacing={1.5}>
+      {row("right", rightHand, "Right hand (R1 · R2 · R3)")}
+      {row("left", leftHand, "Left hand (L1 · L2 · L3)")}
     </Stack>
   );
 }
@@ -710,25 +877,32 @@ function ClassCarousel({
   );
 }
 
+const DAMAGE_TYPE_COLORS: Record<string, string> = {
+  phy: "#ffffff",
+  mag: "#3fbddd",
+  fir: "#ff9900",
+  lit: "#ffff00",
+  hol: "#ffcc99",
+};
+
 function DamagePanel({
   weapon,
   target,
   twoHand,
+  affinity,
 }: {
   weapon: Weapon;
   target: Record<Stat, number>;
   twoHand: boolean;
+  affinity: Affinity;
 }) {
-  const baseEstimate = estimateAttackPower(weapon, target as never, "base", twoHand);
-  const maxEstimate = estimateAttackPower(weapon, target as never, "max", twoHand);
+  const baseEstimate = estimateAttackPower(weapon, target as never, "base", twoHand, affinity);
+  const maxEstimate = estimateAttackPower(weapon, target as never, "max", twoHand, affinity);
   const maxLabel = getMaxUpgradeLevel(weapon);
   const gain = maxEstimate.total - baseEstimate.total;
   const gainPct = baseEstimate.total > 0 ? Math.round((gain / baseEstimate.total) * 100) : 0;
 
-  const cell = (
-    label: string,
-    est: { base: number; scaling: number; total: number },
-  ) => (
+  const cell = (label: string, est: APEstimate) => (
     <Paper variant="outlined" sx={{ p: 2, flex: 1 }}>
       <Typography variant="caption" color="text.secondary">
         {label}
@@ -736,9 +910,28 @@ function DamagePanel({
       <Typography variant="h5" sx={{ fontWeight: 600, mt: 0.5 }}>
         {est.total}
       </Typography>
-      <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
+      <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
         Base {est.base} + Scaling {est.scaling}
       </Typography>
+      <Stack spacing={0.25} sx={{ mt: 0.5 }}>
+        {est.breakdown.map((b) => (
+          <Stack key={b.type} direction="row" spacing={1} sx={{ alignItems: "center" }}>
+            <Box
+              sx={{
+                width: 8, height: 8, borderRadius: "50%",
+                bgcolor: DAMAGE_TYPE_COLORS[b.type] ?? "text.secondary",
+                flexShrink: 0,
+              }}
+            />
+            <Typography variant="caption" sx={{ minWidth: 56, color: DAMAGE_TYPE_COLORS[b.type] ?? "text.primary" }}>
+              {DAMAGE_TYPE_LABELS[b.type]}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {b.base} + {b.scaling} = <b style={{ color: "var(--mui-palette-text-primary, #fff)" }}>{b.total}</b>
+            </Typography>
+          </Stack>
+        ))}
+      </Stack>
     </Paper>
   );
 
@@ -756,9 +949,8 @@ function DamagePanel({
       </Stack>
       <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
         Upgrading from +0 → {maxLabel}: +{gain} AP ({gainPct > 0 ? "+" : ""}
-        {gainPct}%). Approximate model — uses category-typical base AP, ×2.6 upgrade
-        multiplier, and linear scaling correction up to soft caps. Real in-game values vary
-        per weapon.
+        {gainPct}%). Per-damage-type values include each type's base AP plus the scaling
+        contribution from stats that apply to that damage type.
       </Typography>
     </Box>
   );

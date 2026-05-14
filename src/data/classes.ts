@@ -18,6 +18,7 @@ export type StartingClass = {
   description: string;
   startingEquipment: string[];
   image: string;
+  starting?: { right?: string[]; left?: string[] };
 };
 
 const CLASS_IMAGE_BASE =
@@ -57,6 +58,7 @@ export const classes: StartingClass[] = [
     description: "Balanced melee fighter with the best Vigor baseline. Strong default pick for Strength or Quality builds.",
     startingEquipment: ["Longsword", "Halberd", "Heater Shield", "Vagabond Knight armor set"],
     image: classImage("vagabond"),
+    starting: { right: ["longsword", "halberd"], left: ["heater-shield"] },
   },
   {
     id: "warrior",
@@ -66,6 +68,7 @@ export const classes: StartingClass[] = [
     description: "Dual-wielding Dex rogue. Highest Dex baseline tied with Samurai-adjacent builds.",
     startingEquipment: ["Scimitar (x2)", "Riveted Wooden Shield", "Blue Cloth Cowl set"],
     image: classImage("warrior"),
+    starting: { right: ["scimitar"], left: ["scimitar", "riveted-wooden-shield"] },
   },
   {
     id: "hero",
@@ -75,6 +78,7 @@ export const classes: StartingClass[] = [
     description: "Heavy-Strength bruiser. Highest Str baseline — optimal for greatswords, hammers, and colossal weapons.",
     startingEquipment: ["Battle Axe", "Large Leather Shield", "Champion set"],
     image: classImage("hero"),
+    starting: { right: ["battle-axe"], left: ["large-leather-shield"] },
   },
   {
     id: "bandit",
@@ -84,6 +88,7 @@ export const classes: StartingClass[] = [
     description: "Low-level Dex/Arcane archer. Highest Arc baseline — ideal for bleed, Occult, and status builds.",
     startingEquipment: ["Great Knife", "Shortbow", "Buckler", "Bandit set", "Bone Arrow (Fletched) x30"],
     image: classImage("bandit"),
+    starting: { right: ["great-knife", "shortbow"], left: ["buckler"] },
   },
   {
     id: "astrologer",
@@ -93,6 +98,7 @@ export const classes: StartingClass[] = [
     description: "Pure Intelligence caster. Highest Int baseline + Mind 15 + starting staff and two sorceries.",
     startingEquipment: ["Short Sword", "Astrologer's Staff", "Scripture Wooden Shield", "Astrologer set", "Glintstone Pebble", "Glintstone Arc"],
     image: classImage("astrologer"),
+    starting: { right: ["short-sword", "astrologers-staff"], left: ["scripture-wooden-shield"] },
   },
   {
     id: "prophet",
@@ -102,6 +108,7 @@ export const classes: StartingClass[] = [
     description: "Pure Faith caster. Highest Fai baseline + Mind 14 + starting seal, Heal, and Catch Flame.",
     startingEquipment: ["Short Spear", "Finger Seal", "Rickety Shield", "Prophet set", "Heal", "Catch Flame"],
     image: classImage("prophet"),
+    starting: { right: ["short-spear", "finger-seal"], left: ["rickety-shield"] },
   },
   {
     id: "samurai",
@@ -111,6 +118,7 @@ export const classes: StartingClass[] = [
     description: "Dex katana + bow hybrid. Highest Endurance baseline — strong for Dex builds and heavier Dex weapons.",
     startingEquipment: ["Uchigatana", "Longbow", "Red Thorn Roundshield", "Land of Reeds set", "Arrow x20", "Fire Arrow x10"],
     image: classImage("samurai"),
+    starting: { right: ["uchigatana", "longbow"], left: ["red-thorn-roundshield"] },
   },
   {
     id: "prisoner",
@@ -120,6 +128,7 @@ export const classes: StartingClass[] = [
     description: "Spellblade hybrid. Dex 14 + Int 14 + Estoc and Glintstone Staff — best Int melee starter.",
     startingEquipment: ["Estoc", "Glintstone Staff", "Rift Shield", "Prisoner set", "Magic Glintblade"],
     image: classImage("prisoner"),
+    starting: { right: ["estoc", "glintstone-staff"], left: ["rift-shield"] },
   },
   {
     id: "confessor",
@@ -129,6 +138,7 @@ export const classes: StartingClass[] = [
     description: "Faith paladin hybrid. Fai 14 + balanced Str/Dex 12 — best starter for incantation-based melee.",
     startingEquipment: ["Broadsword", "Finger Seal", "Blue Crest Heater Shield", "Confessor set", "Urgent Heal", "Assassin's Approach"],
     image: classImage("confessor"),
+    starting: { right: ["broadsword", "finger-seal"], left: ["blue-crest-heater-shield"] },
   },
   {
     id: "wretch",
@@ -138,6 +148,7 @@ export const classes: StartingClass[] = [
     description: "Naked level-1 blank slate. Flat 10s in every stat = zero wasted points. Best for min-max and challenge runs.",
     startingEquipment: ["Club"],
     image: classImage("wretch"),
+    starting: { right: ["club"] },
   },
 ];
 

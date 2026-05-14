@@ -14,11 +14,11 @@ export const DEFAULT_TARGET_LEVEL = 125;
 
 export type WeaponUpgrade = "base" | "max";
 
-export const MAX_UPGRADE_MULTIPLIER = 2.6;
+export const MAX_UPGRADE_MULTIPLIER = 2.45;
 export const SOFT_CAP_STAT_VALUE = 80;
 
 export const SCALING_FACTOR: Record<ScaleGrade, number> = {
-  S: 1.0, A: 0.75, B: 0.55, C: 0.4, D: 0.25, E: 0.1,
+  S: 1.75, A: 1.30, B: 0.95, C: 0.70, D: 0.45, E: 0.18,
 };
 
 export const AFFINITIES = [
@@ -81,6 +81,7 @@ export type RecommendOptions = {
   classId: string;
   talismanIds: (string | null)[];
   armorSelection: ArmorSelection;
+  extraWeaponWeight: number;
 };
 
 export const DEFAULT_OPTIONS: RecommendOptions = {
@@ -90,6 +91,7 @@ export const DEFAULT_OPTIONS: RecommendOptions = {
   classId: "",
   talismanIds: [null, null, null, null],
   armorSelection: { ...EMPTY_ARMOR_SELECTION },
+  extraWeaponWeight: 0,
 };
 
 export type RollCategory = "light" | "medium" | "heavy" | "overloaded";
