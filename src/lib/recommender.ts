@@ -632,6 +632,86 @@ export function getTargetStats(
         `Scaling reduced to fit Lv ${opts.targetLevel} budget (${availableForScaling} pts left after mandatory): ${beforeAfter}.`,
       );
     }
+
+    // Distribute leftover points if the recommendation lands UNDER the
+    // target Soul Level (e.g. high target like 200 with a simple loadout).
+    // Priority: 1) Endurance until medium roll, then toward soft cap 80;
+    // 2) primary scaling stats toward 80, cycled across stats for balance;
+    // 3) remaining points dumped into Mind even without a catalyst.
+    const computeLeftover = () => {
+      const inv = computeDeficit(startingClass.stats, target);
+      return Math.max(0, maxPoints - inv);
+    };
+    const computeLoadPercent = () => {
+      const eff = Math.min(MAX_ENDURANCE, target.endurance + (armorBoosts.endurance ?? 0));
+      const maxLoad = getMaxEquipLoad(eff);
+      return maxLoad > 0 ? (carriedWeight / maxLoad) * 100 : 100;
+    };
+
+    // Step 1: if the build is heavy-rolling, push Endurance just enough to
+    // reach medium roll (<70% load). Carry weight has priority only when it
+    // actually slows the player down.
+    const endStartHeavy = target.endurance;
+    while (computeLeftover() > 0 && target.endurance < MAX_ENDURANCE && computeLoadPercent() >= 70) {
+      target.endurance += 1;
+    }
+    if (target.endurance > endStartHeavy) {
+      rationale.push(
+        `Endurance → ${target.endurance} (leftover budget — lift to medium roll)`,
+      );
+    }
+
+    // Step 2: push primary scaling (damaging) stats toward raw soft cap 80,
+    // cycling across stats so multi-stat affinities stay balanced. The cap is
+    // raw 80 for every stat; the two-hand Strength multiplier is intentionally
+    // ignored here so damaging stats reach their soft cap before mind/endurance
+    // get the leftover.
+    const primaryScalingStats: Stat[] = [];
+    for (const item of loadoutItems) {
+      if (SHIELD_CATEGORIES.has(item.weapon.category)) continue;
+      for (const stat of getPrimaryStats(item.weapon, item.affinity)) {
+        if (!primaryScalingStats.includes(stat)) primaryScalingStats.push(stat);
+      }
+    }
+    const scalingStart: Partial<Record<Stat, number>> = {};
+    for (const s of primaryScalingStats) scalingStart[s] = target[s];
+    let progressed = true;
+    while (progressed && computeLeftover() > 0) {
+      progressed = false;
+      for (const stat of primaryScalingStats) {
+        if (target[stat] < 80 && computeLeftover() > 0) {
+          target[stat] += 1;
+          progressed = true;
+        }
+      }
+    }
+    for (const s of primaryScalingStats) {
+      if (target[s] > (scalingStart[s] ?? 0)) {
+        rationale.push(`${s} → ${target[s]} (leftover budget — toward soft cap 80)`);
+      }
+    }
+
+    // Step 3: push Endurance toward its first soft cap (60) — but only if
+    // the heavy-roll step (1) didn't already exceed 60. Going past 60 only
+    // happens when the loadout's carry weight forced it.
+    const endStartSoft = target.endurance;
+    while (computeLeftover() > 0 && target.endurance < 60) {
+      target.endurance += 1;
+    }
+    if (target.endurance > endStartSoft) {
+      rationale.push(
+        `Endurance → ${target.endurance} (leftover budget — toward soft cap 60)`,
+      );
+    }
+
+    // Step 4: any leftover goes to Mind, even without a catalyst.
+    const mindStart = target.mind;
+    while (computeLeftover() > 0 && target.mind < MAX_ENDURANCE) {
+      target.mind += 1;
+    }
+    if (target.mind > mindStart) {
+      rationale.push(`Mind → ${target.mind} (+${target.mind - mindStart} from leftover budget)`);
+    }
   }
 
   // Apply armor stat boosts last so they reduce the leveling investment for
