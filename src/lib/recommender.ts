@@ -161,6 +161,105 @@ export function estimateAttackPower(
   };
 }
 
+import type { StatusEffect } from "../data/weapons";
+
+// Status-bearing affinities replace whatever innate status the weapon had
+// with their own status type, with a standardized base build-up. Values
+// match the regulation file's statusSpEffectParams for Cold / Blood /
+// Poison standard-tree weapons (~66 / 57 / 66 base). Standard / Heavy /
+// Keen / Quality etc. affinities don't add status, so the weapon's innate
+// status (if any) is used instead.
+const AFFINITY_STATUS: Partial<Record<Affinity, { type: StatusEffect; base: number }>> = {
+  Cold: { type: "frost", base: 66 },
+  Blood: { type: "bleed", base: 57 },
+  Poison: { type: "poison", base: 66 },
+};
+
+// Stat that boosts each status' build-up value. Per the game: Arcane scales
+// Bleed / Poison / Sleep / Madness / Scarlet Rot; Cold (frost) scales with
+// Intelligence via the Cold affinity rather than directly with Arcane.
+const STATUS_BOOST_STAT: Record<StatusEffect, Stat> = {
+  bleed: "arcane",
+  poison: "arcane",
+  rot: "arcane",
+  sleep: "arcane",
+  madness: "arcane",
+  frost: "intelligence",
+};
+
+// Calc Correct Graph 6 from regulation-vanilla-v1.14.js — the status build-up
+// correction curve. Peaks late: tiny boost until Arc/Int ~25, then ramps fast
+// up to ~0.9 by Arc 60 and to 1.0 by Arc 99.
+const GRAPH_STATUS: ReadonlyArray<Anchor3> = [
+  [1, 0, 1], [25, 0.1, 1], [45, 0.75, 1], [60, 0.9, 1], [99, 1.0, 1],
+];
+
+function statusCorrection(value: number): number {
+  return interpolateGameGraph(value, GRAPH_STATUS);
+}
+
+export type StatusBuildup = {
+  type: StatusEffect;
+  base: number;
+  max: number;
+};
+
+export function estimateStatusBuildup(
+  weapon: import("../data/weapons").Weapon,
+  stats: StatVector,
+  affinity: Affinity,
+): StatusBuildup[] {
+  // Collect status sources. The weapon's innate status carries over even
+  // when an affinity also adds one (e.g. Flamberge keeps its bleed when
+  // infused with Cold, gaining Frostbite alongside). If the affinity-induced
+  // status has the same type as the innate one, the induced base replaces
+  // the innate base (Blood affinity on a bleed-innate weapon).
+  const sources: Array<{ type: StatusEffect; base: number }> = [];
+  if (weapon.innateStatus) sources.push(weapon.innateStatus);
+  const induced = AFFINITY_STATUS[affinity];
+  if (induced) {
+    const dup = sources.findIndex((s) => s.type === induced.type);
+    if (dup >= 0) sources[dup] = induced;
+    else sources.push(induced);
+  }
+  if (sources.length === 0) return [];
+
+  // Per the regulation file: status build-up does NOT scale with the weapon's
+  // upgrade level — base value stays constant from +0 to max. The only thing
+  // that changes the displayed value is the player's Arcane (for bleed /
+  // poison / rot / sleep / madness) or Intelligence (for frost via Cold),
+  // and only when the weapon actually scales with that stat (innate Arc
+  // scaling, or the affinity itself supplying Arc / Int scaling like
+  // Blood / Poison / Cold).
+  const scalingMap = weapon.scalingTable?.max?.[affinity] ?? weapon.scaling;
+  const hasArc = scalingMap["arcane"] !== undefined;
+
+  return sources.map(({ type, base }) => {
+    const boostStat = STATUS_BOOST_STAT[type];
+    const isAffinityInduced = induced?.type === type;
+    let applyBoost = false;
+    if (boostStat === "intelligence") {
+      // Frost scales with Int only via the Cold affinity.
+      applyBoost = affinity === "Cold";
+    } else {
+      // Arc scales bleed / poison / rot / sleep / madness only when the
+      // weapon has Arc scaling — either innate or added by the affinity
+      // (Blood / Poison both add Arc scaling).
+      applyBoost = hasArc || (isAffinityInduced && (type === "bleed" || type === "poison"));
+    }
+    let effective = base;
+    if (applyBoost) {
+      const correction = statusCorrection(stats[boostStat]);
+      effective = base * (1 + correction);
+    }
+    return {
+      type,
+      base,
+      max: Math.round(effective),
+    };
+  });
+}
+
 export type SpellScalingEstimate = {
   base: number;
   max: number;

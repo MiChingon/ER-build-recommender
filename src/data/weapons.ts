@@ -26,6 +26,8 @@ export type ScalingTable = {
   curve?: Partial<Record<Affinity, Partial<Record<Stat, CorrectionAnchors>>>>;
 };
 
+export type StatusEffect = "bleed" | "poison" | "frost" | "rot" | "sleep" | "madness";
+
 export type Weapon = {
   id: string;
   name: string;
@@ -38,6 +40,9 @@ export type Weapon = {
   baseAP?: number;
   image?: string;
   scalingTable?: ScalingTable;
+  // Innate status effect carried by this weapon at +0 (overridden if a status-
+  // bearing affinity like Cold / Poison / Blood is applied via infusion).
+  innateStatus?: { type: StatusEffect; base: number };
 };
 
 export type WeaponCategory =
@@ -979,9 +984,52 @@ const baseWeapons: Weapon[] = [
 ];
 
 
+// Innate status effects for popular status weapons. Values match the
+// regulation file's statusSpEffectParams keyed by the in-game type enum
+// (5=Poison, 6=Scarlet Rot, 7=Hemorrhage, 8=Frostbite, 9=Sleep, 10=Madness).
+// Status build-up is constant across upgrade levels — the AP panel only
+// scales by the relevant Arc / Int correction (graph 6 from regulation).
+const STATUS_OVERRIDES: Record<string, { type: StatusEffect; base: number }> = {
+  // Bleed (Hemorrhage)
+  "uchigatana": { type: "bleed", base: 45 },
+  "nagakiba": { type: "bleed", base: 45 },
+  "great-knife": { type: "bleed", base: 38 },
+  "wakizashi": { type: "bleed", base: 38 },
+  "reduvia": { type: "bleed", base: 50 },
+  "bloody-helice": { type: "bleed", base: 55 },
+  "bloodhounds-fang": { type: "bleed", base: 55 },
+  "scavengers-curved-sword": { type: "bleed", base: 45 },
+  "mohgwyns-sacred-spear": { type: "bleed", base: 55 },
+  "hand-of-malenia": { type: "bleed", base: 50 },
+  "eleonoras-poleblade": { type: "bleed", base: 55 },
+  "morning-star": { type: "bleed", base: 50 },
+  "flamberge": { type: "bleed", base: 55 },
+  "rivers-of-blood": { type: "bleed", base: 50 },
+  "spiked-spear": { type: "bleed", base: 50 },
+  "spiked-club": { type: "bleed", base: 50 },
+  "bloodstained-dagger": { type: "bleed", base: 38 },
+  // Scarlet Rot
+  "antspur-rapier": { type: "rot", base: 55 },
+  "rotten-staff": { type: "rot", base: 75 },
+  "rotten-battle-hammer": { type: "rot", base: 65 },
+  "rotten-crystal-sword": { type: "rot", base: 50 },
+  "rotten-crystal-spear": { type: "rot", base: 55 },
+  "rotten-greataxe": { type: "rot", base: 65 },
+  "scorpions-stinger": { type: "rot", base: 50 },
+  // Poison
+  "venomous-fang": { type: "poison", base: 72 },
+  // Frostbite
+  "icerind-hatchet": { type: "frost", base: 65 },
+  "frozen-needle": { type: "frost", base: 60 },
+  // Madness
+  "fingerprint-stone-shield": { type: "madness", base: 70 },
+};
+
 export const weapons: Weapon[] = baseWeapons.map((w) => {
   const extra = WEAPON_EXTRAS[w.id];
-  return extra ? { ...w, ...extra } : w;
+  const merged = extra ? { ...w, ...extra } : w;
+  const status = STATUS_OVERRIDES[w.id];
+  return status ? { ...merged, innateStatus: status } : merged;
 });
 
 export function getWeapon(id: string): Weapon | undefined {

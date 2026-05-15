@@ -1,5 +1,5 @@
 import { Box, Chip, Paper, Stack, Typography } from "@mui/material";
-import { DAMAGE_TYPE_LABELS, estimateAttackPower, estimateSpellScaling, getMaxUpgradeLevel } from "../../../../../lib/recommender";
+import { DAMAGE_TYPE_LABELS, estimateAttackPower, estimateSpellScaling, estimateStatusBuildup, getMaxUpgradeLevel } from "../../../../../lib/recommender";
 import { Affinity } from "../../../../../lib/types";
 import { Weapon } from "../../../../../data/weapons";
 import { Stat } from "../../../../../data/classes";
@@ -13,6 +13,24 @@ const DAMAGE_TYPE_COLORS: Record<string, string> = {
   fir: "#ff9900",
   lit: "#ffff00",
   hol: "#ffcc99",
+};
+
+const STATUS_COLORS: Record<string, string> = {
+  bleed: "#e53935",
+  poison: "#9ccc65",
+  frost: "#81d4fa",
+  rot: "#ec407a",
+  sleep: "#b39ddb",
+  madness: "#ff7043",
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  bleed: "Hemorrhage",
+  poison: "Poison",
+  frost: "Frostbite",
+  rot: "Scarlet Rot",
+  sleep: "Sleep",
+  madness: "Madness",
 };
 
 const WeaponDamageRow = ({
@@ -34,6 +52,7 @@ const WeaponDamageRow = ({
   const maxEstimate = estimateAttackPower(weapon, target as never, "max", twoHand, affinity);
   const maxLabel = getMaxUpgradeLevel(weapon);
   const spellScaling = estimateSpellScaling(weapon, target as never);
+  const statuses = estimateStatusBuildup(weapon, target as never, affinity);
   const slotLabel = `${pos.hand === "right" ? "R" : "L"}${pos.idx + 1}`;
   return (
     <Paper
@@ -104,6 +123,20 @@ const WeaponDamageRow = ({
             </Typography>
           </Stack>
         )}
+        {statuses.map((status) => (
+          <Stack key={status.type} direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
+            <Box
+              sx={{
+                width: 8, height: 8, borderRadius: "50%",
+                bgcolor: STATUS_COLORS[status.type],
+                flexShrink: 0,
+              }}
+            />
+            <Typography variant="caption" sx={{ color: STATUS_COLORS[status.type], fontWeight: 600 }}>
+              {STATUS_LABELS[status.type]} {status.max} (+0: {status.base})
+            </Typography>
+          </Stack>
+        ))}
       </Stack>
     </Paper>
   );
