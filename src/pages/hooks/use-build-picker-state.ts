@@ -14,6 +14,7 @@ const useBuildPickerState = (initialState: BuildPickerProps) => {
         setLeftHand: (leftHand: BuildPickerProps["leftHand"]) => setState((s) => ({ ...s, leftHand })),
         setActive: (active: BuildPickerProps["active"]) => setState((s) => ({ ...s, active })),
         setWeaponPickerOpen: (weaponPickerOpen: boolean) => setState((s) => ({ ...s, weaponPickerOpen })),
+        setAffinityPickerPos: (affinityPickerPos: BuildPickerProps["affinityPickerPos"]) => setState((s) => ({ ...s, affinityPickerPos })),
         setClassId: (classId: string) => {
           const classArmor = getClass(classId)?.armor ?? null;
           setState((s) => ({ ...s, classId, armorSelection: classArmor ? { ...s.armorSelection, ...classArmor } : s.armorSelection }));

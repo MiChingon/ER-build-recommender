@@ -36,12 +36,13 @@ import {
   isInfusable,
   recommend,
 } from "../lib/recommender";
-import { AFFINITIES, Affinity, DEFAULT_TARGET_LEVEL, LoadoutItem, MAX_TARGET_LEVEL } from "../lib/types";
+import { Affinity, DEFAULT_TARGET_LEVEL, LoadoutItem, MAX_TARGET_LEVEL } from "../lib/types";
 import SpellRecommendations from "./components/SpellRecommendations";
 import Rationale from "./components/Rationale";
 import ClassCarousel from "./components/ClassCarousel";
 import WeaponSlotsGrid from "./components/WeaponSlotsGrid";
 import GearPicker from "../common/components/GearPicker";
+import AffinityPicker from "../common/components/AffinityPicker";
 import ArmorSlots from "./components/ArmorSlots";
 import TalismanSlots from "./components/TalismanSlots";
 import LoadoutDamagePanel from "./components/LoadoutDamagePanel";
@@ -61,6 +62,7 @@ export interface BuildPickerProps {
   leftHand: WeaponSlot[]
   active: SlotPos
   weaponPickerOpen: boolean
+  affinityPickerPos: SlotPos | null
   classId: string
   targetLevel: number
   twoHand: boolean
@@ -77,6 +79,7 @@ const initialBuildPickerState: BuildPickerProps = {
     idx: 0
   },
   weaponPickerOpen: false,
+  affinityPickerPos: null,
   classId: classes[0].id,
   targetLevel: DEFAULT_TARGET_LEVEL,
   twoHand: false,
@@ -102,8 +105,8 @@ const BuildPicker = () => {
 
   const { state, actions } = useBuildPickerState({ ...initialBuildPickerState, rightHand: initialHands.right, leftHand: initialHands.left, armorSelection: initialArmor });
  
-  const { category, classId, targetLevel, twoHand, talismanIds, armorSelection, rightHand, leftHand, active, weaponPickerOpen } = state;
-  const { setCategory, setClassId, setTargetLevel, setTwoHand, setTalismanIds, setArmorSelection, setRightHand, setLeftHand, setActive, setWeaponPickerOpen } = actions;
+  const { category, classId, targetLevel, twoHand, talismanIds, armorSelection, rightHand, leftHand, active, weaponPickerOpen, affinityPickerPos } = state;
+  const { setCategory, setClassId, setTargetLevel, setTwoHand, setTalismanIds, setArmorSelection, setRightHand, setLeftHand, setActive, setWeaponPickerOpen, setAffinityPickerPos } = actions;
 
   const filteredWeapons = useMemo(
     () => (category === "all" ? weapons : weapons.filter((w) => w.category === category)),
@@ -237,8 +240,10 @@ const BuildPicker = () => {
   };
 
   const handleWeaponChange = (next: Weapon | null) => {
+    // setWeapon already resets affinity to "Standard"; calling setAffinity here
+    // would fire a second updateSlot with the stale closure copy of rightHand /
+    // leftHand and overwrite the weapon back to null.
     setWeapon(next);
-    setAffinity("Standard");
     if (next) {
       const nextMin = computeMinFor(next, twoHand);
       if (targetLevel < nextMin) setTargetLevel(nextMin);
@@ -326,6 +331,7 @@ const BuildPicker = () => {
                     setActive(pos);
                     setWeaponPickerOpen(true);
                   }}
+                  onChangeAffinity={(pos) => setAffinityPickerPos(pos)}
                   onClear={(pos) => updateSlot(pos, { weapon: null, affinity: "Standard" })}
                 />
 
@@ -337,57 +343,35 @@ const BuildPicker = () => {
                   onClose={() => setWeaponPickerOpen(false)}
                   secondary={(w) => `${w.category} · ${w.weight} wgt`}
                   header={
-                    <Stack spacing={1.5}>
-                      <FormControl fullWidth size="small">
-                        <InputLabel id="category-label">Weapon category</InputLabel>
-                        <Select
-                          labelId="category-label"
-                          label="Weapon category"
-                          value={category}
-                          onChange={(e) =>
-                            handleCategoryChange(e.target.value as WeaponCategory | "all")
-                          }
-                        >
-                          <MenuItem value="all">All categories</MenuItem>
-                          {CATEGORIES.map((c) => (
-                            <MenuItem key={c} value={c}>
-                              {c}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                      <FormControl fullWidth size="small" disabled={!weapon || !weaponInfusable}>
-                        <InputLabel id="affinity-label">Infusion (affinity)</InputLabel>
-                        <Select
-                          labelId="affinity-label"
-                          label="Infusion (affinity)"
-                          value={effectiveAffinity}
-                          onChange={(e) => setAffinity(e.target.value as Affinity)}
-                          renderValue={(v) => {
-                            if (!weapon) return v as string;
-                            if (weaponUpgradeType === "somber") return "Somber";
-                            if (weaponUpgradeType === "standard-fixed") return "Standard";
-                            return v as string;
-                          }}
-                        >
-                          {AFFINITIES.map((a) => (
-                            <MenuItem key={a} value={a}>
-                              {a}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                        <FormHelperText>
-                          {!weapon
-                            ? "Pick a weapon first."
-                            : weaponUpgradeType === "somber"
-                            ? "Somber weapon (+10 max) — affinity cannot be changed."
-                            : weaponUpgradeType === "standard-fixed"
-                            ? "Standard weapon with a fixed Ash of War — affinity cannot be changed."
-                            : "Affinity overrides the weapon's primary scaling stat."}
-                        </FormHelperText>
-                      </FormControl>
-                    </Stack>
+                    <FormControl fullWidth size="small">
+                      <InputLabel id="category-label">Weapon category</InputLabel>
+                      <Select
+                        labelId="category-label"
+                        label="Weapon category"
+                        value={category}
+                        onChange={(e) =>
+                          handleCategoryChange(e.target.value as WeaponCategory | "all")
+                        }
+                      >
+                        <MenuItem value="all">All categories</MenuItem>
+                        {CATEGORIES.map((c) => (
+                          <MenuItem key={c} value={c}>
+                            {c}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
                   }
+                />
+
+                <AffinityPicker
+                  open={affinityPickerPos !== null}
+                  weapon={affinityPickerPos ? slotsFor(affinityPickerPos.hand)[affinityPickerPos.idx].weapon : null}
+                  currentAffinity={affinityPickerPos ? slotsFor(affinityPickerPos.hand)[affinityPickerPos.idx].affinity : "Standard"}
+                  onSelect={(a) => {
+                    if (affinityPickerPos) updateSlot(affinityPickerPos, { affinity: a });
+                  }}
+                  onClose={() => setAffinityPickerPos(null)}
                 />
 
                 {weapon && (

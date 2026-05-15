@@ -11,6 +11,8 @@ const GearPicker = <T extends GearOption>({
   onClose,
   secondary,
   header,
+  footer,
+  keepOpenOnSelect,
 }: {
   open: boolean;
   title: string;
@@ -19,6 +21,8 @@ const GearPicker = <T extends GearOption>({
   onClose: () => void;
   secondary?: (item: T) => string;
   header?: ReactNode;
+  footer?: ReactNode;
+  keepOpenOnSelect?: (item: T) => boolean;
 }) => {
   const [query, setQuery] = useState("");
   useEffect(() => {
@@ -53,7 +57,7 @@ const GearPicker = <T extends GearOption>({
                 key={o.id}
                 onClick={() => {
                   onSelect(o);
-                  onClose();
+                  if (!keepOpenOnSelect?.(o)) onClose();
                 }}
               >
                 <ListItemAvatar>
@@ -78,6 +82,7 @@ const GearPicker = <T extends GearOption>({
             ))
           )}
         </List>
+        {footer ? <Box sx={{ mt: 2 }}>{footer}</Box> : null}
       </DialogContent>
     </Dialog>
   );
