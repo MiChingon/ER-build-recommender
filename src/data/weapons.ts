@@ -76,7 +76,8 @@ export type WeaponCategory =
   | "Light Bow"
   | "Bow"
   | "Small Shield"
-  | "Medium Shield";
+  | "Medium Shield"
+  | "Greatshield";
 
 export const CATEGORIES: WeaponCategory[] = [
   "Dagger", "Straight Sword", "Greatsword", "Colossal Sword",
@@ -87,7 +88,7 @@ export const CATEGORIES: WeaponCategory[] = [
   "Light Greatsword", "Great Katana", "Backhand Blade", "Throwing Blade",
   "Hand-to-Hand Art", "Beast Claw", "Perfume Bottle",
   "Glintstone Staff", "Sacred Seal",
-  "Light Bow", "Bow", "Small Shield", "Medium Shield",
+  "Light Bow", "Bow", "Small Shield", "Medium Shield", "Greatshield",
 ];
 
 export const CATEGORY_BASE_AP: Record<WeaponCategory, number> = {
@@ -127,6 +128,7 @@ export const CATEGORY_BASE_AP: Record<WeaponCategory, number> = {
   "Bow": 80,
   "Small Shield": 70,
   "Medium Shield": 77,
+  "Greatshield": 85,
 };
 
 // Per-weapon base attack power at +0, summing all damage types (physical +
@@ -886,6 +888,94 @@ const baseWeapons: Weapon[] = [
   w("rickety-shield", "Rickety Shield", "Small Shield", 1, { strength: 8 }, { strength: "E" }, "Parry"),
   w("rift-shield", "Rift Shield", "Small Shield", 2, { strength: 8 }, { strength: "E" }, "Parry"),
   w("blue-crest-heater-shield", "Blue Crest Heater Shield", "Medium Shield", 3.5, { strength: 10 }, { strength: "D" }, "Shield Bash"),
+  w("blue-white-wooden-shield", "Blue-White Wooden Shield", "Small Shield", 2, { strength: 6 }, { strength: "E" }, "No Skill"),
+  w("pillory-shield", "Pillory Shield", "Small Shield", 3.5, { strength: 10 }, { strength: "E" }, "No Skill"),
+  w("iron-roundshield", "Iron Roundshield", "Small Shield", 3, { strength: 8 }, { strength: "E" }, "No Skill"),
+  w("gilded-iron-shield", "Gilded Iron Shield", "Small Shield", 3, { strength: 8 }, { strength: "E" }, "Parry"),
+  w("man-serpents-shield", "Man-Serpent's Shield", "Small Shield", 2, { strength: 8 }, { strength: "E" }, "No Skill"),
+  w("ice-crest-shield", "Ice Crest Shield", "Small Shield", 3, { strength: 9 }, { strength: "E" }, "No Skill"),
+  w("perfumers-shield", "Perfumer's Shield", "Small Shield", 1.5, { strength: 8 }, { strength: "E" }, "Parry"),
+  w("shield-of-the-guilty", "Shield of the Guilty", "Small Shield", 2, { strength: 8 }, { strength: "D" }, "Shield Bash"),
+  w("spiralhorn-shield", "Spiralhorn Shield", "Small Shield", 2, { strength: 8 }, { strength: "E" }, "Parry"),
+  w("smoldering-shield", "Smoldering Shield", "Small Shield", 3, { strength: 10 }, { strength: "E" }, "Shield Bash"),
+  w("coil-shield", "Coil Shield", "Small Shield", 1.5, { strength: 10 }, { strength: "E" }, "Viper Bite"),
+  w("smithscript-shield", "Smithscript Shield", "Small Shield", 2.5, { strength: 10 }, { strength: "D" }, "Discus Hurl", true),
+  w("shield-of-night", "Shield of Night", "Small Shield", 2, { strength: 8 }, { strength: "E" }, "Revenge of the Night", true),
+
+  // Medium Shields
+  w("hawk-crest-wooden-shield", "Hawk Crest Wooden Shield", "Medium Shield", 3.5, { strength: 10 }, { strength: "D" }, "Parry"),
+  w("horse-crest-wooden-shield", "Horse Crest Wooden Shield", "Medium Shield", 3.5, { strength: 10 }, { strength: "D" }, "No Skill"),
+  w("candletree-wooden-shield", "Candletree Wooden Shield", "Medium Shield", 3.5, { strength: 10 }, { strength: "D" }, "Parry"),
+  w("flame-crest-wooden-shield", "Flame Crest Wooden Shield", "Medium Shield", 3.5, { strength: 10 }, { strength: "D" }, "Parry"),
+  w("marred-wooden-shield", "Marred Wooden Shield", "Medium Shield", 4, { strength: 10 }, { strength: "D" }, "No Skill"),
+  w("sun-realm-shield", "Sun Realm Shield", "Medium Shield", 3.5, { strength: 10 }, { strength: "D" }, "Parry"),
+  w("round-shield", "Round Shield", "Medium Shield", 4, { strength: 10 }, { strength: "D" }, "Parry"),
+  w("black-leather-shield", "Black Leather Shield", "Medium Shield", 3, { strength: 8 }, { strength: "D" }, "No Skill"),
+  w("marred-leather-shield", "Marred Leather Shield", "Medium Shield", 3, { strength: 8 }, { strength: "D" }, "No Skill"),
+  w("red-crest-heater-shield", "Red Crest Heater Shield", "Medium Shield", 3.5, { strength: 10 }, { strength: "D" }, "Parry"),
+  w("beast-crest-heater-shield", "Beast Crest Heater Shield", "Medium Shield", 3.5, { strength: 10 }, { strength: "D" }, "Parry"),
+  w("inverted-hawk-heater-shield", "Inverted Hawk Heater Shield", "Medium Shield", 3.5, { strength: 10 }, { strength: "D" }, "Parry"),
+  w("eclipse-crest-heater-shield", "Eclipse Crest Heater Shield", "Medium Shield", 3.5, { strength: 10 }, { strength: "D" }, "No Skill"),
+  w("kite-shield", "Kite Shield", "Medium Shield", 4.5, { strength: 12 }, { strength: "D" }, "No Skill"),
+  w("blue-gold-kite-shield", "Blue-Gold Kite Shield", "Medium Shield", 5, { strength: 12 }, { strength: "D" }, "Parry"),
+  w("scorpion-kite-shield", "Scorpion Kite Shield", "Medium Shield", 4.5, { strength: 12 }, { strength: "D" }, "Parry"),
+  w("twinbird-kite-shield", "Twinbird Kite Shield", "Medium Shield", 4.5, { strength: 12 }, { strength: "D" }, "No Skill"),
+  w("brass-shield", "Brass Shield", "Medium Shield", 7, { strength: 14 }, { strength: "D" }, "No Skill"),
+  w("banished-knights-shield", "Banished Knight's Shield", "Medium Shield", 6, { strength: 14 }, { strength: "D" }, "No Skill"),
+  w("albinauric-shield", "Albinauric Shield", "Medium Shield", 4.5, { strength: 12 }, { strength: "D" }, "Parry"),
+  w("beastmans-jar-shield", "Beastman's Jar-Shield", "Medium Shield", 5, { strength: 12 }, { strength: "E" }, "No Skill"),
+  w("carian-knights-shield", "Carian Knight's Shield", "Medium Shield", 4.5, { strength: 10, intelligence: 13 }, { strength: "D" }, "No Skill"),
+  w("silver-mirrorshield", "Silver Mirrorshield", "Medium Shield", 3.5, { strength: 10 }, { strength: "D" }, "No Skill"),
+  w("great-turtle-shell", "Great Turtle Shell", "Medium Shield", 5.5, { strength: 12 }, { strength: "D" }, "Barricade Shield"),
+  w("golden-lion-shield", "Golden Lion Shield", "Medium Shield", 5.5, { strength: 16 }, { strength: "C" }, "Roaring Bash", true),
+  w("serpent-crest-shield", "Serpent Crest Shield", "Medium Shield", 6, { strength: 14 }, { strength: "D" }, "No Skill", true),
+  w("wolf-crest-shield", "Wolf Crest Shield", "Medium Shield", 6, { strength: 14 }, { strength: "D" }, "No Skill", true),
+  w("messmer-soldier-shield", "Messmer Soldier Shield", "Medium Shield", 5, { strength: 12 }, { strength: "D" }, "No Skill", true),
+
+  // Greatshields
+  w("wooden-greatshield", "Wooden Greatshield", "Greatshield", 8, { strength: 14 }, { strength: "D" }, "No Skill"),
+  w("lordsworns-shield", "Lordsworn's Shield", "Greatshield", 10, { strength: 16 }, { strength: "D" }, "Shield Bash"),
+  w("briar-greatshield", "Briar Greatshield", "Greatshield", 9.5, { strength: 21 }, { strength: "D" }, "Shield Bash"),
+  w("spiked-palisade-shield", "Spiked Palisade Shield", "Greatshield", 11.5, { strength: 20 }, { strength: "D" }, "Shield Bash"),
+  w("icon-shield", "Icon Shield", "Greatshield", 11.5, { strength: 22 }, { strength: "D" }, "No Skill"),
+  w("golden-beast-crest-shield", "Golden Beast Crest Shield", "Greatshield", 12.5, { strength: 24 }, { strength: "D" }, "No Skill"),
+  w("manor-towershield", "Manor Towershield", "Greatshield", 16, { strength: 30 }, { strength: "D" }, "Shield Bash"),
+  w("crossed-tree-towershield", "Crossed-Tree Towershield", "Greatshield", 16, { strength: 30 }, { strength: "D" }, "Shield Bash"),
+  w("inverted-hawk-towershield", "Inverted Hawk Towershield", "Greatshield", 16, { strength: 30 }, { strength: "D" }, "Shield Bash"),
+  w("dragon-towershield", "Dragon Towershield", "Greatshield", 17.5, { strength: 30 }, { strength: "D" }, "Shield Bash"),
+  w("distinguished-greatshield", "Distinguished Greatshield", "Greatshield", 17, { strength: 32 }, { strength: "D" }, "No Skill"),
+  w("gilded-greatshield", "Gilded Greatshield", "Greatshield", 17.5, { strength: 36 }, { strength: "D" }, "No Skill"),
+  w("cuckoo-greatshield", "Cuckoo Greatshield", "Greatshield", 15, { strength: 32 }, { strength: "D" }, "No Skill"),
+  w("redmane-greatshield", "Redmane Greatshield", "Greatshield", 14, { strength: 30 }, { strength: "D" }, "No Skill"),
+  w("golden-greatshield", "Golden Greatshield", "Greatshield", 17, { strength: 34 }, { strength: "D" }, "No Skill"),
+  w("haligtree-crest-greatshield", "Haligtree Crest Greatshield", "Greatshield", 18.5, { strength: 36 }, { strength: "D" }, "No Skill"),
+  w("crucible-hornshield", "Crucible Hornshield", "Greatshield", 11.5, { strength: 26 }, { strength: "D" }, "Shield Bash"),
+  w("dragonclaw-shield", "Dragonclaw Shield", "Greatshield", 13.5, { strength: 28 }, { strength: "D" }, "Shield Bash"),
+  w("fingerprint-stone-shield", "Fingerprint Stone Shield", "Greatshield", 29, { strength: 48 }, { strength: "D" }, "Shield Bash"),
+  w("eclipse-crest-greatshield", "Eclipse Crest Greatshield", "Greatshield", 15, { strength: 32 }, { strength: "D" }, "No Skill"),
+  w("ants-skull-plate", "Ant's Skull Plate", "Greatshield", 13.5, { strength: 28 }, { strength: "D" }, "Shield Bash"),
+  w("erdtree-greatshield", "Erdtree Greatshield", "Greatshield", 13.5, { strength: 30 }, { strength: "D" }, "Golden Retaliation"),
+  w("jellyfish-shield", "Jellyfish Shield", "Greatshield", 8, { strength: 20 }, { strength: "D" }, "Contagious Fury"),
+  w("visage-shield", "Visage Shield", "Greatshield", 24, { strength: 44 }, { strength: "D" }, "Tongues of Fire"),
+  w("one-eyed-shield", "One-Eyed Shield", "Greatshield", 20.5, { strength: 36 }, { strength: "D" }, "Flame Spit"),
+  w("verdigris-greatshield", "Verdigris Greatshield", "Greatshield", 28, { strength: 82 }, { strength: "D" }, "Moore's Charge", true),
+  w("black-steel-greatshield", "Black Steel Greatshield", "Greatshield", 19.5, { strength: 35 }, { strength: "D" }, "Shield Bash", true),
+
+  // Light Bows
+  w("bone-bow", "Bone Bow", "Light Bow", 3, { strength: 8, dexterity: 11 }, { strength: "E", dexterity: "E" }, "Rancor Shot"),
+  w("composite-bow", "Composite Bow", "Light Bow", 3, { strength: 15, dexterity: 15 }, { strength: "E", dexterity: "D" }, "Mighty Shot"),
+  w("red-branch-shortbow", "Red Branch Shortbow", "Light Bow", 2.5, { strength: 8, dexterity: 16 }, { strength: "E", dexterity: "D" }, "Barrage"),
+  w("misbegotten-shortbow", "Misbegotten Shortbow", "Light Bow", 3, { strength: 16, dexterity: 8 }, { strength: "D", dexterity: "E" }, "Barrage"),
+  w("harp-bow", "Harp Bow", "Light Bow", 2, { strength: 9, dexterity: 9 }, { strength: "E", dexterity: "E" }, "Barrage"),
+
+  // Bows
+  w("albinauric-bow", "Albinauric Bow", "Bow", 4.5, { strength: 9, dexterity: 18 }, { strength: "E", dexterity: "D" }, "Mighty Shot"),
+  w("black-bow", "Black Bow", "Bow", 4, { strength: 9, dexterity: 20 }, { strength: "E", dexterity: "D" }, "Barrage"),
+  w("horn-bow", "Horn Bow", "Bow", 4.5, { strength: 12, dexterity: 14 }, { strength: "D", dexterity: "D" }, "Mighty Shot"),
+  w("serpent-bow", "Serpent Bow", "Bow", 3.5, { strength: 9, dexterity: 15 }, { strength: "E", dexterity: "D" }, "Mighty Shot"),
+  w("erdtree-bow", "Erdtree Bow", "Bow", 4, { strength: 9, dexterity: 12, faith: 7 }, { strength: "E", dexterity: "D" }, "Mighty Shot"),
+  w("pulley-bow", "Pulley Bow", "Bow", 5, { strength: 11, dexterity: 11 }, { strength: "E", dexterity: "D" }, "Mighty Shot"),
+  w("ansbachs-longbow", "Ansbach's Longbow", "Bow", 4.5, { strength: 9, dexterity: 18 }, { strength: "E", dexterity: "D" }, "Fan Shot", true),
 ];
 
 
