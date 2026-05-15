@@ -19,6 +19,7 @@ const InfusionControl = ({
   const upgradeType = getUpgradeType(weapon);
   const disabled = upgradeType !== "infusable";
   const label = upgradeType === "somber" ? "Somber" : upgradeType === "standard-fixed" ? "Standard" : affinity;
+  const color = INFUSION_COLORS[label] ?? INFUSION_COLORS.Standard;
   return (
     <Tooltip title={disabled ? "Affinity cannot be changed for this weapon" : "Change infusion"}>
       <span style={{ display: "block", width: "100%" }}>
@@ -31,13 +32,44 @@ const InfusionControl = ({
             e.stopPropagation();
             if (!disabled) onClick();
           }}
-          sx={{ textTransform: "none", fontSize: "0.7rem", py: 0.25, minHeight: 0, lineHeight: 1.2 }}
+          sx={{
+            textTransform: "none",
+            fontSize: "0.7rem",
+            py: 0.25,
+            minHeight: 0,
+            lineHeight: 1.2,
+            color,
+            borderColor: color,
+            "&:hover": { borderColor: color, backgroundColor: `${color}1a` },
+            "&.Mui-disabled": { color: `${color}99`, borderColor: `${color}55` },
+          }}
         >
           {label}
         </Button>
       </span>
     </Tooltip>
   );
+};
+
+// Per-infusion color palette. The base 13 affinities plus the two read-only
+// labels ("Somber" for unique +10 weapons, "Standard" for non-infusable +25
+// weapons like Great Club). Colors are tuned to match the in-game elemental
+// palette where it makes sense.
+const INFUSION_COLORS: Record<string, string> = {
+  Standard: "#d4af37", // gold (default Ash of War-able)
+  Heavy:    "#c97e4a", // burnt-orange / strength
+  Keen:     "#7ed957", // green / dex
+  Quality:  "#f5d76e", // light gold / balanced
+  Fire:     "#ff7043", // orange
+  "Flame Art": "#ff5722", // red-orange
+  Lightning:"#fff176", // pale yellow
+  Sacred:   "#fff3b0", // cream
+  Magic:    "#4fc3f7", // azure
+  Cold:     "#81d4fa", // ice
+  Poison:   "#9ccc65", // sickly green
+  Blood:    "#e53935", // crimson
+  Occult:   "#ce93d8", // purple
+  Somber:   "#9e9e9e", // grey (unique skill, non-infusable +10)
 };
 
 const WeaponSlotsGrid = ({
