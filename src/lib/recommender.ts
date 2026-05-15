@@ -227,12 +227,14 @@ export function estimateStatusBuildup(
   // Per the regulation file: status build-up does NOT scale with the weapon's
   // upgrade level — base value stays constant from +0 to max. The only thing
   // that changes the displayed value is the player's Arcane (for bleed /
-  // poison / rot / sleep / madness) or Intelligence (for frost via Cold),
-  // and only when the weapon actually scales with that stat (innate Arc
-  // scaling, or the affinity itself supplying Arc / Int scaling like
-  // Blood / Poison / Cold).
-  const scalingMap = weapon.scalingTable?.max?.[affinity] ?? weapon.scaling;
-  const hasArc = scalingMap["arcane"] !== undefined;
+  // poison / rot / sleep / madness) or Intelligence (for frost via Cold).
+  //
+  // Innate status only scales with Arcane when the weapon NATURALLY scales
+  // with Arc (i.e. weapon.scaling.arcane is defined on the legacy +0 map).
+  // The Arc scaling that Poison / Blood affinities add at max doesn't reach
+  // back to the weapon's natural sp effect — e.g. Flamberge keeps its 55
+  // hemorrhage flat even when Poison adds Arc D(43) to the max table.
+  const innateArc = weapon.scaling["arcane"] !== undefined;
 
   return sources.map(({ type, base }) => {
     const boostStat = STATUS_BOOST_STAT[type];
@@ -242,10 +244,12 @@ export function estimateStatusBuildup(
       // Frost scales with Int only via the Cold affinity.
       applyBoost = affinity === "Cold";
     } else {
-      // Arc scales bleed / poison / rot / sleep / madness only when the
-      // weapon has Arc scaling — either innate or added by the affinity
-      // (Blood / Poison both add Arc scaling).
-      applyBoost = hasArc || (isAffinityInduced && (type === "bleed" || type === "poison"));
+      // Arc boosts bleed / poison / rot / sleep / madness either:
+      //  - when the weapon naturally scales with Arc (Mohgwyn's, Reduvia, etc.), OR
+      //  - when the affinity is the one supplying the status itself, since
+      //    Blood / Poison affinity damage and status share the affinity's
+      //    added Arc scaling.
+      applyBoost = innateArc || (isAffinityInduced && (type === "bleed" || type === "poison"));
     }
     let effective = base;
     if (applyBoost) {
@@ -555,13 +559,11 @@ export function getMinFeasibleLevel(
 }
 
 function getPrimaryStats(weapon: Weapon, affinity: Affinity): Stat[] {
-  if (affinity !== "Standard") return AFFINITY_PRIMARIES[affinity];
-
-  // Use the max-upgrade scaling table when available — it reflects the final
-  // balance of stats at +10/+25 (e.g. Mohgwyn's Sacred Spear ends at Str C(72)
-  // and Arc C(72), so both deserve equal investment even though Str is only D
-  // at +0). Falls back to the legacy weapon.scaling for weapons that lack a
-  // scalingTable.
+  // Use the max-upgrade scaling table for the chosen affinity to detect which
+  // stats actually drive AP at max — e.g. Flamberge + Poison still has Dex
+  // B(108) as its top scaler, far above the Arc D(43) the Poison affinity
+  // adds. The previous AFFINITY_PRIMARIES short-circuit ignored the weapon's
+  // own scaling letters and over-invested in the affinity's "official" stat.
   const maxScaling = weapon.scalingTable?.max?.[affinity] ?? weapon.scaling;
   const gradeRank = (s: Stat): number => {
     const entry = maxScaling[s];
@@ -570,9 +572,30 @@ function getPrimaryStats(weapon: Weapon, affinity: Affinity): Stat[] {
     return g ? SCALE_RANK[g] : 0;
   };
   const scalingStats = STAT_ORDER.filter((s) => gradeRank(s) > 0);
-  if (scalingStats.length === 0) return [];
-  const bestRank = Math.max(...scalingStats.map(gradeRank));
-  return scalingStats.filter((s) => gradeRank(s) === bestRank);
+  let primaries: Stat[] = [];
+  if (scalingStats.length > 0) {
+    const bestRank = Math.max(...scalingStats.map(gradeRank));
+    primaries = scalingStats.filter((s) => gradeRank(s) === bestRank);
+  } else if (affinity !== "Standard") {
+    // Falls back to the hardcoded affinity primaries when no scalingTable
+    // data is available (e.g. legacy weapons without extras).
+    primaries = AFFINITY_PRIMARIES[affinity].slice();
+  }
+
+  // Status-bearing affinities also want investment in the stat that scales
+  // their status build-up: Arcane for Poison / Blood, Intelligence for Cold.
+  // Push that stat alongside the damage primary so the recommendation lifts
+  // both AP and status build-up without abandoning damage scaling.
+  const statusStat: Stat | null =
+    affinity === "Poison" || affinity === "Blood"
+      ? "arcane"
+      : affinity === "Cold"
+      ? "intelligence"
+      : null;
+  if (statusStat && !primaries.includes(statusStat)) {
+    primaries.push(statusStat);
+  }
+  return primaries;
 }
 
 function adjustStrForTwoHand(value: number, twoHand: boolean, strengthStartingValue: number): number {
