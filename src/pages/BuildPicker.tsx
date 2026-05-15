@@ -315,8 +315,6 @@ const BuildPicker = () => {
           <Card>
             <CardContent>
               <Stack spacing={3}>
-                <Typography variant="h6">Pick your build</Typography>
-
                 <ClassCarousel classId={classId} onChange={handleClassChange} />
 
                 <FormControl fullWidth>

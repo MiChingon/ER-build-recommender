@@ -23,8 +23,8 @@ const ClassCarousel = ({
 
   return (
     <Box>
-      <Typography variant="subtitle2" gutterBottom>
-        Starting class
+      <Typography variant="h6" gutterBottom>
+        Starting Class
       </Typography>
       <Paper variant="outlined" sx={{ p: 2 }}>
         <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
@@ -54,13 +54,7 @@ const ClassCarousel = ({
                 pt: 1,
               }}
             />
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              {current.name}
-            </Typography>
             <Chip size="small" label={`Lv ${current.level}`} />
-            <Typography variant="caption" color="text.secondary">
-              {currentIndex + 1} / {classes.length}
-            </Typography>
           </Stack>
           <IconButton
             aria-label="Next class"
