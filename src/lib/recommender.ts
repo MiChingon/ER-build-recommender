@@ -161,6 +161,50 @@ export function estimateAttackPower(
   };
 }
 
+export type SpellScalingEstimate = {
+  base: number;
+  max: number;
+  type: "sorcery" | "incantation";
+};
+
+// Catalysts (staves / seals) don't show meaningful melee AP — their effective
+// "attack power" is the spell-scaling stat the game displays on the catalyst's
+// status screen, which boosts every cast spell. Approximate it as a baseline
+// of 100 (no-investment) plus the catalyst's per-stat numeric scaling times
+// the elemental correction curve for the relevant stat (Int for staves, Faith
+// for seals; Arcane also contributes when the catalyst has Arc scaling).
+export function estimateSpellScaling(weapon: Weapon, stats: StatVector): SpellScalingEstimate | null {
+  const isStaff = weapon.category === "Glintstone Staff";
+  const isSeal = weapon.category === "Sacred Seal";
+  if (!isStaff && !isSeal) return null;
+  const scalingStats: Stat[] = isStaff ? ["intelligence", "arcane"] : ["faith", "arcane"];
+  const computeFor = (level: "base" | "max"): number => {
+    const scalingMap = level === "base"
+      ? (weapon.scalingTable?.base ?? weapon.scaling)
+      : (weapon.scalingTable?.max?.["Standard"] ?? weapon.scaling);
+    let total = 0;
+    for (const stat of scalingStats) {
+      const entry = scalingMap[stat];
+      if (!entry) continue;
+      const numeric = valueOf(entry);
+      const grade = gradeOf(entry);
+      // Per-affinity numeric values are tuples like ["A", 130]; some catalysts
+      // store the max row as a plain letter grade (no tuple). Fall back to the
+      // SCALING_FACTOR letter weight scaled to the same 0–175 range.
+      const factor = numeric !== undefined ? numeric : (grade ? SCALING_FACTOR[grade] * 100 : 0);
+      if (factor <= 0) continue;
+      const correction = scalingCorrection(stat, stats[stat]);
+      total += factor * correction;
+    }
+    return Math.round(100 + total);
+  };
+  return {
+    base: computeFor("base"),
+    max: computeFor("max"),
+    type: isStaff ? "sorcery" : "incantation",
+  };
+}
+
 export function isInfusable(weapon: Weapon): boolean {
   return getUpgradeType(weapon) === "infusable";
 }

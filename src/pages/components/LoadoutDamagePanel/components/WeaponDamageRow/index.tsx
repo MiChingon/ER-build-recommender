@@ -1,5 +1,5 @@
 import { Box, Chip, Paper, Stack, Typography } from "@mui/material";
-import { DAMAGE_TYPE_LABELS, estimateAttackPower, getMaxUpgradeLevel } from "../../../../../lib/recommender";
+import { DAMAGE_TYPE_LABELS, estimateAttackPower, estimateSpellScaling, getMaxUpgradeLevel } from "../../../../../lib/recommender";
 import { Affinity } from "../../../../../lib/types";
 import { Weapon } from "../../../../../data/weapons";
 import { Stat } from "../../../../../data/classes";
@@ -33,6 +33,7 @@ const WeaponDamageRow = ({
   const baseEstimate = estimateAttackPower(weapon, target as never, "base", twoHand, affinity);
   const maxEstimate = estimateAttackPower(weapon, target as never, "max", twoHand, affinity);
   const maxLabel = getMaxUpgradeLevel(weapon);
+  const spellScaling = estimateSpellScaling(weapon, target as never);
   const slotLabel = `${pos.hand === "right" ? "R" : "L"}${pos.idx + 1}`;
   return (
     <Paper
@@ -89,6 +90,20 @@ const WeaponDamageRow = ({
             </Typography>
           </Stack>
         ))}
+        {spellScaling && (
+          <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
+            <Box
+              sx={{
+                width: 8, height: 8, borderRadius: "50%",
+                bgcolor: "primary.main",
+                flexShrink: 0,
+              }}
+            />
+            <Typography variant="caption" sx={{ color: "primary.main", fontWeight: 600 }}>
+              {spellScaling.type === "sorcery" ? "Sorcery Scaling" : "Incant Scaling"} {spellScaling.max} (+0: {spellScaling.base})
+            </Typography>
+          </Stack>
+        )}
       </Stack>
     </Paper>
   );
