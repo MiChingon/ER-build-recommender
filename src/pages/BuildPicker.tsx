@@ -317,25 +317,6 @@ const BuildPicker = () => {
               <Stack spacing={3}>
                 <ClassCarousel classId={classId} onChange={handleClassChange} />
 
-                <FormControl fullWidth>
-                  <InputLabel id="category-label">Weapon category</InputLabel>
-                  <Select
-                    labelId="category-label"
-                    label="Weapon category"
-                    value={category}
-                    onChange={(e) =>
-                      handleCategoryChange(e.target.value as WeaponCategory | "all")
-                    }
-                  >
-                    <MenuItem value="all">All categories</MenuItem>
-                    {CATEGORIES.map((c) => (
-                      <MenuItem key={c} value={c}>
-                        {c}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-
                 <WeaponSlotsGrid
                   rightHand={rightHand}
                   leftHand={leftHand}
@@ -356,36 +337,56 @@ const BuildPicker = () => {
                   onClose={() => setWeaponPickerOpen(false)}
                   secondary={(w) => `${w.category} · ${w.weight} wgt`}
                   header={
-                    <FormControl fullWidth size="small" disabled={!weapon || !weaponInfusable}>
-                      <InputLabel id="affinity-label">Infusion (affinity)</InputLabel>
-                      <Select
-                        labelId="affinity-label"
-                        label="Infusion (affinity)"
-                        value={effectiveAffinity}
-                        onChange={(e) => setAffinity(e.target.value as Affinity)}
-                        renderValue={(v) => {
-                          if (!weapon) return v as string;
-                          if (weaponUpgradeType === "somber") return "Somber";
-                          if (weaponUpgradeType === "standard-fixed") return "Standard";
-                          return v as string;
-                        }}
-                      >
-                        {AFFINITIES.map((a) => (
-                          <MenuItem key={a} value={a}>
-                            {a}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                      <FormHelperText>
-                        {!weapon
-                          ? "Pick a weapon first."
-                          : weaponUpgradeType === "somber"
-                          ? "Somber weapon (+10 max) — affinity cannot be changed."
-                          : weaponUpgradeType === "standard-fixed"
-                          ? "Standard weapon with a fixed Ash of War — affinity cannot be changed."
-                          : "Affinity overrides the weapon's primary scaling stat."}
-                      </FormHelperText>
-                    </FormControl>
+                    <Stack spacing={1.5}>
+                      <FormControl fullWidth size="small">
+                        <InputLabel id="category-label">Weapon category</InputLabel>
+                        <Select
+                          labelId="category-label"
+                          label="Weapon category"
+                          value={category}
+                          onChange={(e) =>
+                            handleCategoryChange(e.target.value as WeaponCategory | "all")
+                          }
+                        >
+                          <MenuItem value="all">All categories</MenuItem>
+                          {CATEGORIES.map((c) => (
+                            <MenuItem key={c} value={c}>
+                              {c}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                      <FormControl fullWidth size="small" disabled={!weapon || !weaponInfusable}>
+                        <InputLabel id="affinity-label">Infusion (affinity)</InputLabel>
+                        <Select
+                          labelId="affinity-label"
+                          label="Infusion (affinity)"
+                          value={effectiveAffinity}
+                          onChange={(e) => setAffinity(e.target.value as Affinity)}
+                          renderValue={(v) => {
+                            if (!weapon) return v as string;
+                            if (weaponUpgradeType === "somber") return "Somber";
+                            if (weaponUpgradeType === "standard-fixed") return "Standard";
+                            return v as string;
+                          }}
+                        >
+                          {AFFINITIES.map((a) => (
+                            <MenuItem key={a} value={a}>
+                              {a}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        <FormHelperText>
+                          {!weapon
+                            ? "Pick a weapon first."
+                            : weaponUpgradeType === "somber"
+                            ? "Somber weapon (+10 max) — affinity cannot be changed."
+                            : weaponUpgradeType === "standard-fixed"
+                            ? "Standard weapon with a fixed Ash of War — affinity cannot be changed."
+                            : "Affinity overrides the weapon's primary scaling stat."}
+                        </FormHelperText>
+                      </FormControl>
+                    </Stack>
                   }
                 />
 
