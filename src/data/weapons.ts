@@ -635,7 +635,7 @@ const baseWeapons: Weapon[] = [
   w("vykes-war-spear", "Vyke's War Spear", "Great Spear", 8, { strength: 16, dexterity: 20, faith: 14 }, { strength: "E", dexterity: "B", faith: "C" }, "Frenzyflame Thrust"),
   w("serpent-hunter", "Serpent-Hunter", "Great Spear", 12, {}, { strength: "B", dexterity: "E" }, "Great-Serpent Hunt"),
   w("siluras-tree", "Siluria's Tree", "Great Spear", 10, { strength: 27, dexterity: 13, faith: 20 }, { strength: "D", dexterity: "E", faith: "D" }, "Siluria's Woe"),
-  w("mohgwyns-sacred-spear", "Mohgwyn's Sacred Spear", "Great Spear", 10, { strength: 24, dexterity: 14, faith: 27, arcane: 10 }, { strength: "D", dexterity: "E", faith: "D", arcane: "C" }, "Bloodboon Ritual"),
+  w("mohgwyns-sacred-spear", "Mohgwyn's Sacred Spear", "Great Spear", 10, { strength: 24, dexterity: 14, arcane: 27 }, { strength: "D", dexterity: "E", arcane: "C" }, "Bloodboon Ritual"),
 
   w("halberd", "Halberd", "Halberd", 8, { strength: 14, dexterity: 12 }, { strength: "D", dexterity: "D" }, "Charge Forth"),
   w("banished-knights-halberd", "Banished Knight's Halberd", "Halberd", 8, { strength: 14, dexterity: 12 }, { strength: "D", dexterity: "D" }, "Charge Forth"),

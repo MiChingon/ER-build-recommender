@@ -458,23 +458,22 @@ export function getMinFeasibleLevel(
 function getPrimaryStats(weapon: Weapon, affinity: Affinity): Stat[] {
   if (affinity !== "Standard") return AFFINITY_PRIMARIES[affinity];
 
-  const scalingStats = STAT_ORDER.filter((s) => weapon.scaling[s] !== undefined);
+  // Use the max-upgrade scaling table when available — it reflects the final
+  // balance of stats at +10/+25 (e.g. Mohgwyn's Sacred Spear ends at Str C(72)
+  // and Arc C(72), so both deserve equal investment even though Str is only D
+  // at +0). Falls back to the legacy weapon.scaling for weapons that lack a
+  // scalingTable.
+  const maxScaling = weapon.scalingTable?.max?.[affinity] ?? weapon.scaling;
+  const gradeRank = (s: Stat): number => {
+    const entry = maxScaling[s];
+    if (!entry) return 0;
+    const g = gradeOf(entry);
+    return g ? SCALE_RANK[g] : 0;
+  };
+  const scalingStats = STAT_ORDER.filter((s) => gradeRank(s) > 0);
   if (scalingStats.length === 0) return [];
-
-  if (!isInfusable(weapon)) {
-    const dominant = scalingStats.reduce((best, cur) => {
-      const reqBest = weapon.requirements[best] ?? 0;
-      const reqCur = weapon.requirements[cur] ?? 0;
-      if (reqCur !== reqBest) return reqCur > reqBest ? cur : best;
-      const gradeBest = SCALE_RANK[gradeOf(weapon.scaling[best])!];
-      const gradeCur = SCALE_RANK[gradeOf(weapon.scaling[cur])!];
-      return gradeCur > gradeBest ? cur : best;
-    });
-    return [dominant];
-  }
-
-  const bestRank = Math.max(...scalingStats.map((s) => SCALE_RANK[gradeOf(weapon.scaling[s])!]));
-  return scalingStats.filter((s) => SCALE_RANK[gradeOf(weapon.scaling[s])!] === bestRank);
+  const bestRank = Math.max(...scalingStats.map(gradeRank));
+  return scalingStats.filter((s) => gradeRank(s) === bestRank);
 }
 
 function adjustStrForTwoHand(value: number, twoHand: boolean, strengthStartingValue: number): number {
