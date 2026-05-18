@@ -134,8 +134,6 @@ const BuildPicker = () => {
   const allSlots = [...rightHand, ...leftHand];
   const totalWeaponWeight =
     Math.round(allSlots.reduce((sum, s) => sum + (s.weapon?.weight ?? 0), 0) * 10) / 10;
-  const extraWeaponWeight = Math.max(0, totalWeaponWeight - (weapon?.weight ?? 0));
-
   const weaponUpgradeType = weapon ? getUpgradeType(weapon) : null;
   const weaponInfusable = weaponUpgradeType === "infusable";
   const effectiveAffinity: Affinity = weaponInfusable ? affinity : "Standard";
@@ -150,6 +148,13 @@ const BuildPicker = () => {
         })),
     [rightHand, leftHand],
   );
+
+  // Anchor weapon: the slot used for AP-panel breakdown + spell scaling.
+  // Falls back to any non-empty loadout weapon when the active slot is empty
+  // so the recommendation still renders if the user has weapons in other
+  // slots (clicking on an empty slot shouldn't clear the panel).
+  const anchorWeapon: Weapon | null = weapon ?? loadout[0]?.weapon ?? null;
+  const anchorAffinity: Affinity = weapon ? effectiveAffinity : loadout[0]?.affinity ?? "Standard";
 
   const displayLoadout = useMemo(() => {
     const out: { pos: SlotPos; weapon: Weapon; affinity: Affinity }[] = [];
@@ -177,29 +182,34 @@ const BuildPicker = () => {
   const selectedClass = classes.find((c) => c.id === classId);
 
   const minLevel = useMemo(() => {
-    if (!weapon) return 1;
+    if (!anchorWeapon) return 1;
     return selectedClass
-      ? getMinFeasibleLevel(selectedClass, weapon, twoHand, effectiveAffinity, talismanIds, armorSelection, loadout)
-      : getMinLevelForWeapon(weapon, twoHand);
-  }, [weapon, twoHand, selectedClass, effectiveAffinity, talismanIds, armorSelection, loadout]);
+      ? getMinFeasibleLevel(selectedClass, anchorWeapon, twoHand, anchorAffinity, talismanIds, armorSelection, loadout)
+      : getMinLevelForWeapon(anchorWeapon, twoHand);
+  }, [anchorWeapon, anchorAffinity, twoHand, selectedClass, talismanIds, armorSelection, loadout]);
 
   const clampedTargetLevel = Math.max(minLevel, Math.min(MAX_TARGET_LEVEL, targetLevel));
 
+  // Equip-load math: total weapon weight is the sum across all six slots.
+  // Subtract the anchor weapon's weight to derive the "extra" weight from
+  // the other slots (the recommender uses anchor.weight + extraWeaponWeight).
+  const anchorExtraWeight = Math.max(0, totalWeaponWeight - (anchorWeapon?.weight ?? 0));
+
   const rec = useMemo(
     () =>
-      weapon
-        ? recommend(weapon, {
+      anchorWeapon
+        ? recommend(anchorWeapon, {
             targetLevel: clampedTargetLevel,
             twoHand,
-            affinity: effectiveAffinity,
+            affinity: anchorAffinity,
             classId: selectedClass?.id,
             talismanIds,
             armorSelection,
-            extraWeaponWeight,
+            extraWeaponWeight: anchorExtraWeight,
             loadout,
           })
         : null,
-    [weapon, clampedTargetLevel, twoHand, effectiveAffinity, talismanIds, armorSelection, selectedClass?.id, extraWeaponWeight, loadout],
+    [anchorWeapon, anchorAffinity, clampedTargetLevel, twoHand, talismanIds, armorSelection, selectedClass?.id, anchorExtraWeight, loadout],
   );
 
   const selectedClassMatch =
@@ -512,7 +522,7 @@ const BuildPicker = () => {
               <CardContent>
                 <Stack spacing={3}>
                   <RecommendationHeader
-                    weapon={weapon!}
+                    weapon={anchorWeapon!}
                     bestClassName={rec.best.cls.name}
                     targetLevel={clampedTargetLevel}
                     equipLoad={rec.equipLoad}
@@ -520,7 +530,7 @@ const BuildPicker = () => {
                       selectedClass
                         ? () =>
                             generateBuildPdf({
-                              weapon: weapon!,
+                              weapon: anchorWeapon!,
                               rec,
                               loadout,
                               classData: selectedClass,

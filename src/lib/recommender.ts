@@ -572,8 +572,16 @@ function getPrimaryStats(weapon: Weapon, affinity: Affinity): Stat[] {
     return g ? SCALE_RANK[g] : 0;
   };
   const scalingStats = STAT_ORDER.filter((s) => gradeRank(s) > 0);
+
+  // Catalysts are a special case: a staff or seal's "primary" stats are every
+  // stat it scales with, not just the top-grade letter. Dragon Communion Seal
+  // has Arc B and Faith C; both deserve investment because Faith governs
+  // incant-casting requirements and Faith + Arc together drive Sorcery /
+  // Incant Scaling on the catalyst's status sheet.
   let primaries: Stat[] = [];
-  if (scalingStats.length > 0) {
+  if (isCatalyst(weapon) && scalingStats.length > 0) {
+    primaries = scalingStats.slice();
+  } else if (scalingStats.length > 0) {
     const bestRank = Math.max(...scalingStats.map(gradeRank));
     primaries = scalingStats.filter((s) => gradeRank(s) === bestRank);
   } else if (affinity !== "Standard") {
@@ -826,11 +834,12 @@ export function getTargetStats(
       );
     }
 
-    // Step 2: push primary scaling (damaging) stats toward raw soft cap 80,
-    // cycling across stats so multi-stat affinities stay balanced. The cap is
-    // raw 80 for every stat; the two-hand Strength multiplier is intentionally
-    // ignored here so damaging stats reach their soft cap before mind/endurance
-    // get the leftover.
+    // Step 2: push primary scaling (damaging) stats toward their first soft
+    // cap (60), cycling across stats so multi-stat affinities stay balanced.
+    // The two-hand Strength multiplier is intentionally ignored here so
+    // damaging stats reach their soft cap before mind/endurance get the
+    // leftover. Past 60 every additional point gives diminishing returns,
+    // so the leftover is better spent elsewhere (catalyst stats, Mind, etc.).
     const primaryScalingStats: Stat[] = [];
     for (const item of loadoutItems) {
       if (SHIELD_CATEGORIES.has(item.weapon.category)) continue;
@@ -844,7 +853,7 @@ export function getTargetStats(
     while (progressed && computeLeftover() > 0) {
       progressed = false;
       for (const stat of primaryScalingStats) {
-        if (target[stat] < 80 && computeLeftover() > 0) {
+        if (target[stat] < 60 && computeLeftover() > 0) {
           target[stat] += 1;
           progressed = true;
         }
@@ -852,7 +861,7 @@ export function getTargetStats(
     }
     for (const s of primaryScalingStats) {
       if (target[s] > (scalingStart[s] ?? 0)) {
-        rationale.push(`${s} → ${target[s]} (leftover budget — toward soft cap 80)`);
+        rationale.push(`${s} → ${target[s]} (leftover budget — toward soft cap 60)`);
       }
     }
 

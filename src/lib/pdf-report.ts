@@ -1,9 +1,44 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { STAT_LABELS, STAT_ORDER, type Stat, type StartingClass, type StatVector } from "../data/classes";
-import { recommend } from "./recommender";
+import {
+  DAMAGE_TYPE_LABELS,
+  estimateAttackPower,
+  estimateSpellScaling,
+  estimateStatusBuildup,
+  getMaxUpgradeLevel,
+  recommend,
+} from "./recommender";
 import type { LoadoutItem, Recommendation } from "./types";
 import type { Weapon } from "../data/weapons";
+import { ARMOR_SLOTS, ARMOR_SLOT_LABELS, findArmor } from "../data/armor";
+import { talismans as ALL_TALISMANS } from "../data/talismans";
+
+const STATUS_LABELS: Record<string, string> = {
+  bleed: "Hemorrhage",
+  poison: "Poison",
+  frost: "Frostbite",
+  rot: "Scarlet Rot",
+  sleep: "Sleep",
+  madness: "Madness",
+};
+
+// jsPDF's default Helvetica is WinAnsi-only — Unicode glyphs like → · × ÷ —
+// render garbled and unusually wide, pushing text past the right margin.
+// Replace them with ASCII equivalents before drawing.
+function sanitize(text: string): string {
+  return text
+    .replace(/→/g, "->")
+    .replace(/·/g, "-")
+    .replace(/×/g, "x")
+    .replace(/÷/g, "/")
+    .replace(/—/g, "-")
+    .replace(/–/g, "-")
+    .replace(/’/g, "'")
+    .replace(/‘/g, "'")
+    .replace(/“/g, '"')
+    .replace(/”/g, '"');
+}
 
 const MAX_SL = 200;
 
@@ -75,26 +110,150 @@ export function generateBuildPdf(opts: {
     y += 16;
   }
 
-  // Loadout list
+  // Loadout — per-weapon AP, damage-type breakdown, status build-up, and
+  // sorcery/incant scaling for catalysts.
   y += 8;
   doc.setFontSize(13);
   doc.setFont("helvetica", "bold");
   doc.text("Loadout", 40, y);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(11);
-  y += 16;
+  doc.setFontSize(10);
+  y += 18;
   if (loadout.length === 0) {
     doc.text("(none)", 50, y);
     y += 14;
   } else {
     for (const item of loadout) {
-      doc.text(`• ${item.weapon.name} (${item.weapon.category}) — ${item.affinity}`, 50, y);
-      y += 14;
+      const base = estimateAttackPower(item.weapon, rec.target, "base", rec.options.twoHand, item.affinity);
+      const max = estimateAttackPower(item.weapon, rec.target, "max", rec.options.twoHand, item.affinity);
+      const maxLabel = getMaxUpgradeLevel(item.weapon);
+      const spell = estimateSpellScaling(item.weapon, rec.target);
+      const statuses = estimateStatusBuildup(item.weapon, rec.target, item.affinity);
+
+      const wName = sanitize(item.weapon.name);
+      doc.setFont("helvetica", "bold");
+      doc.text(wName, 50, y);
+      doc.setFont("helvetica", "normal");
+      doc.text(sanitize(`- ${item.weapon.category} - ${item.affinity}`), 50 + doc.getTextWidth(wName) + 8, y);
+      y += 13;
+
+      doc.text(`+0 total: ${base.total}    ${maxLabel} total: ${max.total}`, 60, y);
+      y += 13;
+
+      // Per-damage-type breakdown at max
+      const dmgRow = max.breakdown
+        .map((b) => `${DAMAGE_TYPE_LABELS[b.type]} ${b.total}`)
+        .join(" - ");
+      if (dmgRow) {
+        doc.text(`Damage @ ${maxLabel}: ${dmgRow}`, 60, y);
+        y += 13;
+      }
+
+      // Status build-up rows
+      for (const status of statuses) {
+        doc.text(
+          `${STATUS_LABELS[status.type] ?? status.type}: ${status.max} (base ${status.base})`,
+          60,
+          y,
+        );
+        y += 13;
+      }
+
+      // Spell scaling for catalysts
+      if (spell) {
+        const label = spell.type === "sorcery" ? "Sorcery Scaling" : "Incant Scaling";
+        doc.text(`${label}: ${spell.max} (base ${spell.base})`, 60, y);
+        y += 13;
+      }
+
+      y += 4;
+      // Page break safety
+      if (y > 760) {
+        doc.addPage();
+        y = 60;
+      }
     }
   }
 
+  // Armor section (only when at least one slot is filled).
+  const armorRows = ARMOR_SLOTS
+    .map((slot) => {
+      const piece = findArmor(rec.options.armorSelection[slot]);
+      return piece ? { slot, piece } : null;
+    })
+    .filter((x): x is { slot: typeof ARMOR_SLOTS[number]; piece: NonNullable<ReturnType<typeof findArmor>> } => x !== null);
+  if (armorRows.length > 0) {
+    y += 6;
+    doc.setFontSize(13);
+    doc.setFont("helvetica", "bold");
+    doc.text("Armor", 40, y);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    y += 10;
+    autoTable(doc, {
+      startY: y,
+      head: [["Slot", "Piece", "Phy", "Poise", "Wgt"]],
+      body: armorRows.map(({ slot, piece }) => [
+        ARMOR_SLOT_LABELS[slot],
+        sanitize(piece.name),
+        piece.phy,
+        piece.poise,
+        piece.weight,
+      ]),
+      theme: "striped",
+      headStyles: { fillColor: [180, 144, 50] },
+      styles: { fontSize: 9 },
+      columnStyles: {
+        0: { cellWidth: 80 },
+        2: { halign: "right", cellWidth: 50 },
+        3: { halign: "right", cellWidth: 50 },
+        4: { halign: "right", cellWidth: 50 },
+      },
+    });
+    // @ts-expect-error jspdf-autotable adds lastAutoTable
+    y = doc.lastAutoTable.finalY;
+  }
+
+  // Talismans section (only when at least one slot is filled).
+  const pickedTalismans = (rec.options.talismanIds ?? [])
+    .map((id) => (id ? ALL_TALISMANS.find((t) => t.id === id) ?? null : null))
+    .filter((t): t is NonNullable<typeof t> => Boolean(t));
+  if (pickedTalismans.length > 0) {
+    y += 14;
+    if (y > 720) {
+      doc.addPage();
+      y = 60;
+    }
+    doc.setFontSize(13);
+    doc.setFont("helvetica", "bold");
+    doc.text("Talismans", 40, y);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    y += 10;
+    autoTable(doc, {
+      startY: y,
+      head: [["#", "Talisman", "Effect", "Wgt"]],
+      body: pickedTalismans.map((t, i) => [
+        `T${i + 1}`,
+        sanitize(t.name),
+        sanitize(t.effect),
+        t.weight,
+      ]),
+      theme: "striped",
+      headStyles: { fillColor: [180, 144, 50] },
+      styles: { fontSize: 9, cellPadding: 4 },
+      columnStyles: {
+        0: { cellWidth: 30 },
+        1: { cellWidth: 140 },
+        3: { halign: "right", cellWidth: 40 },
+      },
+    });
+    // @ts-expect-error jspdf-autotable adds lastAutoTable
+    y = doc.lastAutoTable.finalY;
+  }
+
   // Stats table
-  y += 8;
+  y += 16;
   autoTable(doc, {
     startY: y,
     head: [["Stat", "Class base", "Target", "Invest"]],
@@ -102,7 +261,7 @@ export function generateBuildPdf(opts: {
       const base = classData.stats[s];
       const tgt = rec.target[s];
       const delta = tgt - base;
-      return [STAT_LABELS[s], base, tgt, delta > 0 ? `+${delta}` : delta < 0 ? `${delta} (wasted)` : "—"];
+      return [STAT_LABELS[s], base, tgt, delta > 0 ? `+${delta}` : delta < 0 ? `${delta} (wasted)` : "-"];
     }),
     theme: "striped",
     headStyles: { fillColor: [180, 144, 50] },
@@ -119,9 +278,51 @@ export function generateBuildPdf(opts: {
   doc.setFontSize(10);
   nextY += 14;
   for (const line of rec.rationale) {
-    const wrapped = doc.splitTextToSize(`• ${line}`, 510);
+    const wrapped = doc.splitTextToSize(sanitize(`- ${line}`), 510);
     doc.text(wrapped, 50, nextY);
     nextY += wrapped.length * 12;
+  }
+
+  // Spell suggestions (only when the loadout has at least one catalyst).
+  if (rec.spellSuggestions.length > 0) {
+    if (nextY > 700) {
+      doc.addPage();
+      nextY = 60;
+    } else {
+      nextY += 20;
+    }
+    doc.setFontSize(13);
+    doc.setFont("helvetica", "bold");
+    doc.text("Suggested spells (within 10 memory slots)", 40, nextY);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    nextY += 10;
+    autoTable(doc, {
+      startY: nextY,
+      head: [["Spell", "Type", "Category", "Reqs", "FP / Slots", "Boost"]],
+      body: rec.spellSuggestions.map(({ spell, boosted }) => {
+        const reqs = [
+          spell.requirements.intelligence ? `Int ${spell.requirements.intelligence}` : null,
+          spell.requirements.faith ? `Fai ${spell.requirements.faith}` : null,
+          spell.requirements.arcane ? `Arc ${spell.requirements.arcane}` : null,
+        ]
+          .filter(Boolean)
+          .join(" - ");
+        return [
+          sanitize(spell.name),
+          spell.type === "sorcery" ? "Sorcery" : "Incantation",
+          sanitize(spell.category),
+          reqs || "-",
+          `FP ${spell.fpCost} / ${spell.slots}`,
+          boosted ? "Yes" : "",
+        ];
+      }),
+      theme: "striped",
+      headStyles: { fillColor: [180, 144, 50] },
+      styles: { fontSize: 9 },
+    });
+    // @ts-expect-error jspdf-autotable adds lastAutoTable
+    nextY = doc.lastAutoTable.finalY;
   }
 
   // Per-level leveling plan (class.level + 1 → 200)
