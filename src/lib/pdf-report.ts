@@ -7,6 +7,7 @@ import {
   estimateSpellScaling,
   estimateStatusBuildup,
   getMaxUpgradeLevel,
+  getMinFeasibleLevel,
   recommend,
 } from "./recommender";
 import type { LoadoutItem, Recommendation } from "./types";
@@ -42,34 +43,37 @@ function sanitize(text: string): string {
 
 const MAX_SL = 200;
 
-const PRIORITY_ORDER: Stat[] = [
-  "vigor",
-  "strength",
-  "dexterity",
-  "intelligence",
-  "faith",
-  "arcane",
-  "endurance",
-  "mind",
-];
-
-// Walk class base → target one point at a time, going through PRIORITY_ORDER
-// (vigor → primary scaling → endurance → mind). Each iteration emits one row
-// showing the Soul Level reached and which stat got the point.
-export function buildLevelByLevelPlan(
+// Iterate from minLevel to maxLevel and call recommend() at every Soul Level,
+// then diff each target against the previous level's target to find which stat
+// got the +1 — this matches what the Target Soul Level slider would say if the
+// player dragged it one notch at a time. The PRIORITY_ORDER-based plan we
+// used before walked stat-by-stat through the final target, which produced
+// "all of Vigor, then all of Str, then all of Dex" instead of the interleaved
+// order the slider actually uses.
+export function buildSliderLevelPlan(
+  weapon: import("../data/weapons").Weapon,
+  options: import("./types").RecommendOptions,
   classBase: StatVector,
-  target: StatVector,
-  classLevel: number,
+  minLevel: number,
+  maxLevel: number,
 ): Array<{ level: number; stat: Stat; value: number }> {
   const out: Array<{ level: number; stat: Stat; value: number }> = [];
-  const current: StatVector = { ...classBase };
-  let lvl = classLevel;
-  for (const stat of PRIORITY_ORDER) {
-    while (current[stat] < target[stat]) {
-      lvl += 1;
-      current[stat] += 1;
-      out.push({ level: lvl, stat, value: current[stat] });
+  let prev: StatVector = { ...classBase };
+  for (let lvl = minLevel; lvl <= maxLevel; lvl += 1) {
+    const rec = recommend(weapon, { ...options, targetLevel: lvl });
+    let bestStat: Stat | null = null;
+    let bestDelta = 0;
+    for (const stat of STAT_ORDER) {
+      const delta = rec.target[stat] - prev[stat];
+      if (delta > bestDelta) {
+        bestDelta = delta;
+        bestStat = stat;
+      }
     }
+    if (bestStat) {
+      out.push({ level: lvl, stat: bestStat, value: rec.target[bestStat] });
+    }
+    prev = rec.target;
   }
   return out;
 }
@@ -268,7 +272,9 @@ export function generateBuildPdf(opts: {
     styles: { fontSize: 10 },
   });
 
-  // Rationale
+  // Rationale — render as a borderless single-column table so jspdf-autotable
+  // takes care of word-wrapping each bullet within the page width. Long
+  // rationale lines used to overflow the right margin with splitTextToSize.
   // @ts-expect-error jspdf-autotable adds lastAutoTable
   let nextY = doc.lastAutoTable.finalY + 20;
   doc.setFontSize(13);
@@ -276,12 +282,17 @@ export function generateBuildPdf(opts: {
   doc.text("Why these targets", 40, nextY);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
-  nextY += 14;
-  for (const line of rec.rationale) {
-    const wrapped = doc.splitTextToSize(sanitize(`- ${line}`), 510);
-    doc.text(wrapped, 50, nextY);
-    nextY += wrapped.length * 12;
-  }
+  nextY += 4;
+  autoTable(doc, {
+    startY: nextY,
+    body: rec.rationale.map((line) => [sanitize(`- ${line}`)]),
+    theme: "plain",
+    styles: { fontSize: 9, cellPadding: { top: 2, right: 4, bottom: 2, left: 4 } },
+    columnStyles: { 0: { cellWidth: 515 } },
+    margin: { left: 40, right: 40 },
+  });
+  // @ts-expect-error jspdf-autotable adds lastAutoTable
+  nextY = doc.lastAutoTable.finalY;
 
   // Spell suggestions (only when the loadout has at least one catalyst).
   if (rec.spellSuggestions.length > 0) {
@@ -325,14 +336,18 @@ export function generateBuildPdf(opts: {
     nextY = doc.lastAutoTable.finalY;
   }
 
-  // Per-level leveling plan (class.level + 1 → 200)
-  // Compute the Lv 200 recommendation so the plan extends the player's
-  // current target all the way to the soft cap of 200.
-  const rec200 = recommend(weapon, {
-    ...rec.options,
-    targetLevel: MAX_SL,
-  });
-  const plan = buildLevelByLevelPlan(classData.stats, rec200.target, classData.level);
+  // Per-level upgrade plan: walk the slider from min to 200 and record
+  // which stat the recommender bumps at every Soul Level.
+  const minLevel = getMinFeasibleLevel(
+    classData,
+    weapon,
+    rec.options.twoHand,
+    rec.options.affinity,
+    rec.options.talismanIds,
+    rec.options.armorSelection,
+    rec.options.loadout,
+  );
+  const plan = buildSliderLevelPlan(weapon, rec.options, classData.stats, minLevel, MAX_SL);
 
   // Render the plan as a wide multi-page table.
   doc.addPage();
@@ -343,8 +358,10 @@ export function generateBuildPdf(opts: {
   doc.setFontSize(10);
   doc.setTextColor(120);
   doc.text(
-    `From ${classData.name} starting Lv ${classData.level} up to Soul Level ${MAX_SL}. ` +
-      `Bump the listed stat at each level — order goes Vigor → primary scaling → Endurance → Mind.`,
+    sanitize(
+      `From Soul Level ${minLevel} (minimum to wield and survive the loadout) up to ${MAX_SL}. ` +
+        `Each row mirrors what the slider would recommend if the player dragged it one level at a time.`,
+    ),
     40,
     70,
     { maxWidth: 510 },
