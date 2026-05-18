@@ -48,6 +48,7 @@ import TalismanSlots from "./components/TalismanSlots";
 import LoadoutDamagePanel from "./components/LoadoutDamagePanel";
 import { Hand, SlotPos, STAT_COLORS } from "../common/types";
 import RecommendationHeader from "./components/RecommendationHeader";
+import { generateBuildPdf } from "../lib/pdf-report";
 import ClassRanking from "./components/ClassRanking";
 import TargetStatsTable from "./components/TargetStatsTable";
 import useBuildPickerState from "./hooks/use-build-picker-state";
@@ -515,6 +516,17 @@ const BuildPicker = () => {
                     bestClassName={rec.best.cls.name}
                     targetLevel={clampedTargetLevel}
                     equipLoad={rec.equipLoad}
+                    onDownloadPdf={
+                      selectedClass
+                        ? () =>
+                            generateBuildPdf({
+                              weapon: weapon!,
+                              rec,
+                              loadout,
+                              classData: selectedClass,
+                            })
+                        : undefined
+                    }
                   />
 
                   <TargetStatsTable

@@ -972,27 +972,61 @@ export function recommendSpells(
     return true;
   });
 
-  const scored = castable.map((s) => {
+  const scoreFor = (s: typeof spells[number], boosted: boolean) => {
     const reqSum =
       (s.requirements.intelligence ?? 0) +
       (s.requirements.faith ?? 0) +
       (s.requirements.arcane ?? 0);
+    return (boosted ? 10000 : 0) + reqSum;
+  };
+  const scored = castable.map((s) => {
     const boosted = boostedCategories.has(s.category);
-    return { spell: s, boosted, score: (boosted ? 10000 : 0) + reqSum };
+    return { spell: s, boosted, score: scoreFor(s, boosted) };
   });
   scored.sort((a, b) => b.score - a.score);
 
-  // Greedy memory-slot fit: walk down the score-sorted list and pick each
-  // spell only if its memory-slot cost still fits under the cap.
-  const selected: SpellSuggestion[] = [];
-  let slotsUsed = 0;
-  for (const { spell, boosted } of scored) {
-    if (slotsUsed + spell.slots > maxMemorySlots) continue;
-    selected.push({ spell, boosted });
-    slotsUsed += spell.slots;
-    if (slotsUsed === maxMemorySlots) break;
+  // Greedy fill helper — walks a score-sorted list and picks each item whose
+  // slot cost still fits, up to the given memory-slot cap.
+  const greedyFill = (
+    pool: typeof scored,
+    slotCap: number,
+    skipIds: Set<string>,
+  ): { picked: SpellSuggestion[]; slotsUsed: number } => {
+    const picked: SpellSuggestion[] = [];
+    let slotsUsed = 0;
+    for (const { spell, boosted } of pool) {
+      if (skipIds.has(spell.id)) continue;
+      if (slotsUsed + spell.slots > slotCap) continue;
+      picked.push({ spell, boosted });
+      slotsUsed += spell.slots;
+      if (slotsUsed === slotCap) break;
+    }
+    return { picked, slotsUsed };
+  };
+
+  // When both catalyst types are wielded, split the memory budget roughly
+  // 50/50 so seal-boosted incantations don't monopolize the panel. Any
+  // unused half rolls over to the other type at the end.
+  if (hasStaff && hasSeal) {
+    const halfSlots = Math.ceil(maxMemorySlots / 2);
+    const sorceries = scored.filter((x) => x.spell.type === "sorcery");
+    const incantations = scored.filter((x) => x.spell.type === "incantation");
+    const s = greedyFill(sorceries, halfSlots, new Set());
+    const i = greedyFill(incantations, maxMemorySlots - s.slotsUsed, new Set());
+    const used = s.slotsUsed + i.slotsUsed;
+    const picked = [...s.picked, ...i.picked];
+    if (used < maxMemorySlots) {
+      // Top up with extras from either type, ignoring already-picked spells.
+      const skip = new Set(picked.map((p) => p.spell.id));
+      const top = greedyFill(scored, maxMemorySlots - used, skip);
+      picked.push(...top.picked);
+    }
+    // Re-sort by original score so boosted spells still appear first.
+    picked.sort((a, b) => scoreFor(b.spell, b.boosted) - scoreFor(a.spell, a.boosted));
+    return picked;
   }
-  return selected;
+
+  return greedyFill(scored, maxMemorySlots, new Set()).picked;
 }
 
 export function recommend(weapon: Weapon, opts: Partial<RecommendOptions> = {}): Recommendation {

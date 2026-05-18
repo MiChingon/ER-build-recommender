@@ -60,6 +60,15 @@ const SpellRecommendations = ({
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>
                       {spell.name}
                     </Typography>
+                    <Chip
+                      size="small"
+                      label={spell.type === "sorcery" ? "Sorcery" : "Incantation"}
+                      sx={{
+                        bgcolor: spell.type === "sorcery" ? "rgba(79,195,247,0.15)" : "rgba(255,176,32,0.15)",
+                        color: spell.type === "sorcery" ? "#4fc3f7" : "#ffb020",
+                        fontWeight: 600,
+                      }}
+                    />
                     <Chip size="small" variant="outlined" label={spell.category} />
                     {boosted && (
                       <Chip size="small" color="primary" label="Boosted by this catalyst" />

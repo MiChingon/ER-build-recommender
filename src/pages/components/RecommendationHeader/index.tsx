@@ -1,4 +1,4 @@
-import { Box, Chip, Stack, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Chip, Stack, Tooltip, Typography } from "@mui/material";
 import { Weapon } from "../../../data/weapons";
 
 const RecommendationHeader = ({
@@ -6,11 +6,13 @@ const RecommendationHeader = ({
   bestClassName,
   targetLevel,
   equipLoad,
+  onDownloadPdf,
 }: {
   weapon: Weapon;
   bestClassName: string;
   targetLevel: number;
   equipLoad: import("../../../lib/types").EquipLoadSummary;
+  onDownloadPdf?: () => void;
 }) => {
   const loadColor =
     equipLoad.rollCategory === "overloaded"
@@ -22,9 +24,16 @@ const RecommendationHeader = ({
       : "success";
   return (
     <Box>
-      <Typography variant="h6" gutterBottom>
-        Recommended build for {weapon.name}
-      </Typography>
+      <Stack direction="row" spacing={2} sx={{ alignItems: "center", justifyContent: "space-between", mb: 1, flexWrap: "wrap" }} useFlexGap>
+        <Typography variant="h6">
+          Recommended build for {weapon.name}
+        </Typography>
+        {onDownloadPdf && (
+          <Button size="small" variant="outlined" onClick={onDownloadPdf}>
+            Download PDF
+          </Button>
+        )}
+      </Stack>
       <Stack direction="row" spacing={2} useFlexGap sx={{ flexWrap: "wrap" }}>
         <Chip color="primary" label={`Best class: ${bestClassName}`} />
         <Chip label={`Target Soul Level: ${targetLevel}`} variant="outlined" />
