@@ -5,6 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#d4af37" />
 
+    <!--
+      Content-Security-Policy: defensive baseline for a static SPA.
+      - script-src includes Google Tag Manager (gtag.js loader) and allows
+        inline JSON-LD + the Vite HMR client (dev only). The codebase has
+        no eval/Function/dangerouslySetInnerHTML so 'unsafe-inline' here is
+        a practical concession for inline JSON-LD + MUI / Emotion runtime.
+      - style-src 'unsafe-inline' is required by MUI / Emotion CSS-in-JS.
+      - img-src whitelists the fextralife wiki host where weapon, armor,
+        talisman, and spell icons are hotlinked from.
+      - connect-src covers Google Analytics beacons and the Vite dev HMR
+        websocket. ws: is harmless in production (no dev server) but lets
+        local development continue to work under the same policy.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: https://eldenring.wiki.fextralife.com; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; connect-src 'self' ws: wss: https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:;"
+    />
+
     <!-- Favicon: inline SVG so no extra file is needed; matches the in-app emblem. -->
     <link
       rel="icon"

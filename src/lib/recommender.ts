@@ -633,6 +633,43 @@ function adjustStrForTwoHand(value: number, twoHand: boolean, strengthStartingVa
   return Math.ceil(value / TWO_HAND_STR_MULTIPLIER);
 }
 
+// Returns stats that scale the weapon at a tier BELOW the primary letter
+// grade — e.g. Longsword Standard max is Str C, Dex D so the secondary is
+// Dex. Used to add a second damaging stat to the leftover-distribution
+// push when every damager shares the same primary stat and runs Standard
+// infusion (see shouldIncludeSecondaryScaling).
+function getSecondaryStats(weapon: Weapon, affinity: Affinity): Stat[] {
+  const maxScaling = weapon.scalingTable?.max?.[affinity] ?? weapon.scaling;
+  const gradeRank = (s: Stat): number => {
+    const entry = maxScaling[s];
+    if (!entry) return 0;
+    const g = gradeOf(entry);
+    return g ? SCALE_RANK[g] : 0;
+  };
+  const ranked = STAT_ORDER
+    .map((s) => ({ s, rank: gradeRank(s) }))
+    .filter((x) => x.rank > 0);
+  if (ranked.length === 0) return [];
+  const topRank = Math.max(...ranked.map((x) => x.rank));
+  return ranked.filter((x) => x.rank < topRank).map((x) => x.s);
+}
+
+// True when every non-shield item in the loadout is Standard-infused AND
+// they all share a single primary scaling stat. In that case the second-
+// tier scaling stat (Dex on most Quality-leaning Standard swords, etc.)
+// still pays off and is a reasonable place to spend leftover points.
+// Catalysts are *not* filtered: a faith / int catalyst would split the
+// primary across stats and disqualify the loadout, which is the intent.
+function shouldIncludeSecondaryScaling(loadout: LoadoutItem[]): boolean {
+  const items = loadout.filter((i) => !SHIELD_CATEGORIES.has(i.weapon.category));
+  if (items.length === 0) return false;
+  if (items.some((i) => i.affinity !== "Standard")) return false;
+  const primarySets = items.map((i) => getPrimaryStats(i.weapon, i.affinity));
+  if (primarySets.some((p) => p.length !== 1)) return false;
+  const first = primarySets[0][0];
+  return primarySets.every((p) => p[0] === first);
+}
+
 export function getEffectiveStrRequirement(weapon: Weapon, twoHand: boolean, strengthStartingValue: number): number {
   const req = weapon.requirements.strength ?? 0;
   return adjustStrForTwoHand(req, twoHand, strengthStartingValue);
@@ -891,12 +928,14 @@ export function getTargetStats(
       }
     }
 
-    // Step 2: push primary scaling (damaging) stats toward their first soft
-    // cap (60), cycling across stats so multi-stat affinities stay balanced.
-    // The two-hand Strength multiplier is intentionally ignored here so
-    // damaging stats reach their soft cap before mind/endurance get the
-    // leftover. Past 60 every additional point gives diminishing returns,
-    // so the leftover is better spent elsewhere (catalyst stats, Mind, etc.).
+    // Step 2: push damaging stats toward their first soft cap (60), cycling
+    // across stats so multi-stat affinities stay balanced. When the loadout
+    // is two-handed, Strength caps at 54 (≈ effective 81 after the ×1.5
+    // multiplier, just past the 80 soft cap) — going further wastes points
+    // that the secondary scaling stat can spend more profitably.
+    // When every damager runs Standard infusion and shares the same primary,
+    // the second-tier scaling stat (e.g. Dex on a Standard sword whose
+    // Str is C and Dex is D) is added to the rotation as well.
     const primaryScalingStats: Stat[] = [];
     for (const item of loadoutItems) {
       if (
@@ -909,44 +948,58 @@ export function getTargetStats(
         if (!primaryScalingStats.includes(stat)) primaryScalingStats.push(stat);
       }
     }
+    const damageStats: Stat[] = primaryScalingStats.slice();
+    if (shouldIncludeSecondaryScaling(loadoutItems)) {
+      for (const item of loadoutItems) {
+        if (SHIELD_CATEGORIES.has(item.weapon.category)) continue;
+        for (const stat of getSecondaryStats(item.weapon, item.affinity)) {
+          if (!damageStats.includes(stat)) damageStats.push(stat);
+        }
+      }
+    }
+    const firstCap = (s: Stat): number =>
+      s === "strength" && opts.twoHand ? 54 : 60;
+    const secondCap = (s: Stat): number =>
+      s === "strength" && opts.twoHand ? 60 : 80;
+
     const scalingStart: Partial<Record<Stat, number>> = {};
-    for (const s of primaryScalingStats) scalingStart[s] = target[s];
+    for (const s of damageStats) scalingStart[s] = target[s];
     let progressed = true;
     while (progressed && computeLeftover() > 0) {
       progressed = false;
-      for (const stat of primaryScalingStats) {
-        if (target[stat] < 60 && computeLeftover() > 0) {
+      for (const stat of damageStats) {
+        if (target[stat] < firstCap(stat) && computeLeftover() > 0) {
           target[stat] += 1;
           progressed = true;
         }
       }
     }
-    for (const s of primaryScalingStats) {
+    for (const s of damageStats) {
       if (target[s] > (scalingStart[s] ?? 0)) {
-        rationale.push(`${s} → ${target[s]} (leftover budget — toward soft cap 60)`);
+        rationale.push(`${s} → ${target[s]} (leftover budget — toward soft cap ${firstCap(s)})`);
       }
     }
 
-    // Step 2b: push every primary scaling stat past 60 toward the SECOND
-    // soft cap (80). Faith / Int keep paying off via Sorcery / Incant
-    // Scaling and elemental weapon damage, and Str / Dex still increase
-    // physical AP in that range too. These investments take priority over
-    // topping Endurance up to 60 or dumping points into Mind.
+    // Step 2b: continue past the first soft cap toward the second. Faith /
+    // Int still pay off via Sorcery / Incant Scaling and elemental damage,
+    // Str / Dex still increase physical AP. In two-hand mode Strength caps
+    // at 60 here (≈ effective 90 — well past the 80 soft cap and short of
+    // the 99 hard cap that 66 two-handed would reach).
     const scalingSecondStart: Partial<Record<Stat, number>> = {};
-    for (const s of primaryScalingStats) scalingSecondStart[s] = target[s];
+    for (const s of damageStats) scalingSecondStart[s] = target[s];
     progressed = true;
     while (progressed && computeLeftover() > 0) {
       progressed = false;
-      for (const stat of primaryScalingStats) {
-        if (target[stat] < 80 && computeLeftover() > 0) {
+      for (const stat of damageStats) {
+        if (target[stat] < secondCap(stat) && computeLeftover() > 0) {
           target[stat] += 1;
           progressed = true;
         }
       }
     }
-    for (const s of primaryScalingStats) {
+    for (const s of damageStats) {
       if (target[s] > (scalingSecondStart[s] ?? 0)) {
-        rationale.push(`${s} → ${target[s]} (leftover budget — toward soft cap 80)`);
+        rationale.push(`${s} → ${target[s]} (leftover budget — toward soft cap ${secondCap(s)})`);
       }
     }
 

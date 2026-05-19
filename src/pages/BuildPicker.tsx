@@ -560,7 +560,7 @@ const BuildPicker = () => {
                     onDownloadPdf={
                       selectedClass
                         ? () => {
-                            trackPdfDownload(anchorWeapon!.id);
+                            trackPdfDownload(selectedClass.name);
                             generateBuildPdf({
                               weapon: anchorWeapon!,
                               rec,

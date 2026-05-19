@@ -25,7 +25,7 @@ export function initAnalytics(): void {
   gtag("config", measurementId);
 }
 
-export function trackPdfDownload(weaponId: string): void {
+export function trackPdfDownload(startingClass: string): void {
   if (!measurementId) return;
-  window.gtag?.("event", "pdf_download", { weapon_id: weaponId });
+  window.gtag?.("event", "pdf_download", { starting_class: startingClass });
 }
