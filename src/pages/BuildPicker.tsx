@@ -458,38 +458,6 @@ const BuildPicker = () => {
                   />
                 </Tooltip>
 
-                <Box>
-                  <Stack direction="row" spacing={2} sx={{ alignItems: "baseline", mb: 1 }}>
-                    <Typography variant="subtitle2">Target Soul Level</Typography>
-                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                      {clampedTargetLevel}
-                    </Typography>
-                  </Stack>
-                  <Box sx={{ px: 1 }}>
-                    <Slider
-                      value={clampedTargetLevel}
-                      onChange={(_, v) => handleLevelChange(Array.isArray(v) ? v[0] : v)}
-                      min={minLevel}
-                      max={MAX_TARGET_LEVEL}
-                      step={1}
-                      marks={[
-                        { value: minLevel, label: `${minLevel}` },
-                        { value: 125, label: "125" },
-                        { value: MAX_TARGET_LEVEL, label: `${MAX_TARGET_LEVEL}` },
-                      ]}
-                      valueLabelDisplay="auto"
-                    />
-                  </Box>
-                  <FormHelperText>
-                    Minimum is the level{" "}
-                    {selectedClass
-                      ? `${selectedClass.name} needs`
-                      : "the best-fit class needs"}{" "}
-                    to wield {weapon ? weapon.name : "the weapon"}
-                    {twoHand && weapon ? " (two-handed, ×1.5 Str)" : ""}. Vigor target scales:
-                    50→30, 80→40, 100→50, 125+→60 (interpolated).
-                  </FormHelperText>
-                </Box>
                 <ArmorSlots
                   selection={armorSelection}
                   onChange={handleArmorChange}
@@ -538,6 +506,37 @@ const BuildPicker = () => {
                         : undefined
                     }
                   />
+
+                  <Box>
+                    <Stack direction="row" spacing={2} sx={{ alignItems: "baseline", mb: 1 }}>
+                      <Typography variant="subtitle2">Target Soul Level</Typography>
+                      <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                        {clampedTargetLevel}
+                      </Typography>
+                    </Stack>
+                    <Box sx={{ px: 1 }}>
+                      <Slider
+                        value={clampedTargetLevel}
+                        onChange={(_, v) => handleLevelChange(Array.isArray(v) ? v[0] : v)}
+                        min={minLevel}
+                        max={MAX_TARGET_LEVEL}
+                        step={1}
+                        marks={[
+                          { value: minLevel, label: `${minLevel}` },
+                          { value: 125, label: "125" },
+                          { value: MAX_TARGET_LEVEL, label: `${MAX_TARGET_LEVEL}` },
+                        ]}
+                        valueLabelDisplay="auto"
+                      />
+                    </Box>
+                    <FormHelperText>
+                      Minimum is the level{" "}
+                      {selectedClass ? `${selectedClass.name} needs` : "the best-fit class needs"}{" "}
+                      to wield {anchorWeapon ? anchorWeapon.name : "the weapon"}
+                      {twoHand && anchorWeapon ? " (two-handed, ×1.5 Str)" : ""}. Vigor target scales:
+                      50→30, 80→40, 100→50, 125+→60 (interpolated).
+                    </FormHelperText>
+                  </Box>
 
                   <TargetStatsTable
                     target={rec.target}

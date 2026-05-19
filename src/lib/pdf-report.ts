@@ -368,8 +368,24 @@ export function generateBuildPdf(opts: {
   );
   doc.setTextColor(0);
 
+  // Stat spread at the minimum Soul Level — what the slider would show if
+  // the player moved it to `minLevel`. The per-level table below extends
+  // these values one stat point per row.
+  const startRec = recommend(weapon, { ...rec.options, targetLevel: minLevel });
   autoTable(doc, {
     startY: 100,
+    head: [[`Stats at Soul Level ${minLevel}`, ...STAT_ORDER.map((s) => STAT_LABELS[s].slice(0, 3))]],
+    body: [["Value", ...STAT_ORDER.map((s) => startRec.target[s])]],
+    theme: "striped",
+    headStyles: { fillColor: [180, 144, 50] },
+    styles: { fontSize: 9, halign: "right" },
+    columnStyles: { 0: { halign: "left", fontStyle: "bold", cellWidth: 130 } },
+  });
+  // @ts-expect-error jspdf-autotable adds lastAutoTable
+  const planStartY = doc.lastAutoTable.finalY + 12;
+
+  autoTable(doc, {
+    startY: planStartY,
     head: [["Soul Level", "Stat", "New value"]],
     body: plan.map((p) => [p.level, STAT_LABELS[p.stat], p.value]),
     theme: "grid",
