@@ -4,7 +4,6 @@ import {
   Box,
   Card,
   CardContent,
-  Chip,
   FormControl,
   FormControlLabel,
   FormHelperText,
@@ -417,11 +416,7 @@ const BuildPicker = () => {
                                 const maxG = gradeOf(maxScaling[s]);
                                 const maxN = valueOf(maxScaling[s]);
                                 const maxLabel = maxG ? (maxN !== undefined ? `${maxG}(${maxN})` : maxG) : null;
-                                const scalingLabel = baseG && maxLabel
-                                  ? ` (+0:${baseG}→${upgradeLabel}:${maxLabel})`
-                                  : maxLabel
-                                  ? ` (${maxLabel})`
-                                  : "";
+                                const color = STAT_COLORS[s];
                                 return (
                                   <Tooltip
                                     key={s}
@@ -431,11 +426,83 @@ const BuildPicker = () => {
                                         : `${STAT_LABELS[s]} scaling at ${upgradeLabel}: ${maxLabel ?? "—"}`
                                     }
                                   >
-                                    <Chip
-                                      size="small"
-                                      label={`${STAT_LABELS[s].slice(0, 3)} ${req ?? "—"}${scalingLabel}`}
-                                      sx={{ bgcolor: STAT_COLORS[s], color: "rgba(0,0,0,0.85)" }}
-                                    />
+                                    <Box
+                                      sx={{
+                                        display: "inline-flex",
+                                        alignItems: "center",
+                                        gap: 0.75,
+                                        px: 1.1,
+                                        py: 0.4,
+                                        borderRadius: 999,
+                                        bgcolor: `${color}1f`,
+                                        border: `1px solid ${color}66`,
+                                        boxShadow: `0 0 10px ${color}22, inset 0 0 0 1px rgba(0,0,0,0.25)`,
+                                      }}
+                                    >
+                                      <Box
+                                        sx={{
+                                          width: 8,
+                                          height: 8,
+                                          borderRadius: "50%",
+                                          bgcolor: color,
+                                          boxShadow: `0 0 6px ${color}`,
+                                          flexShrink: 0,
+                                        }}
+                                      />
+                                      <Typography
+                                        component="span"
+                                        sx={{
+                                          color,
+                                          fontWeight: 700,
+                                          fontSize: "0.7rem",
+                                          letterSpacing: 0.6,
+                                          textTransform: "uppercase",
+                                        }}
+                                      >
+                                        {STAT_LABELS[s].slice(0, 3)}
+                                      </Typography>
+                                      <Typography
+                                        component="span"
+                                        sx={{ color, fontWeight: 700, fontSize: "0.78rem" }}
+                                      >
+                                        {req ?? "—"}
+                                      </Typography>
+                                      {baseG && maxLabel && (
+                                        <Box
+                                          sx={{
+                                            display: "inline-flex",
+                                            alignItems: "center",
+                                            gap: 0.4,
+                                            pl: 0.85,
+                                            ml: 0.15,
+                                            borderLeft: `1px solid ${color}55`,
+                                          }}
+                                        >
+                                          <Typography
+                                            component="span"
+                                            sx={{
+                                              color: "rgba(255,255,255,0.55)",
+                                              fontSize: "0.7rem",
+                                              fontWeight: 600,
+                                            }}
+                                          >
+                                            {baseG}
+                                          </Typography>
+                                          <Typography
+                                            component="span"
+                                            sx={{ color: "rgba(255,255,255,0.4)", fontSize: "0.65rem" }}
+                                          >
+                                            →
+                                          </Typography>
+                                          <Typography
+                                            component="span"
+                                            sx={{ color, fontWeight: 700, fontSize: "0.72rem" }}
+                                          >
+                                            {maxLabel}
+                                          </Typography>
+                                        </Box>
+                                      )}
+                                    </Box>
                                   </Tooltip>
                                 );
                               })}
