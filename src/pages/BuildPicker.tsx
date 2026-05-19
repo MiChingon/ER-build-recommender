@@ -313,16 +313,12 @@ const BuildPicker = () => {
     const nextMin = getMinFeasibleLevel(nextCls, activeWeapon, twoHand, "Standard", talismanIds, armorSelection, nextLoadout);
     if (targetLevel < nextMin) setTargetLevel(nextMin);
   };
-  console.log('ARMOR SELECTION', armorSelection);
   return (
     <Stack spacing={3}>
       <Box>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Elden Ring Build Recommender
-        </Typography>
         <Typography variant="body1" color="text.secondary">
-          Pick a weapon to see the recommended stat spread and starting class.
-          Optionally compare against a specific class.
+          Pick weapons to see the recommended stat spread and starting class.
+          Download a PDF file with your level-up plan.
         </Typography>
       </Box>
 
