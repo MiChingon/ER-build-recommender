@@ -34477,14 +34477,8 @@ export const WEAPON_EXTRAS: Partial<Record<string, Extras>> = {
       },
       "max": {
         "Standard": {
-          "strength": [
-            "E",
-            17
-          ],
-          "dexterity": [
-            "E",
-            17
-          ]
+          "strength": "E",
+          "dexterity": "E"
         }
       }
     }
@@ -34504,14 +34498,8 @@ export const WEAPON_EXTRAS: Partial<Record<string, Extras>> = {
       },
       "max": {
         "Standard": {
-          "strength": [
-            "E",
-            20
-          ],
-          "dexterity": [
-            "D",
-            26
-          ]
+          "strength": "E",
+          "dexterity": "D"
         }
       }
     }
@@ -34539,6 +34527,126 @@ export const WEAPON_EXTRAS: Partial<Record<string, Extras>> = {
             "D",
             30
           ]
+        },
+        "Heavy": {
+          "strength": [
+            "E",
+            10
+          ],
+          "dexterity": [
+            "D",
+            30
+          ]
+        },
+        "Keen": {
+          "strength": [
+            "E",
+            10
+          ],
+          "dexterity": [
+            "D",
+            30
+          ]
+        },
+        "Quality": {
+          "strength": [
+            "E",
+            10
+          ],
+          "dexterity": [
+            "D",
+            30
+          ]
+        },
+        "Fire": {
+          "strength": [
+            "E",
+            10
+          ],
+          "dexterity": [
+            "D",
+            30
+          ]
+        },
+        "Flame Art": {
+          "strength": [
+            "E",
+            10
+          ],
+          "dexterity": [
+            "D",
+            30
+          ]
+        },
+        "Lightning": {
+          "strength": [
+            "E",
+            10
+          ],
+          "dexterity": [
+            "D",
+            30
+          ]
+        },
+        "Sacred": {
+          "strength": [
+            "E",
+            10
+          ],
+          "dexterity": [
+            "D",
+            30
+          ]
+        },
+        "Magic": {
+          "strength": [
+            "E",
+            10
+          ],
+          "dexterity": [
+            "D",
+            30
+          ]
+        },
+        "Cold": {
+          "strength": [
+            "E",
+            10
+          ],
+          "dexterity": [
+            "D",
+            30
+          ]
+        },
+        "Poison": {
+          "strength": [
+            "E",
+            10
+          ],
+          "dexterity": [
+            "D",
+            30
+          ]
+        },
+        "Blood": {
+          "strength": [
+            "E",
+            10
+          ],
+          "dexterity": [
+            "D",
+            30
+          ]
+        },
+        "Occult": {
+          "strength": [
+            "E",
+            10
+          ],
+          "dexterity": [
+            "D",
+            30
+          ]
         }
       }
     }
@@ -34554,6 +34662,78 @@ export const WEAPON_EXTRAS: Partial<Record<string, Extras>> = {
       },
       "max": {
         "Standard": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Heavy": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Keen": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Quality": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Fire": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Flame Art": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Lightning": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Sacred": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Magic": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Cold": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Poison": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Blood": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Occult": {
           "strength": [
             "E",
             24
@@ -34577,6 +34757,78 @@ export const WEAPON_EXTRAS: Partial<Record<string, Extras>> = {
             "D",
             40
           ]
+        },
+        "Heavy": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Keen": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Quality": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Fire": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Flame Art": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Lightning": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Sacred": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Magic": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Cold": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Poison": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Blood": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Occult": {
+          "strength": [
+            "D",
+            40
+          ]
         }
       }
     }
@@ -34592,6 +34844,78 @@ export const WEAPON_EXTRAS: Partial<Record<string, Extras>> = {
       },
       "max": {
         "Standard": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Heavy": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Keen": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Quality": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Fire": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Flame Art": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Lightning": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Sacred": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Magic": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Cold": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Poison": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Blood": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Occult": {
           "strength": [
             "E",
             24
@@ -34615,6 +34939,78 @@ export const WEAPON_EXTRAS: Partial<Record<string, Extras>> = {
             "D",
             40
           ]
+        },
+        "Heavy": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Keen": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Quality": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Fire": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Flame Art": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Lightning": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Sacred": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Magic": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Cold": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Poison": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Blood": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Occult": {
+          "strength": [
+            "D",
+            40
+          ]
         }
       }
     }
@@ -34630,6 +35026,78 @@ export const WEAPON_EXTRAS: Partial<Record<string, Extras>> = {
       },
       "max": {
         "Standard": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Heavy": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Keen": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Quality": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Fire": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Flame Art": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Lightning": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Sacred": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Magic": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Cold": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Poison": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Blood": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Occult": {
           "strength": [
             "E",
             24
@@ -34653,6 +35121,78 @@ export const WEAPON_EXTRAS: Partial<Record<string, Extras>> = {
             "E",
             24
           ]
+        },
+        "Heavy": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Keen": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Quality": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Fire": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Flame Art": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Lightning": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Sacred": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Magic": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Cold": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Poison": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Blood": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Occult": {
+          "strength": [
+            "E",
+            24
+          ]
         }
       }
     }
@@ -34668,6 +35208,78 @@ export const WEAPON_EXTRAS: Partial<Record<string, Extras>> = {
       },
       "max": {
         "Standard": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Heavy": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Keen": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Quality": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Fire": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Flame Art": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Lightning": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Sacred": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Magic": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Cold": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Poison": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Blood": {
+          "strength": [
+            "E",
+            24
+          ]
+        },
+        "Occult": {
           "strength": [
             "E",
             24
@@ -34691,6 +35303,78 @@ export const WEAPON_EXTRAS: Partial<Record<string, Extras>> = {
             "D",
             40
           ]
+        },
+        "Heavy": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Keen": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Quality": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Fire": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Flame Art": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Lightning": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Sacred": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Magic": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Cold": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Poison": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Blood": {
+          "strength": [
+            "D",
+            40
+          ]
+        },
+        "Occult": {
+          "strength": [
+            "D",
+            40
+          ]
         }
       }
     }
@@ -34699,70 +35383,198 @@ export const WEAPON_EXTRAS: Partial<Record<string, Extras>> = {
     "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/blue_white_wooden_shield_elden_ring_wiki_guide_200px.png",
     "scalingTable": {
       "base": { "strength": ["E", 18] },
-      "max": { "Standard": { "strength": ["E", 32] } }
+      "max": {
+        "Standard": { "strength": ["E", 32] },
+        "Heavy": { "strength": ["E", 32] },
+        "Keen": { "strength": ["E", 32] },
+        "Quality": { "strength": ["E", 32] },
+        "Fire": { "strength": ["E", 32] },
+        "Flame Art": { "strength": ["E", 32] },
+        "Lightning": { "strength": ["E", 32] },
+        "Sacred": { "strength": ["E", 32] },
+        "Magic": { "strength": ["E", 32] },
+        "Cold": { "strength": ["E", 32] },
+        "Poison": { "strength": ["E", 32] },
+        "Blood": { "strength": ["E", 32] },
+        "Occult": { "strength": ["E", 32] }
+      }
     }
   },
   "pillory-shield": {
     "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/pillory_shield_elden_ring_wiki_guide_200px.png",
     "scalingTable": {
       "base": { "strength": ["E", 20] },
-      "max": { "Standard": { "strength": ["E", 36] } }
+      "max": {
+        "Standard": { "strength": ["E", 36] },
+        "Heavy": { "strength": ["E", 36] },
+        "Keen": { "strength": ["E", 36] },
+        "Quality": { "strength": ["E", 36] },
+        "Fire": { "strength": ["E", 36] },
+        "Flame Art": { "strength": ["E", 36] },
+        "Lightning": { "strength": ["E", 36] },
+        "Sacred": { "strength": ["E", 36] },
+        "Magic": { "strength": ["E", 36] },
+        "Cold": { "strength": ["E", 36] },
+        "Poison": { "strength": ["E", 36] },
+        "Blood": { "strength": ["E", 36] },
+        "Occult": { "strength": ["E", 36] }
+      }
     }
   },
   "iron-roundshield": {
     "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/iron_roundshield_elden_ring_wiki_guide_200px.png",
     "scalingTable": {
       "base": { "strength": ["E", 22] },
-      "max": { "Standard": { "strength": ["E", 40] } }
+      "max": {
+        "Standard": { "strength": ["E", 40] },
+        "Heavy": { "strength": ["E", 40] },
+        "Keen": { "strength": ["E", 40] },
+        "Quality": { "strength": ["E", 40] },
+        "Fire": { "strength": ["E", 40] },
+        "Flame Art": { "strength": ["E", 40] },
+        "Lightning": { "strength": ["E", 40] },
+        "Sacred": { "strength": ["E", 40] },
+        "Magic": { "strength": ["E", 40] },
+        "Cold": { "strength": ["E", 40] },
+        "Poison": { "strength": ["E", 40] },
+        "Blood": { "strength": ["E", 40] },
+        "Occult": { "strength": ["E", 40] }
+      }
     }
   },
   "gilded-iron-shield": {
     "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/gilded_iron_shield_elden_ring_wiki_guide_200px.png",
     "scalingTable": {
       "base": { "strength": ["E", 24] },
-      "max": { "Standard": { "strength": ["E", 42] } }
+      "max": {
+        "Standard": { "strength": ["E", 42] },
+        "Heavy": { "strength": ["E", 42] },
+        "Keen": { "strength": ["E", 42] },
+        "Quality": { "strength": ["E", 42] },
+        "Fire": { "strength": ["E", 42] },
+        "Flame Art": { "strength": ["E", 42] },
+        "Lightning": { "strength": ["E", 42] },
+        "Sacred": { "strength": ["E", 42] },
+        "Magic": { "strength": ["E", 42] },
+        "Cold": { "strength": ["E", 42] },
+        "Poison": { "strength": ["E", 42] },
+        "Blood": { "strength": ["E", 42] },
+        "Occult": { "strength": ["E", 42] }
+      }
     }
   },
   "man-serpents-shield": {
     "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/man_serpents_shield_elden_ring_wiki_guide_200px.png",
     "scalingTable": {
       "base": { "strength": ["E", 22] },
-      "max": { "Standard": { "strength": ["E", 40] } }
+      "max": {
+        "Standard": { "strength": ["E", 40] },
+        "Heavy": { "strength": ["E", 40] },
+        "Keen": { "strength": ["E", 40] },
+        "Quality": { "strength": ["E", 40] },
+        "Fire": { "strength": ["E", 40] },
+        "Flame Art": { "strength": ["E", 40] },
+        "Lightning": { "strength": ["E", 40] },
+        "Sacred": { "strength": ["E", 40] },
+        "Magic": { "strength": ["E", 40] },
+        "Cold": { "strength": ["E", 40] },
+        "Poison": { "strength": ["E", 40] },
+        "Blood": { "strength": ["E", 40] },
+        "Occult": { "strength": ["E", 40] }
+      }
     }
   },
   "ice-crest-shield": {
     "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/ice_crest_shield_elden_ring_wiki_guide_200px.png",
     "scalingTable": {
       "base": { "strength": ["E", 22] },
-      "max": { "Standard": { "strength": ["E", 40] } }
+      "max": {
+        "Standard": { "strength": ["E", 40] },
+        "Heavy": { "strength": ["E", 40] },
+        "Keen": { "strength": ["E", 40] },
+        "Quality": { "strength": ["E", 40] },
+        "Fire": { "strength": ["E", 40] },
+        "Flame Art": { "strength": ["E", 40] },
+        "Lightning": { "strength": ["E", 40] },
+        "Sacred": { "strength": ["E", 40] },
+        "Magic": { "strength": ["E", 40] },
+        "Cold": { "strength": ["E", 40] },
+        "Poison": { "strength": ["E", 40] },
+        "Blood": { "strength": ["E", 40] },
+        "Occult": { "strength": ["E", 40] }
+      }
     }
   },
   "perfumers-shield": {
     "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/perfumers_shield_elden_ring_wiki_guide_200px.png",
     "scalingTable": {
       "base": { "strength": ["E", 16] },
-      "max": { "Standard": { "strength": ["E", 30] } }
+      "max": {
+        "Standard": { "strength": ["E", 30] },
+        "Heavy": { "strength": ["E", 30] },
+        "Keen": { "strength": ["E", 30] },
+        "Quality": { "strength": ["E", 30] },
+        "Fire": { "strength": ["E", 30] },
+        "Flame Art": { "strength": ["E", 30] },
+        "Lightning": { "strength": ["E", 30] },
+        "Sacred": { "strength": ["E", 30] },
+        "Magic": { "strength": ["E", 30] },
+        "Cold": { "strength": ["E", 30] },
+        "Poison": { "strength": ["E", 30] },
+        "Blood": { "strength": ["E", 30] },
+        "Occult": { "strength": ["E", 30] }
+      }
     }
   },
   "shield-of-the-guilty": {
     "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/shield_of_the_guilty_elden_ring_wiki_guide_200px.png",
     "scalingTable": {
       "base": { "strength": ["D", 34] },
-      "max": { "Standard": { "strength": ["D", 58] } }
+      "max": {
+        "Standard": { "strength": ["D", 58] },
+        "Heavy": { "strength": ["D", 58] },
+        "Keen": { "strength": ["D", 58] },
+        "Quality": { "strength": ["D", 58] },
+        "Fire": { "strength": ["D", 58] },
+        "Flame Art": { "strength": ["D", 58] },
+        "Lightning": { "strength": ["D", 58] },
+        "Sacred": { "strength": ["D", 58] },
+        "Magic": { "strength": ["D", 58] },
+        "Cold": { "strength": ["D", 58] },
+        "Poison": { "strength": ["D", 58] },
+        "Blood": { "strength": ["D", 58] },
+        "Occult": { "strength": ["D", 58] }
+      }
     }
   },
   "spiralhorn-shield": {
     "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/spiralhorn_shield_elden_ring_wiki_guide_200px.png",
     "scalingTable": {
       "base": { "strength": ["E", 22] },
-      "max": { "Standard": { "strength": ["E", 40] } }
+      "max": {
+        "Standard": { "strength": ["E", 40] },
+        "Heavy": { "strength": ["E", 40] },
+        "Keen": { "strength": ["E", 40] },
+        "Quality": { "strength": ["E", 40] },
+        "Fire": { "strength": ["E", 40] },
+        "Flame Art": { "strength": ["E", 40] },
+        "Lightning": { "strength": ["E", 40] },
+        "Sacred": { "strength": ["E", 40] },
+        "Magic": { "strength": ["E", 40] },
+        "Cold": { "strength": ["E", 40] },
+        "Poison": { "strength": ["E", 40] },
+        "Blood": { "strength": ["E", 40] },
+        "Occult": { "strength": ["E", 40] }
+      }
     }
   },
   "smoldering-shield": {
     "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/smoldering_shield_elden_ring_wiki_guide_200px.png",
     "scalingTable": {
       "base": { "strength": ["E", 22] },
-      "max": { "Standard": { "strength": ["E", 40] } }
+      "max": {
+        "Standard": { "strength": "E" }
+      }
     }
   },
   "coil-shield": {
@@ -34776,7 +35588,9 @@ export const WEAPON_EXTRAS: Partial<Record<string, Extras>> = {
     "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/smithscript_shield_elden_ring_wiki_guide_200px.png",
     "scalingTable": {
       "base": { "strength": ["D", 38] },
-      "max": { "Standard": { "strength": ["D", 65] } }
+      "max": {
+        "Standard": { "strength": "D" }
+      }
     }
   },
   "shield-of-night": {
@@ -34786,69 +35600,667 @@ export const WEAPON_EXTRAS: Partial<Record<string, Extras>> = {
       "max": { "Standard": { "strength": ["E", 40] } }
     }
   },
-  "hawk-crest-wooden-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/hawk_crest_wooden_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 36] }, "max": { "Standard": { "strength": ["D", 62] } } } },
-  "horse-crest-wooden-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/horse_crest_wooden_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 36] }, "max": { "Standard": { "strength": ["D", 62] } } } },
-  "candletree-wooden-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/candletree_wooden_shield_medium_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 36] }, "max": { "Standard": { "strength": ["D", 62] } } } },
-  "flame-crest-wooden-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/flame_crest_wooden_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 36] }, "max": { "Standard": { "strength": ["D", 62] } } } },
-  "marred-wooden-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/marred_wooden_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 38] }, "max": { "Standard": { "strength": ["D", 65] } } } },
-  "sun-realm-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/sun_realm_shield_medium_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 36] }, "max": { "Standard": { "strength": ["D", 62] } } } },
-  "round-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/round_shield_medium_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 38] }, "max": { "Standard": { "strength": ["D", 65] } } } },
-  "black-leather-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/black_leather_shield_1_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 32] }, "max": { "Standard": { "strength": ["D", 56] } } } },
-  "marred-leather-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/marred_leather_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 32] }, "max": { "Standard": { "strength": ["D", 56] } } } },
-  "red-crest-heater-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/red_crest_heater_shield_medium_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 40] }, "max": { "Standard": { "strength": ["D", 70] } } } },
-  "beast-crest-heater-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/beast_crest_heater_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 40] }, "max": { "Standard": { "strength": ["D", 70] } } } },
-  "inverted-hawk-heater-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/inverted_hawk_heater_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 40] }, "max": { "Standard": { "strength": ["D", 70] } } } },
-  "eclipse-crest-heater-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/eclipse_crest_heater_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 40] }, "max": { "Standard": { "strength": ["D", 70] } } } },
-  "kite-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/kite_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 45] }, "max": { "Standard": { "strength": ["D", 78] } } } },
-  "blue-gold-kite-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/gold_kite_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 48] }, "max": { "Standard": { "strength": ["D", 82] } } } },
-  "scorpion-kite-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/scorpion_kite_shield_medium_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 45] }, "max": { "Standard": { "strength": ["D", 78] } } } },
-  "twinbird-kite-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/twinbird_kite_shield_medium_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 45] }, "max": { "Standard": { "strength": ["D", 78] } } } },
-  "brass-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/brass_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 55] }, "max": { "Standard": { "strength": ["D", 95] } } } },
-  "banished-knights-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/banished_knights_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 52] }, "max": { "Standard": { "strength": ["D", 88] } } } },
-  "albinauric-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/albinauric_shield_small_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 44] }, "max": { "Standard": { "strength": ["D", 76] } } } },
-  "beastmans-jar-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/beastmans_jar_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["E", 30] }, "max": { "Standard": { "strength": ["E", 52] } } } },
+  "hawk-crest-wooden-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/hawk_crest_wooden_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 36] }, "max": {
+        "Standard": { "strength": ["D", 62] },
+        "Heavy": { "strength": ["D", 62] },
+        "Keen": { "strength": ["D", 62] },
+        "Quality": { "strength": ["D", 62] },
+        "Fire": { "strength": ["D", 62] },
+        "Flame Art": { "strength": ["D", 62] },
+        "Lightning": { "strength": ["D", 62] },
+        "Sacred": { "strength": ["D", 62] },
+        "Magic": { "strength": ["D", 62] },
+        "Cold": { "strength": ["D", 62] },
+        "Poison": { "strength": ["D", 62] },
+        "Blood": { "strength": ["D", 62] },
+        "Occult": { "strength": ["D", 62] }
+      } } },
+  "horse-crest-wooden-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/horse_crest_wooden_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 36] }, "max": {
+        "Standard": { "strength": ["D", 62] },
+        "Heavy": { "strength": ["D", 62] },
+        "Keen": { "strength": ["D", 62] },
+        "Quality": { "strength": ["D", 62] },
+        "Fire": { "strength": ["D", 62] },
+        "Flame Art": { "strength": ["D", 62] },
+        "Lightning": { "strength": ["D", 62] },
+        "Sacred": { "strength": ["D", 62] },
+        "Magic": { "strength": ["D", 62] },
+        "Cold": { "strength": ["D", 62] },
+        "Poison": { "strength": ["D", 62] },
+        "Blood": { "strength": ["D", 62] },
+        "Occult": { "strength": ["D", 62] }
+      } } },
+  "candletree-wooden-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/candletree_wooden_shield_medium_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 36] }, "max": {
+        "Standard": { "strength": ["D", 62] },
+        "Heavy": { "strength": ["D", 62] },
+        "Keen": { "strength": ["D", 62] },
+        "Quality": { "strength": ["D", 62] },
+        "Fire": { "strength": ["D", 62] },
+        "Flame Art": { "strength": ["D", 62] },
+        "Lightning": { "strength": ["D", 62] },
+        "Sacred": { "strength": ["D", 62] },
+        "Magic": { "strength": ["D", 62] },
+        "Cold": { "strength": ["D", 62] },
+        "Poison": { "strength": ["D", 62] },
+        "Blood": { "strength": ["D", 62] },
+        "Occult": { "strength": ["D", 62] }
+      } } },
+  "flame-crest-wooden-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/flame_crest_wooden_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 36] }, "max": {
+        "Standard": { "strength": ["D", 62] },
+        "Heavy": { "strength": ["D", 62] },
+        "Keen": { "strength": ["D", 62] },
+        "Quality": { "strength": ["D", 62] },
+        "Fire": { "strength": ["D", 62] },
+        "Flame Art": { "strength": ["D", 62] },
+        "Lightning": { "strength": ["D", 62] },
+        "Sacred": { "strength": ["D", 62] },
+        "Magic": { "strength": ["D", 62] },
+        "Cold": { "strength": ["D", 62] },
+        "Poison": { "strength": ["D", 62] },
+        "Blood": { "strength": ["D", 62] },
+        "Occult": { "strength": ["D", 62] }
+      } } },
+  "marred-wooden-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/marred_wooden_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 38] }, "max": {
+        "Standard": { "strength": ["D", 65] },
+        "Heavy": { "strength": ["D", 65] },
+        "Keen": { "strength": ["D", 65] },
+        "Quality": { "strength": ["D", 65] },
+        "Fire": { "strength": ["D", 65] },
+        "Flame Art": { "strength": ["D", 65] },
+        "Lightning": { "strength": ["D", 65] },
+        "Sacred": { "strength": ["D", 65] },
+        "Magic": { "strength": ["D", 65] },
+        "Cold": { "strength": ["D", 65] },
+        "Poison": { "strength": ["D", 65] },
+        "Blood": { "strength": ["D", 65] },
+        "Occult": { "strength": ["D", 65] }
+      } } },
+  "sun-realm-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/sun_realm_shield_medium_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 36] }, "max": {
+        "Standard": { "strength": ["D", 62] },
+        "Heavy": { "strength": ["D", 62] },
+        "Keen": { "strength": ["D", 62] },
+        "Quality": { "strength": ["D", 62] },
+        "Fire": { "strength": ["D", 62] },
+        "Flame Art": { "strength": ["D", 62] },
+        "Lightning": { "strength": ["D", 62] },
+        "Sacred": { "strength": ["D", 62] },
+        "Magic": { "strength": ["D", 62] },
+        "Cold": { "strength": ["D", 62] },
+        "Poison": { "strength": ["D", 62] },
+        "Blood": { "strength": ["D", 62] },
+        "Occult": { "strength": ["D", 62] }
+      } } },
+  "round-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/round_shield_medium_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 38] }, "max": {
+        "Standard": { "strength": ["D", 65] },
+        "Heavy": { "strength": ["D", 65] },
+        "Keen": { "strength": ["D", 65] },
+        "Quality": { "strength": ["D", 65] },
+        "Fire": { "strength": ["D", 65] },
+        "Flame Art": { "strength": ["D", 65] },
+        "Lightning": { "strength": ["D", 65] },
+        "Sacred": { "strength": ["D", 65] },
+        "Magic": { "strength": ["D", 65] },
+        "Cold": { "strength": ["D", 65] },
+        "Poison": { "strength": ["D", 65] },
+        "Blood": { "strength": ["D", 65] },
+        "Occult": { "strength": ["D", 65] }
+      } } },
+  "black-leather-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/black_leather_shield_1_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 32] }, "max": {
+        "Standard": { "strength": ["D", 56] },
+        "Heavy": { "strength": ["D", 56] },
+        "Keen": { "strength": ["D", 56] },
+        "Quality": { "strength": ["D", 56] },
+        "Fire": { "strength": ["D", 56] },
+        "Flame Art": { "strength": ["D", 56] },
+        "Lightning": { "strength": ["D", 56] },
+        "Sacred": { "strength": ["D", 56] },
+        "Magic": { "strength": ["D", 56] },
+        "Cold": { "strength": ["D", 56] },
+        "Poison": { "strength": ["D", 56] },
+        "Blood": { "strength": ["D", 56] },
+        "Occult": { "strength": ["D", 56] }
+      } } },
+  "marred-leather-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/marred_leather_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 32] }, "max": {
+        "Standard": { "strength": ["D", 56] },
+        "Heavy": { "strength": ["D", 56] },
+        "Keen": { "strength": ["D", 56] },
+        "Quality": { "strength": ["D", 56] },
+        "Fire": { "strength": ["D", 56] },
+        "Flame Art": { "strength": ["D", 56] },
+        "Lightning": { "strength": ["D", 56] },
+        "Sacred": { "strength": ["D", 56] },
+        "Magic": { "strength": ["D", 56] },
+        "Cold": { "strength": ["D", 56] },
+        "Poison": { "strength": ["D", 56] },
+        "Blood": { "strength": ["D", 56] },
+        "Occult": { "strength": ["D", 56] }
+      } } },
+  "red-crest-heater-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/red_crest_heater_shield_medium_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 40] }, "max": {
+        "Standard": { "strength": ["D", 70] },
+        "Heavy": { "strength": ["D", 70] },
+        "Keen": { "strength": ["D", 70] },
+        "Quality": { "strength": ["D", 70] },
+        "Fire": { "strength": ["D", 70] },
+        "Flame Art": { "strength": ["D", 70] },
+        "Lightning": { "strength": ["D", 70] },
+        "Sacred": { "strength": ["D", 70] },
+        "Magic": { "strength": ["D", 70] },
+        "Cold": { "strength": ["D", 70] },
+        "Poison": { "strength": ["D", 70] },
+        "Blood": { "strength": ["D", 70] },
+        "Occult": { "strength": ["D", 70] }
+      } } },
+  "beast-crest-heater-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/beast_crest_heater_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 40] }, "max": {
+        "Standard": { "strength": ["D", 70] },
+        "Heavy": { "strength": ["D", 70] },
+        "Keen": { "strength": ["D", 70] },
+        "Quality": { "strength": ["D", 70] },
+        "Fire": { "strength": ["D", 70] },
+        "Flame Art": { "strength": ["D", 70] },
+        "Lightning": { "strength": ["D", 70] },
+        "Sacred": { "strength": ["D", 70] },
+        "Magic": { "strength": ["D", 70] },
+        "Cold": { "strength": ["D", 70] },
+        "Poison": { "strength": ["D", 70] },
+        "Blood": { "strength": ["D", 70] },
+        "Occult": { "strength": ["D", 70] }
+      } } },
+  "inverted-hawk-heater-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/inverted_hawk_heater_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 40] }, "max": {
+        "Standard": { "strength": ["D", 70] },
+        "Heavy": { "strength": ["D", 70] },
+        "Keen": { "strength": ["D", 70] },
+        "Quality": { "strength": ["D", 70] },
+        "Fire": { "strength": ["D", 70] },
+        "Flame Art": { "strength": ["D", 70] },
+        "Lightning": { "strength": ["D", 70] },
+        "Sacred": { "strength": ["D", 70] },
+        "Magic": { "strength": ["D", 70] },
+        "Cold": { "strength": ["D", 70] },
+        "Poison": { "strength": ["D", 70] },
+        "Blood": { "strength": ["D", 70] },
+        "Occult": { "strength": ["D", 70] }
+      } } },
+  "eclipse-crest-heater-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/eclipse_crest_heater_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 40] }, "max": {
+        "Standard": { "strength": ["D", 70] },
+        "Heavy": { "strength": ["D", 70] },
+        "Keen": { "strength": ["D", 70] },
+        "Quality": { "strength": ["D", 70] },
+        "Fire": { "strength": ["D", 70] },
+        "Flame Art": { "strength": ["D", 70] },
+        "Lightning": { "strength": ["D", 70] },
+        "Sacred": { "strength": ["D", 70] },
+        "Magic": { "strength": ["D", 70] },
+        "Cold": { "strength": ["D", 70] },
+        "Poison": { "strength": ["D", 70] },
+        "Blood": { "strength": ["D", 70] },
+        "Occult": { "strength": ["D", 70] }
+      } } },
+  "kite-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/kite_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 45] }, "max": {
+        "Standard": { "strength": ["D", 78] },
+        "Heavy": { "strength": ["D", 78] },
+        "Keen": { "strength": ["D", 78] },
+        "Quality": { "strength": ["D", 78] },
+        "Fire": { "strength": ["D", 78] },
+        "Flame Art": { "strength": ["D", 78] },
+        "Lightning": { "strength": ["D", 78] },
+        "Sacred": { "strength": ["D", 78] },
+        "Magic": { "strength": ["D", 78] },
+        "Cold": { "strength": ["D", 78] },
+        "Poison": { "strength": ["D", 78] },
+        "Blood": { "strength": ["D", 78] },
+        "Occult": { "strength": ["D", 78] }
+      } } },
+  "blue-gold-kite-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/gold_kite_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 48] }, "max": {
+        "Standard": { "strength": ["D", 82] },
+        "Heavy": { "strength": ["D", 82] },
+        "Keen": { "strength": ["D", 82] },
+        "Quality": { "strength": ["D", 82] },
+        "Fire": { "strength": ["D", 82] },
+        "Flame Art": { "strength": ["D", 82] },
+        "Lightning": { "strength": ["D", 82] },
+        "Sacred": { "strength": ["D", 82] },
+        "Magic": { "strength": ["D", 82] },
+        "Cold": { "strength": ["D", 82] },
+        "Poison": { "strength": ["D", 82] },
+        "Blood": { "strength": ["D", 82] },
+        "Occult": { "strength": ["D", 82] }
+      } } },
+  "scorpion-kite-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/scorpion_kite_shield_medium_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 45] }, "max": {
+        "Standard": { "strength": ["D", 78] },
+        "Heavy": { "strength": ["D", 78] },
+        "Keen": { "strength": ["D", 78] },
+        "Quality": { "strength": ["D", 78] },
+        "Fire": { "strength": ["D", 78] },
+        "Flame Art": { "strength": ["D", 78] },
+        "Lightning": { "strength": ["D", 78] },
+        "Sacred": { "strength": ["D", 78] },
+        "Magic": { "strength": ["D", 78] },
+        "Cold": { "strength": ["D", 78] },
+        "Poison": { "strength": ["D", 78] },
+        "Blood": { "strength": ["D", 78] },
+        "Occult": { "strength": ["D", 78] }
+      } } },
+  "twinbird-kite-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/twinbird_kite_shield_medium_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 45] }, "max": {
+        "Standard": { "strength": ["D", 78] },
+        "Heavy": { "strength": ["D", 78] },
+        "Keen": { "strength": ["D", 78] },
+        "Quality": { "strength": ["D", 78] },
+        "Fire": { "strength": ["D", 78] },
+        "Flame Art": { "strength": ["D", 78] },
+        "Lightning": { "strength": ["D", 78] },
+        "Sacred": { "strength": ["D", 78] },
+        "Magic": { "strength": ["D", 78] },
+        "Cold": { "strength": ["D", 78] },
+        "Poison": { "strength": ["D", 78] },
+        "Blood": { "strength": ["D", 78] },
+        "Occult": { "strength": ["D", 78] }
+      } } },
+  "brass-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/brass_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 55] }, "max": {
+        "Standard": { "strength": ["D", 95] },
+        "Heavy": { "strength": ["D", 95] },
+        "Keen": { "strength": ["D", 95] },
+        "Quality": { "strength": ["D", 95] },
+        "Fire": { "strength": ["D", 95] },
+        "Flame Art": { "strength": ["D", 95] },
+        "Lightning": { "strength": ["D", 95] },
+        "Sacred": { "strength": ["D", 95] },
+        "Magic": { "strength": ["D", 95] },
+        "Cold": { "strength": ["D", 95] },
+        "Poison": { "strength": ["D", 95] },
+        "Blood": { "strength": ["D", 95] },
+        "Occult": { "strength": ["D", 95] }
+      } } },
+  "banished-knights-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/banished_knights_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 52] }, "max": {
+        "Standard": { "strength": ["D", 88] },
+        "Heavy": { "strength": ["D", 88] },
+        "Keen": { "strength": ["D", 88] },
+        "Quality": { "strength": ["D", 88] },
+        "Fire": { "strength": ["D", 88] },
+        "Flame Art": { "strength": ["D", 88] },
+        "Lightning": { "strength": ["D", 88] },
+        "Sacred": { "strength": ["D", 88] },
+        "Magic": { "strength": ["D", 88] },
+        "Cold": { "strength": ["D", 88] },
+        "Poison": { "strength": ["D", 88] },
+        "Blood": { "strength": ["D", 88] },
+        "Occult": { "strength": ["D", 88] }
+      } } },
+  "albinauric-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/albinauric_shield_small_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 44] }, "max": {
+        "Standard": { "strength": ["D", 76] },
+        "Heavy": { "strength": ["D", 76] },
+        "Keen": { "strength": ["D", 76] },
+        "Quality": { "strength": ["D", 76] },
+        "Fire": { "strength": ["D", 76] },
+        "Flame Art": { "strength": ["D", 76] },
+        "Lightning": { "strength": ["D", 76] },
+        "Sacred": { "strength": ["D", 76] },
+        "Magic": { "strength": ["D", 76] },
+        "Cold": { "strength": ["D", 76] },
+        "Poison": { "strength": ["D", 76] },
+        "Blood": { "strength": ["D", 76] },
+        "Occult": { "strength": ["D", 76] }
+      } } },
+  "beastmans-jar-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/beastmans_jar_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["E", 30] }, "max": {
+        "Standard": { "strength": ["E", 52] },
+        "Heavy": { "strength": ["E", 52] },
+        "Keen": { "strength": ["E", 52] },
+        "Quality": { "strength": ["E", 52] },
+        "Fire": { "strength": ["E", 52] },
+        "Flame Art": { "strength": ["E", 52] },
+        "Lightning": { "strength": ["E", 52] },
+        "Sacred": { "strength": ["E", 52] },
+        "Magic": { "strength": ["E", 52] },
+        "Cold": { "strength": ["E", 52] },
+        "Poison": { "strength": ["E", 52] },
+        "Blood": { "strength": ["E", 52] },
+        "Occult": { "strength": ["E", 52] }
+      } } },
   "carian-knights-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/carian_knights_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 38] }, "max": { "Standard": { "strength": ["D", 65] } } } },
   "silver-mirrorshield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/silver_mirrorshield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 36] }, "max": { "Standard": { "strength": ["D", 62] } } } },
-  "great-turtle-shell": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/great_turtle_shell_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 48] }, "max": { "Standard": { "strength": ["D", 82] } } } },
+  "great-turtle-shell": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/great_turtle_shell_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 48] }, "max": {
+        "Standard": { "strength": ["D", 82] },
+        "Heavy": { "strength": ["D", 82] },
+        "Keen": { "strength": ["D", 82] },
+        "Quality": { "strength": ["D", 82] },
+        "Fire": { "strength": ["D", 82] },
+        "Flame Art": { "strength": ["D", 82] },
+        "Lightning": { "strength": ["D", 82] },
+        "Sacred": { "strength": ["D", 82] },
+        "Magic": { "strength": ["D", 82] },
+        "Cold": { "strength": ["D", 82] },
+        "Poison": { "strength": ["D", 82] },
+        "Blood": { "strength": ["D", 82] },
+        "Occult": { "strength": ["D", 82] }
+      } } },
   "golden-lion-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/golden_lion_shield_elden_ring_shadow_of_the_erdtree_dlc_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["C", 60] }, "max": { "Standard": { "strength": ["C", 102] } } } },
-  "serpent-crest-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/serpent_crest_shield_elden_ring_shadow_of_the_erdtree_dlc_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 50] }, "max": { "Standard": { "strength": ["D", 86] } } } },
-  "wolf-crest-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/wolf_crest_shield_elden_ring_shadow_of_the_erdtree_dlc_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 50] }, "max": { "Standard": { "strength": ["D", 86] } } } },
-  "messmer-soldier-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/messmer_soldier_shield_elden_ring_shadow_of_the_erdtree_dlc_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 45] }, "max": { "Standard": { "strength": ["D", 78] } } } },
-  "wooden-greatshield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/wooden_greatshield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 50] }, "max": { "Standard": { "strength": ["D", 86] } } } },
-  "lordsworns-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/lordsworns_shield_greatshield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 54] }, "max": { "Standard": { "strength": ["D", 92] } } } },
+  "serpent-crest-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/serpent_crest_shield_elden_ring_shadow_of_the_erdtree_dlc_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 50] }, "max": {
+        "Standard": { "strength": ["D", 86] },
+        "Heavy": { "strength": ["D", 86] },
+        "Keen": { "strength": ["D", 86] },
+        "Quality": { "strength": ["D", 86] },
+        "Fire": { "strength": ["D", 86] },
+        "Flame Art": { "strength": ["D", 86] },
+        "Lightning": { "strength": ["D", 86] },
+        "Sacred": { "strength": ["D", 86] },
+        "Magic": { "strength": ["D", 86] },
+        "Cold": { "strength": ["D", 86] },
+        "Poison": { "strength": ["D", 86] },
+        "Blood": { "strength": ["D", 86] },
+        "Occult": { "strength": ["D", 86] }
+      } } },
+  "wolf-crest-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/wolf_crest_shield_elden_ring_shadow_of_the_erdtree_dlc_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 50] }, "max": {
+        "Standard": { "strength": ["D", 86] },
+        "Heavy": { "strength": ["D", 86] },
+        "Keen": { "strength": ["D", 86] },
+        "Quality": { "strength": ["D", 86] },
+        "Fire": { "strength": ["D", 86] },
+        "Flame Art": { "strength": ["D", 86] },
+        "Lightning": { "strength": ["D", 86] },
+        "Sacred": { "strength": ["D", 86] },
+        "Magic": { "strength": ["D", 86] },
+        "Cold": { "strength": ["D", 86] },
+        "Poison": { "strength": ["D", 86] },
+        "Blood": { "strength": ["D", 86] },
+        "Occult": { "strength": ["D", 86] }
+      } } },
+  "messmer-soldier-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/messmer_soldier_shield_elden_ring_shadow_of_the_erdtree_dlc_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 45] }, "max": {
+        "Standard": { "strength": ["D", 78] },
+        "Heavy": { "strength": ["D", 78] },
+        "Keen": { "strength": ["D", 78] },
+        "Quality": { "strength": ["D", 78] },
+        "Fire": { "strength": ["D", 78] },
+        "Flame Art": { "strength": ["D", 78] },
+        "Lightning": { "strength": ["D", 78] },
+        "Sacred": { "strength": ["D", 78] },
+        "Magic": { "strength": ["D", 78] },
+        "Cold": { "strength": ["D", 78] },
+        "Poison": { "strength": ["D", 78] },
+        "Blood": { "strength": ["D", 78] },
+        "Occult": { "strength": ["D", 78] }
+      } } },
+  "wooden-greatshield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/wooden_greatshield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 50] }, "max": {
+        "Standard": { "strength": ["D", 86] },
+        "Heavy": { "strength": ["D", 86] },
+        "Keen": { "strength": ["D", 86] },
+        "Quality": { "strength": ["D", 86] },
+        "Fire": { "strength": ["D", 86] },
+        "Flame Art": { "strength": ["D", 86] },
+        "Lightning": { "strength": ["D", 86] },
+        "Sacred": { "strength": ["D", 86] },
+        "Magic": { "strength": ["D", 86] },
+        "Cold": { "strength": ["D", 86] },
+        "Poison": { "strength": ["D", 86] },
+        "Blood": { "strength": ["D", 86] },
+        "Occult": { "strength": ["D", 86] }
+      } } },
+  "lordsworns-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/lordsworns_shield_greatshield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 54] }, "max": {
+        "Standard": { "strength": ["D", 92] },
+        "Heavy": { "strength": ["D", 92] },
+        "Keen": { "strength": ["D", 92] },
+        "Quality": { "strength": ["D", 92] },
+        "Fire": { "strength": ["D", 92] },
+        "Flame Art": { "strength": ["D", 92] },
+        "Lightning": { "strength": ["D", 92] },
+        "Sacred": { "strength": ["D", 92] },
+        "Magic": { "strength": ["D", 92] },
+        "Cold": { "strength": ["D", 92] },
+        "Poison": { "strength": ["D", 92] },
+        "Blood": { "strength": ["D", 92] },
+        "Occult": { "strength": ["D", 92] }
+      } } },
   "briar-greatshield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/briar_greatshield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 56] }, "max": { "Standard": { "strength": ["D", 96] } } } },
-  "spiked-palisade-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/spiked_palisade_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 58] }, "max": { "Standard": { "strength": ["D", 100] } } } },
+  "spiked-palisade-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/spiked_palisade_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 58] }, "max": {
+        "Standard": { "strength": ["D", 100] },
+        "Heavy": { "strength": ["D", 100] },
+        "Keen": { "strength": ["D", 100] },
+        "Quality": { "strength": ["D", 100] },
+        "Fire": { "strength": ["D", 100] },
+        "Flame Art": { "strength": ["D", 100] },
+        "Lightning": { "strength": ["D", 100] },
+        "Sacred": { "strength": ["D", 100] },
+        "Magic": { "strength": ["D", 100] },
+        "Cold": { "strength": ["D", 100] },
+        "Poison": { "strength": ["D", 100] },
+        "Blood": { "strength": ["D", 100] },
+        "Occult": { "strength": ["D", 100] }
+      } } },
   "icon-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/icon_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 60] }, "max": { "Standard": { "strength": ["D", 102] } } } },
-  "golden-beast-crest-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/golden_beast_crest_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 62] }, "max": { "Standard": { "strength": ["D", 106] } } } },
-  "manor-towershield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/manor_towershield_greatshield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 70] }, "max": { "Standard": { "strength": ["D", 120] } } } },
-  "crossed-tree-towershield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/crossed_tree_towershield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 70] }, "max": { "Standard": { "strength": ["D", 120] } } } },
-  "inverted-hawk-towershield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/invert_hawk_towershield_greatshield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 70] }, "max": { "Standard": { "strength": ["D", 120] } } } },
-  "dragon-towershield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/dragon_towershield_greatshield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 72] }, "max": { "Standard": { "strength": ["D", 124] } } } },
-  "distinguished-greatshield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/distinguished_greatshield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 74] }, "max": { "Standard": { "strength": ["D", 128] } } } },
-  "gilded-greatshield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/gilded_greatshield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 76] }, "max": { "Standard": { "strength": ["D", 130] } } } },
-  "cuckoo-greatshield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/cuckoo_greatshield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 70] }, "max": { "Standard": { "strength": ["D", 120] } } } },
-  "redmane-greatshield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/redmane_greatshield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 68] }, "max": { "Standard": { "strength": ["D", 116] } } } },
-  "golden-greatshield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/golden_greatshield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 74] }, "max": { "Standard": { "strength": ["D", 128] } } } },
-  "haligtree-crest-greatshield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/haligtree_crest_greatshield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 76] }, "max": { "Standard": { "strength": ["D", 130] } } } },
+  "golden-beast-crest-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/golden_beast_crest_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 62] }, "max": {
+        "Standard": { "strength": ["D", 106] },
+        "Heavy": { "strength": ["D", 106] },
+        "Keen": { "strength": ["D", 106] },
+        "Quality": { "strength": ["D", 106] },
+        "Fire": { "strength": ["D", 106] },
+        "Flame Art": { "strength": ["D", 106] },
+        "Lightning": { "strength": ["D", 106] },
+        "Sacred": { "strength": ["D", 106] },
+        "Magic": { "strength": ["D", 106] },
+        "Cold": { "strength": ["D", 106] },
+        "Poison": { "strength": ["D", 106] },
+        "Blood": { "strength": ["D", 106] },
+        "Occult": { "strength": ["D", 106] }
+      } } },
+  "manor-towershield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/manor_towershield_greatshield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 70] }, "max": {
+        "Standard": { "strength": ["D", 120] },
+        "Heavy": { "strength": ["D", 120] },
+        "Keen": { "strength": ["D", 120] },
+        "Quality": { "strength": ["D", 120] },
+        "Fire": { "strength": ["D", 120] },
+        "Flame Art": { "strength": ["D", 120] },
+        "Lightning": { "strength": ["D", 120] },
+        "Sacred": { "strength": ["D", 120] },
+        "Magic": { "strength": ["D", 120] },
+        "Cold": { "strength": ["D", 120] },
+        "Poison": { "strength": ["D", 120] },
+        "Blood": { "strength": ["D", 120] },
+        "Occult": { "strength": ["D", 120] }
+      } } },
+  "crossed-tree-towershield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/crossed_tree_towershield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 70] }, "max": {
+        "Standard": { "strength": ["D", 120] },
+        "Heavy": { "strength": ["D", 120] },
+        "Keen": { "strength": ["D", 120] },
+        "Quality": { "strength": ["D", 120] },
+        "Fire": { "strength": ["D", 120] },
+        "Flame Art": { "strength": ["D", 120] },
+        "Lightning": { "strength": ["D", 120] },
+        "Sacred": { "strength": ["D", 120] },
+        "Magic": { "strength": ["D", 120] },
+        "Cold": { "strength": ["D", 120] },
+        "Poison": { "strength": ["D", 120] },
+        "Blood": { "strength": ["D", 120] },
+        "Occult": { "strength": ["D", 120] }
+      } } },
+  "inverted-hawk-towershield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/invert_hawk_towershield_greatshield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 70] }, "max": {
+        "Standard": { "strength": ["D", 120] },
+        "Heavy": { "strength": ["D", 120] },
+        "Keen": { "strength": ["D", 120] },
+        "Quality": { "strength": ["D", 120] },
+        "Fire": { "strength": ["D", 120] },
+        "Flame Art": { "strength": ["D", 120] },
+        "Lightning": { "strength": ["D", 120] },
+        "Sacred": { "strength": ["D", 120] },
+        "Magic": { "strength": ["D", 120] },
+        "Cold": { "strength": ["D", 120] },
+        "Poison": { "strength": ["D", 120] },
+        "Blood": { "strength": ["D", 120] },
+        "Occult": { "strength": ["D", 120] }
+      } } },
+  "dragon-towershield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/dragon_towershield_greatshield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 72] }, "max": {
+        "Standard": { "strength": ["D", 124] },
+        "Heavy": { "strength": ["D", 124] },
+        "Keen": { "strength": ["D", 124] },
+        "Quality": { "strength": ["D", 124] },
+        "Fire": { "strength": ["D", 124] },
+        "Flame Art": { "strength": ["D", 124] },
+        "Lightning": { "strength": ["D", 124] },
+        "Sacred": { "strength": ["D", 124] },
+        "Magic": { "strength": ["D", 124] },
+        "Cold": { "strength": ["D", 124] },
+        "Poison": { "strength": ["D", 124] },
+        "Blood": { "strength": ["D", 124] },
+        "Occult": { "strength": ["D", 124] }
+      } } },
+  "distinguished-greatshield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/distinguished_greatshield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 74] }, "max": {
+        "Standard": { "strength": ["D", 128] },
+        "Heavy": { "strength": ["D", 128] },
+        "Keen": { "strength": ["D", 128] },
+        "Quality": { "strength": ["D", 128] },
+        "Fire": { "strength": ["D", 128] },
+        "Flame Art": { "strength": ["D", 128] },
+        "Lightning": { "strength": ["D", 128] },
+        "Sacred": { "strength": ["D", 128] },
+        "Magic": { "strength": ["D", 128] },
+        "Cold": { "strength": ["D", 128] },
+        "Poison": { "strength": ["D", 128] },
+        "Blood": { "strength": ["D", 128] },
+        "Occult": { "strength": ["D", 128] }
+      } } },
+  "gilded-greatshield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/gilded_greatshield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 76] }, "max": {
+        "Standard": { "strength": ["D", 130] },
+        "Heavy": { "strength": ["D", 130] },
+        "Keen": { "strength": ["D", 130] },
+        "Quality": { "strength": ["D", 130] },
+        "Fire": { "strength": ["D", 130] },
+        "Flame Art": { "strength": ["D", 130] },
+        "Lightning": { "strength": ["D", 130] },
+        "Sacred": { "strength": ["D", 130] },
+        "Magic": { "strength": ["D", 130] },
+        "Cold": { "strength": ["D", 130] },
+        "Poison": { "strength": ["D", 130] },
+        "Blood": { "strength": ["D", 130] },
+        "Occult": { "strength": ["D", 130] }
+      } } },
+  "cuckoo-greatshield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/cuckoo_greatshield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 70] }, "max": {
+        "Standard": { "strength": ["D", 120] },
+        "Heavy": { "strength": ["D", 120] },
+        "Keen": { "strength": ["D", 120] },
+        "Quality": { "strength": ["D", 120] },
+        "Fire": { "strength": ["D", 120] },
+        "Flame Art": { "strength": ["D", 120] },
+        "Lightning": { "strength": ["D", 120] },
+        "Sacred": { "strength": ["D", 120] },
+        "Magic": { "strength": ["D", 120] },
+        "Cold": { "strength": ["D", 120] },
+        "Poison": { "strength": ["D", 120] },
+        "Blood": { "strength": ["D", 120] },
+        "Occult": { "strength": ["D", 120] }
+      } } },
+  "redmane-greatshield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/redmane_greatshield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 68] }, "max": {
+        "Standard": { "strength": ["D", 116] },
+        "Heavy": { "strength": ["D", 116] },
+        "Keen": { "strength": ["D", 116] },
+        "Quality": { "strength": ["D", 116] },
+        "Fire": { "strength": ["D", 116] },
+        "Flame Art": { "strength": ["D", 116] },
+        "Lightning": { "strength": ["D", 116] },
+        "Sacred": { "strength": ["D", 116] },
+        "Magic": { "strength": ["D", 116] },
+        "Cold": { "strength": ["D", 116] },
+        "Poison": { "strength": ["D", 116] },
+        "Blood": { "strength": ["D", 116] },
+        "Occult": { "strength": ["D", 116] }
+      } } },
+  "golden-greatshield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/golden_greatshield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 74] }, "max": {
+        "Standard": { "strength": ["D", 128] },
+        "Heavy": { "strength": ["D", 128] },
+        "Keen": { "strength": ["D", 128] },
+        "Quality": { "strength": ["D", 128] },
+        "Fire": { "strength": ["D", 128] },
+        "Flame Art": { "strength": ["D", 128] },
+        "Lightning": { "strength": ["D", 128] },
+        "Sacred": { "strength": ["D", 128] },
+        "Magic": { "strength": ["D", 128] },
+        "Cold": { "strength": ["D", 128] },
+        "Poison": { "strength": ["D", 128] },
+        "Blood": { "strength": ["D", 128] },
+        "Occult": { "strength": ["D", 128] }
+      } } },
+  "haligtree-crest-greatshield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/haligtree_crest_greatshield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 76] }, "max": {
+        "Standard": { "strength": ["D", 130] },
+        "Heavy": { "strength": ["D", 130] },
+        "Keen": { "strength": ["D", 130] },
+        "Quality": { "strength": ["D", 130] },
+        "Fire": { "strength": ["D", 130] },
+        "Flame Art": { "strength": ["D", 130] },
+        "Lightning": { "strength": ["D", 130] },
+        "Sacred": { "strength": ["D", 130] },
+        "Magic": { "strength": ["D", 130] },
+        "Cold": { "strength": ["D", 130] },
+        "Poison": { "strength": ["D", 130] },
+        "Blood": { "strength": ["D", 130] },
+        "Occult": { "strength": ["D", 130] }
+      } } },
   "crucible-hornshield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/crucible_hornshield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 64] }, "max": { "Standard": { "strength": ["D", 110] } } } },
   "dragonclaw-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/dragonclaw__shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 68] }, "max": { "Standard": { "strength": ["D", 116] } } } },
-  "fingerprint-stone-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/fingerprint_stone_shield_greatshield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 90] }, "max": { "Standard": { "strength": ["D", 155] } } } },
-  "eclipse-crest-greatshield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/eclipse_crest_greatshield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 70] }, "max": { "Standard": { "strength": ["D", 120] } } } },
+  "fingerprint-stone-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/fingerprint_stone_shield_greatshield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 90] }, "max": {
+        "Standard": { "strength": ["D", 155] },
+        "Heavy": { "strength": ["D", 155] },
+        "Keen": { "strength": ["D", 155] },
+        "Quality": { "strength": ["D", 155] },
+        "Fire": { "strength": ["D", 155] },
+        "Flame Art": { "strength": ["D", 155] },
+        "Lightning": { "strength": ["D", 155] },
+        "Sacred": { "strength": ["D", 155] },
+        "Magic": { "strength": ["D", 155] },
+        "Cold": { "strength": ["D", 155] },
+        "Poison": { "strength": ["D", 155] },
+        "Blood": { "strength": ["D", 155] },
+        "Occult": { "strength": ["D", 155] }
+      } } },
+  "eclipse-crest-greatshield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/eclipse_crest_greatshield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 70] }, "max": {
+        "Standard": { "strength": ["D", 120] },
+        "Heavy": { "strength": ["D", 120] },
+        "Keen": { "strength": ["D", 120] },
+        "Quality": { "strength": ["D", 120] },
+        "Fire": { "strength": ["D", 120] },
+        "Flame Art": { "strength": ["D", 120] },
+        "Lightning": { "strength": ["D", 120] },
+        "Sacred": { "strength": ["D", 120] },
+        "Magic": { "strength": ["D", 120] },
+        "Cold": { "strength": ["D", 120] },
+        "Poison": { "strength": ["D", 120] },
+        "Blood": { "strength": ["D", 120] },
+        "Occult": { "strength": ["D", 120] }
+      } } },
   "ants-skull-plate": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/ants_skull_plate_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 68] }, "max": { "Standard": { "strength": ["D", 116] } } } },
   "erdtree-greatshield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/erdtree_greatshield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 70] }, "max": { "Standard": { "strength": ["D", 120] } } } },
   "jellyfish-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/jellyfish_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 58] }, "max": { "Standard": { "strength": ["D", 100] } } } },
   "visage-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/visage_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 86] }, "max": { "Standard": { "strength": ["D", 148] } } } },
   "one-eyed-shield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/eyed_shield_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 76] }, "max": { "Standard": { "strength": ["D", 130] } } } },
   "verdigris-greatshield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/verdigris_greatshield_greatshields_elden_ring_shadow_of_the_erdtree_dlc_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 110] }, "max": { "Standard": { "strength": ["D", 190] } } } },
-  "black-steel-greatshield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/black_steel_greatshield_elden_ring_shadow_of_the_erdtree_dlc_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 75] }, "max": { "Standard": { "strength": ["D", 128] } } } },
+  "black-steel-greatshield": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/black_steel_greatshield_elden_ring_shadow_of_the_erdtree_dlc_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 75] }, "max": {
+        "Standard": { "strength": ["D", 128] },
+        "Heavy": { "strength": ["D", 128] },
+        "Keen": { "strength": ["D", 128] },
+        "Quality": { "strength": ["D", 128] },
+        "Fire": { "strength": ["D", 128] },
+        "Flame Art": { "strength": ["D", 128] },
+        "Lightning": { "strength": ["D", 128] },
+        "Sacred": { "strength": ["D", 128] },
+        "Magic": { "strength": ["D", 128] },
+        "Cold": { "strength": ["D", 128] },
+        "Poison": { "strength": ["D", 128] },
+        "Blood": { "strength": ["D", 128] },
+        "Occult": { "strength": ["D", 128] }
+      } } },
   "bone-bow": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/bone_bow_elden_ring_shadow_of_the_erdtree_dlc_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["E", 18], "dexterity": ["E", 22] }, "max": { "Standard": { "strength": ["E", 32], "dexterity": ["E", 38] } } } },
-  "composite-bow": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/composite_bow_light_bow_weapon_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["E", 20], "dexterity": ["D", 38] }, "max": { "Standard": { "strength": ["E", 34], "dexterity": ["D", 65] } } } },
-  "red-branch-shortbow": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/red_branch_shortbow_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["E", 18], "dexterity": ["D", 40] }, "max": { "Standard": { "strength": ["E", 30], "dexterity": ["D", 68] } } } },
-  "misbegotten-shortbow": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/misbegotten_shortbow_light_bow_weapon_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 38], "dexterity": ["E", 20] }, "max": { "Standard": { "strength": ["D", 65], "dexterity": ["E", 34] } } } },
+  "composite-bow": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/composite_bow_light_bow_weapon_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["E", 20], "dexterity": ["D", 38] }, "max": {
+        "Standard": { "strength": "E", "dexterity": "D" }
+      } } },
+  "red-branch-shortbow": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/red_branch_shortbow_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["E", 18], "dexterity": ["D", 40] }, "max": {
+        "Standard": { "strength": "E", "dexterity": "D" }
+      } } },
+  "misbegotten-shortbow": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/misbegotten_shortbow_light_bow_weapon_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 38], "dexterity": ["E", 20] }, "max": {
+        "Standard": { "strength": "D", "dexterity": "E" }
+      } } },
   "harp-bow": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/harp_bow_light_bow_weapon_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["E", 18], "dexterity": ["E", 22] }, "max": { "Standard": { "strength": ["E", 30], "dexterity": ["E", 38] } } } },
-  "albinauric-bow": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/albinauric_bow_weapon_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["E", 20], "dexterity": ["D", 42] }, "max": { "Standard": { "strength": ["E", 34], "dexterity": ["D", 72] } } } },
+  "albinauric-bow": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/albinauric_bow_weapon_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["E", 20], "dexterity": ["D", 42] }, "max": {
+        "Standard": { "strength": "E", "dexterity": "D" }
+      } } },
   "black-bow": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/black_bow_weapon_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["E", 22], "dexterity": ["D", 48] }, "max": { "Standard": { "strength": ["E", 38], "dexterity": ["D", 82] } } } },
-  "horn-bow": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/horn_bow_weapon_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 36], "dexterity": ["D", 38] }, "max": { "Standard": { "strength": ["D", 62], "dexterity": ["D", 65] } } } },
+  "horn-bow": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/horn_bow_weapon_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["D", 36], "dexterity": ["D", 38] }, "max": {
+        "Standard": { "strength": "D", "dexterity": "D" }
+      } } },
   "serpent-bow": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/serpent_bow_weapon_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["E", 20], "dexterity": ["D", 38] }, "max": { "Standard": { "strength": ["E", 34], "dexterity": ["D", 65] } } } },
   "erdtree-bow": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/erdtree_bow_weapon_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["E", 18], "dexterity": ["D", 32] }, "max": { "Standard": { "strength": ["E", 30], "dexterity": ["D", 55] } } } },
   "pulley-bow": { "image": "https://eldenring.wiki.fextralife.com/file/Elden-Ring/pulley_bow_weapon_elden_ring_wiki_guide_200px.png", "scalingTable": { "base": { "strength": ["E", 20], "dexterity": ["D", 30] }, "max": { "Standard": { "strength": ["E", 34], "dexterity": ["D", 52] } } } },
