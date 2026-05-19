@@ -3,7 +3,7 @@ import { DAMAGE_TYPE_LABELS, estimateAttackPower, estimateSpellScaling, estimate
 import { Affinity } from "../../../../../lib/types";
 import { Weapon } from "../../../../../data/weapons";
 import { Stat } from "../../../../../data/classes";
-import { Hand } from "../../../../../common/types";
+import { Hand, STAT_COLORS } from "../../../../../common/types";
 
 type SlotPos = { hand: Hand; idx: number };
 
@@ -109,20 +109,23 @@ const WeaponDamageRow = ({
             </Typography>
           </Stack>
         ))}
-        {spellScaling && (
-          <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
-            <Box
-              sx={{
-                width: 8, height: 8, borderRadius: "50%",
-                bgcolor: "primary.main",
-                flexShrink: 0,
-              }}
-            />
-            <Typography variant="caption" sx={{ color: "primary.main", fontWeight: 600 }}>
-              {spellScaling.type === "sorcery" ? "Sorcery Scaling" : "Incant Scaling"} {spellScaling.max} (+0: {spellScaling.base})
-            </Typography>
-          </Stack>
-        )}
+        {spellScaling && (() => {
+          const spellColor = spellScaling.type === "sorcery" ? STAT_COLORS.intelligence : "primary.main";
+          return (
+            <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
+              <Box
+                sx={{
+                  width: 8, height: 8, borderRadius: "50%",
+                  bgcolor: spellColor,
+                  flexShrink: 0,
+                }}
+              />
+              <Typography variant="caption" sx={{ color: spellColor, fontWeight: 600 }}>
+                {spellScaling.type === "sorcery" ? "Sorcery Scaling" : "Incant Scaling"} {spellScaling.max} (+0: {spellScaling.base})
+              </Typography>
+            </Stack>
+          );
+        })()}
         {statuses.map((status) => (
           <Stack key={status.type} direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
             <Box

@@ -467,7 +467,7 @@ const BuildPicker = () => {
                                       >
                                         {req ?? "—"}
                                       </Typography>
-                                      {baseG && maxLabel && (
+                                      {maxLabel && (
                                         <Box
                                           sx={{
                                             display: "inline-flex",
@@ -486,7 +486,7 @@ const BuildPicker = () => {
                                               fontWeight: 600,
                                             }}
                                           >
-                                            {baseG}
+                                            {baseG ?? "—"}
                                           </Typography>
                                           <Typography
                                             component="span"
@@ -553,7 +553,6 @@ const BuildPicker = () => {
               <CardContent>
                 <Stack spacing={3}>
                   <RecommendationHeader
-                    weapon={anchorWeapon!}
                     bestClassName={rec.best.cls.name}
                     targetLevel={clampedTargetLevel}
                     equipLoad={rec.equipLoad}

@@ -1,14 +1,11 @@
 import { Box, Button, Chip, Stack, Tooltip, Typography } from "@mui/material";
-import { Weapon } from "../../../data/weapons";
 
 const RecommendationHeader = ({
-  weapon,
   bestClassName,
   targetLevel,
   equipLoad,
   onDownloadPdf,
 }: {
-  weapon: Weapon;
   bestClassName: string;
   targetLevel: number;
   equipLoad: import("../../../lib/types").EquipLoadSummary;
@@ -24,9 +21,9 @@ const RecommendationHeader = ({
       : "success";
   return (
     <Box>
-      <Stack direction="row" spacing={2} sx={{ alignItems: "center", justifyContent: "space-between", mb: 1, flexWrap: "wrap" }} useFlexGap>
+      <Stack direction="row" spacing={2} sx={{ alignItems: "center", justifyContent: "space-between", mb: 2.5, flexWrap: "wrap" }} useFlexGap>
         <Typography variant="h6">
-          Recommended build for {weapon.name}
+          Recommended build
         </Typography>
         {onDownloadPdf && (
           <Button size="small" variant="outlined" onClick={onDownloadPdf}>

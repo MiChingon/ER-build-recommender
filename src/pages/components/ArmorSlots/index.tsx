@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ARMOR_SLOT_LABELS, ARMOR_SLOTS, armorBySlot, ArmorPiece, ArmorSelection, ArmorSlot, findArmor } from "../../../data/armor";
 import { Box, Stack, Typography } from "@mui/material";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import GearTile from "../../../common/components/GearTile";
 import GearPicker from "../../../common/components/GearPicker";
 
@@ -31,6 +32,12 @@ const ArmorSlots = ({
             />
           );
         })}
+      </Stack>
+      <Stack direction="row" spacing={0.5} sx={{ alignItems: "flex-start", mt: 1 }}>
+        <InfoOutlinedIcon sx={{ fontSize: "0.875rem", mt: "1px", flexShrink: 0, color: "info.light" }} />
+        <Typography variant="caption" sx={{ fontSize: "0.625rem", lineHeight: 1.4, color: "common.white" }}>
+          Bonus stats and bonus AP from armor is not computed against the recommended stats nor the AP of a given weapon.
+        </Typography>
       </Stack>
       <GearPicker
         open={openSlot !== null}

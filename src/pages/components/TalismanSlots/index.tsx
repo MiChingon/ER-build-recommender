@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Talisman, talismanBaseName, talismans } from "../../../data/talismans";
 import { Box, Stack, Typography } from "@mui/material";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import GearTile from "../../../common/components/GearTile";
 import GearPicker from "../../../common/components/GearPicker";
 
@@ -51,6 +52,12 @@ const TalismanSlots = ({
             />
           );
         })}
+      </Stack>
+      <Stack direction="row" spacing={0.5} sx={{ alignItems: "flex-start", mt: 1 }}>
+        <InfoOutlinedIcon sx={{ fontSize: "0.875rem", mt: "1px", flexShrink: 0, color: "info.light" }} />
+        <Typography variant="caption" sx={{ fontSize: "0.625rem", lineHeight: 1.4, color: "common.white" }}>
+          Bonuses from talismans are not computed against the recommended stats, weapons AP, equip load, or Target Soul Level.
+        </Typography>
       </Stack>
       <GearPicker
         open={openSlot !== null}
