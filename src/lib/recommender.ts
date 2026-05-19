@@ -317,8 +317,29 @@ export function isCatalyst(weapon: Weapon): boolean {
 }
 
 // Shields contribute requirement floors and equip-load weight but their scaling
-// is too minor to justify pushing the player's primary stat to its soft cap.
+// is too minor to justify pushing the player's primary stat to its soft cap by
+// default. A shield IS included in the scaling push when one of these holds:
+//   1) it is the only thing in the loadout (no other items at all);
+//   2) every other non-shield item is a catalyst (so the shield is the only
+//      melee/physical option and its AP actually matters);
+//   3) some other damaging weapon in the loadout already drives the same
+//      scaling stat as the shield — in that case including the shield is a
+//      free win since the stat is already being pushed.
 const SHIELD_CATEGORIES = new Set(["Small Shield", "Medium Shield", "Greatshield"]);
+
+function shouldIncludeShieldScaling(shield: LoadoutItem, loadout: LoadoutItem[]): boolean {
+  const damagers = loadout.filter(
+    (i) =>
+      i !== shield &&
+      !SHIELD_CATEGORIES.has(i.weapon.category) &&
+      !isCatalyst(i.weapon),
+  );
+  if (damagers.length === 0) return true;
+  const shieldPrimaries = new Set(getPrimaryStats(shield.weapon, shield.affinity));
+  return damagers.some((d) =>
+    getPrimaryStats(d.weapon, d.affinity).some((s) => shieldPrimaries.has(s)),
+  );
+}
 
 function affinityAddsSpellScaling(affinity: Affinity): boolean {
   return (
@@ -669,7 +690,12 @@ export function getTargetStats(
 
   if (!internal?.noScalingPush) {
     for (const item of loadoutItems) {
-      if (SHIELD_CATEGORIES.has(item.weapon.category)) continue;
+      if (
+        SHIELD_CATEGORIES.has(item.weapon.category) &&
+        !shouldIncludeShieldScaling(item, loadoutItems)
+      ) {
+        continue;
+      }
       const wpnPrimaries = getPrimaryStats(item.weapon, item.affinity);
       for (const stat of wpnPrimaries) {
         const reqRaw = item.weapon.requirements[stat] ?? 0;
@@ -808,9 +834,21 @@ export function getTargetStats(
 
     // Distribute leftover points if the recommendation lands UNDER the
     // target Soul Level (e.g. high target like 200 with a simple loadout).
-    // Priority: 1) Endurance until medium roll, then toward soft cap 80;
-    // 2) primary scaling stats toward 80, cycled across stats for balance;
-    // 3) remaining points dumped into Mind even without a catalyst.
+    // Priority:
+    //   1) Endurance just until medium roll (only if currently heavy).
+    //   1b) If the loadout includes a catalyst, push Mind to a caster floor
+    //       of 40 before primary scaling — without enough FP the catalyst
+    //       runs dry mid-fight, which beats any extra Sorcery / Incant
+    //       Scaling from another stat point.
+    //   2) Primary scaling stats toward their first soft cap (60), cycled
+    //      across stats for balance.
+    //   2b) Primary scaling stats toward the SECOND soft cap (80). They
+    //       still pay off meaningfully between 60 and 80 (especially Faith
+    //       / Int for spell scaling, Str / Dex for physical AP), so they
+    //       take priority over topping Endurance up to 60 or dumping into
+    //       Mind further.
+    //   3) Endurance toward its first soft cap (60).
+    //   4) Remaining points dumped into Mind even without a catalyst.
     const computeLeftover = () => {
       const inv = computeDeficit(startingClass.stats, target);
       return Math.max(0, maxPoints - inv);
@@ -834,6 +872,25 @@ export function getTargetStats(
       );
     }
 
+    // Step 1b: catalyst loadouts get Mind topped up to a caster floor (40)
+    // before any leftover goes into damaging stats. The mind anchors give
+    // a baseline by level, but at high target levels with a simple loadout
+    // there is plenty of room to reach 40 — and the alternative (running
+    // out of FP) is worse than a smaller scaling-stat push.
+    const CASTER_MIND_FLOOR = 40;
+    const hasCatalyst = loadoutItems.some((i) => isCatalyst(i.weapon));
+    if (hasCatalyst) {
+      const mindStartCaster = target.mind;
+      while (computeLeftover() > 0 && target.mind < CASTER_MIND_FLOOR) {
+        target.mind += 1;
+      }
+      if (target.mind > mindStartCaster) {
+        rationale.push(
+          `Mind → ${target.mind} (leftover budget — caster floor ${CASTER_MIND_FLOOR} before scaling push)`,
+        );
+      }
+    }
+
     // Step 2: push primary scaling (damaging) stats toward their first soft
     // cap (60), cycling across stats so multi-stat affinities stay balanced.
     // The two-hand Strength multiplier is intentionally ignored here so
@@ -842,7 +899,12 @@ export function getTargetStats(
     // so the leftover is better spent elsewhere (catalyst stats, Mind, etc.).
     const primaryScalingStats: Stat[] = [];
     for (const item of loadoutItems) {
-      if (SHIELD_CATEGORIES.has(item.weapon.category)) continue;
+      if (
+        SHIELD_CATEGORIES.has(item.weapon.category) &&
+        !shouldIncludeShieldScaling(item, loadoutItems)
+      ) {
+        continue;
+      }
       for (const stat of getPrimaryStats(item.weapon, item.affinity)) {
         if (!primaryScalingStats.includes(stat)) primaryScalingStats.push(stat);
       }
@@ -862,6 +924,29 @@ export function getTargetStats(
     for (const s of primaryScalingStats) {
       if (target[s] > (scalingStart[s] ?? 0)) {
         rationale.push(`${s} → ${target[s]} (leftover budget — toward soft cap 60)`);
+      }
+    }
+
+    // Step 2b: push every primary scaling stat past 60 toward the SECOND
+    // soft cap (80). Faith / Int keep paying off via Sorcery / Incant
+    // Scaling and elemental weapon damage, and Str / Dex still increase
+    // physical AP in that range too. These investments take priority over
+    // topping Endurance up to 60 or dumping points into Mind.
+    const scalingSecondStart: Partial<Record<Stat, number>> = {};
+    for (const s of primaryScalingStats) scalingSecondStart[s] = target[s];
+    progressed = true;
+    while (progressed && computeLeftover() > 0) {
+      progressed = false;
+      for (const stat of primaryScalingStats) {
+        if (target[stat] < 80 && computeLeftover() > 0) {
+          target[stat] += 1;
+          progressed = true;
+        }
+      }
+    }
+    for (const s of primaryScalingStats) {
+      if (target[s] > (scalingSecondStart[s] ?? 0)) {
+        rationale.push(`${s} → ${target[s]} (leftover budget — toward soft cap 80)`);
       }
     }
 

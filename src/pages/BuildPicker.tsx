@@ -48,6 +48,7 @@ import LoadoutDamagePanel from "./components/LoadoutDamagePanel";
 import { Hand, SlotPos, STAT_COLORS } from "../common/types";
 import RecommendationHeader from "./components/RecommendationHeader";
 import { generateBuildPdf } from "../lib/pdf-report";
+import { trackPdfDownload } from "../lib/analytics";
 import ClassRanking from "./components/ClassRanking";
 import TargetStatsTable from "./components/TargetStatsTable";
 import useBuildPickerState from "./hooks/use-build-picker-state";
@@ -558,13 +559,15 @@ const BuildPicker = () => {
                     equipLoad={rec.equipLoad}
                     onDownloadPdf={
                       selectedClass
-                        ? () =>
+                        ? () => {
+                            trackPdfDownload(anchorWeapon!.id);
                             generateBuildPdf({
                               weapon: anchorWeapon!,
                               rec,
                               loadout,
                               classData: selectedClass,
-                            })
+                            });
+                          }
                         : undefined
                     }
                   />

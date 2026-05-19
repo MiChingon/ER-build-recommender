@@ -4,6 +4,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import App from "./App";
 import BuildPicker from "./pages/BuildPicker";
+import { initAnalytics } from "./lib/analytics";
+
+initAnalytics();
 
 const theme = createTheme({
   palette: {

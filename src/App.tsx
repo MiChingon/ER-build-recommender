@@ -61,21 +61,39 @@ export default function App() {
           >
             <Emblem />
             <Box>
-              <Typography
-                variant="h5"
-                component="div"
-                sx={{
-                  fontWeight: 700,
-                  letterSpacing: 1.5,
-                  textTransform: "uppercase",
-                  background: "linear-gradient(180deg, #f4d670 0%, #c4942b 100%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  lineHeight: 1.1,
-                }}
-              >
-                Elden Ring Build Recommender
-              </Typography>
+              <Stack direction="row" spacing={1} sx={{ alignItems: "baseline" }}>
+                <Typography
+                  variant="h5"
+                  component="div"
+                  sx={{
+                    fontWeight: 700,
+                    letterSpacing: 1.5,
+                    textTransform: "uppercase",
+                    background: "linear-gradient(180deg, #f4d670 0%, #c4942b 100%)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    lineHeight: 1.1,
+                  }}
+                >
+                  Elden Ring Build Recommender
+                </Typography>
+                <Typography
+                  component="span"
+                  sx={{
+                    color: "rgba(212,175,55,0.75)",
+                    fontWeight: 600,
+                    fontSize: "0.75rem",
+                    letterSpacing: 0.5,
+                    border: "1px solid rgba(212,175,55,0.4)",
+                    borderRadius: 999,
+                    px: 0.85,
+                    py: 0.05,
+                    lineHeight: 1.2,
+                  }}
+                >
+                  v{__APP_VERSION__}
+                </Typography>
+              </Stack>
               <Typography
                 variant="caption"
                 sx={{ color: "rgba(212,175,55,0.7)", letterSpacing: 1, textTransform: "uppercase" }}
