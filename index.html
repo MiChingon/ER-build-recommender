@@ -3,10 +3,78 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Items</title>
+    <meta name="theme-color" content="#d4af37" />
+
+    <title>Elden Ring Build Recommender — Optimal Stats, AP, Status & Spells</title>
+    <meta
+      name="description"
+      content="Plan an Elden Ring build with the best starting class, target Soul Level, and per-stat upgrade plan. Live AP, status build-up, Sorcery / Incant scaling, and suggested spells for every weapon + catalyst in your loadout."
+    />
+    <meta
+      name="keywords"
+      content="Elden Ring, build planner, build calculator, stat calculator, attack power, status buildup, sorcery scaling, incant scaling, soul level, starting class, weapon scaling, infusion, talisman, armor"
+    />
+    <meta name="author" content="Elden Ring Build Recommender" />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://elden-ring-build-recommender.example.com/" />
+
+    <!-- Open Graph (Facebook, Discord, Slack previews) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content="Elden Ring Build Recommender" />
+    <meta
+      property="og:title"
+      content="Elden Ring Build Recommender — Optimal Stats, AP, Status & Spells"
+    />
+    <meta
+      property="og:description"
+      content="Pick a starting class and a weapon loadout — get the optimal stat spread, attack power, status build-up, and a per-level upgrade plan you can download as PDF."
+    />
+    <meta property="og:url" content="https://elden-ring-build-recommender.example.com/" />
+    <meta
+      property="og:image"
+      content="https://eldenring.wiki.fextralife.com/file/Elden-Ring/erdtree_elden_ring_wiki_guide.jpg"
+    />
+    <meta property="og:image:alt" content="The Erdtree from Elden Ring" />
+
+    <!-- Twitter card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Elden Ring Build Recommender — Optimal Stats, AP, Status & Spells"
+    />
+    <meta
+      name="twitter:description"
+      content="Plan an Elden Ring build with optimal stats, AP, status build-up, sorcery / incant scaling, and a per-level upgrade plan."
+    />
+    <meta
+      name="twitter:image"
+      content="https://eldenring.wiki.fextralife.com/file/Elden-Ring/erdtree_elden_ring_wiki_guide.jpg"
+    />
+
+    <!-- Structured data: WebApplication -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Elden Ring Build Recommender",
+        "applicationCategory": "GameApplication",
+        "operatingSystem": "Web",
+        "description": "Pick a starting class and a weapon loadout to see optimal stats, attack power, status build-up, and a per-level upgrade plan.",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "about": { "@type": "VideoGame", "name": "Elden Ring" }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <p>
+        This Elden Ring build recommender needs JavaScript to compute optimal
+        stats, attack power, and the per-level upgrade plan. Please enable
+        JavaScript to continue.
+      </p>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
