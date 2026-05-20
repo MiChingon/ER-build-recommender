@@ -78,12 +78,23 @@ export function buildSliderLevelPlan(
   return out;
 }
 
-export function generateBuildPdf(opts: {
+type PdfOpts = {
   weapon: Weapon;
   rec: Recommendation;
   loadout: LoadoutItem[];
   classData: StartingClass;
-}) {
+};
+
+export function generateBuildPdf(opts: PdfOpts) {
+  const { doc, filename } = buildBuildPdfDoc(opts);
+  doc.save(filename);
+}
+
+// Same content as generateBuildPdf but returns the jsPDF doc + the filename
+// it would have been saved as, WITHOUT triggering a browser download. Useful
+// for headless rendering — pages can be read via `doc.output("arraybuffer")`
+// and rasterised into an image pipeline outside the app.
+export function buildBuildPdfDoc(opts: PdfOpts) {
   const { weapon, rec, loadout, classData } = opts;
   const doc = new jsPDF({ unit: "pt" });
 
@@ -405,5 +416,5 @@ export function generateBuildPdf(opts: {
   doc.text(`Generated ${today} — Elden Ring Build Recommender`, 40, 800);
 
   const filename = `elden-ring-build-${classData.id}-${weapon.id}-lv${rec.options.targetLevel}.pdf`;
-  doc.save(filename);
+  return { doc, filename };
 }
