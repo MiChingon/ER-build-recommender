@@ -336,6 +336,10 @@ const BuildPicker = () => {
                   onActivate={(pos) => setActive(pos)}
                   onPickWeapon={(pos) => {
                     setActive(pos);
+                    // Reset the category filter to "all" each time the picker
+                    // opens so the user isn't stuck inside whichever category
+                    // they last browsed.
+                    setCategory("all");
                     setWeaponPickerOpen(true);
                   }}
                   onChangeAffinity={(pos) => setAffinityPickerPos(pos)}
