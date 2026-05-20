@@ -280,11 +280,20 @@ export function estimateSpellScaling(weapon: Weapon, stats: StatVector): SpellSc
   const isStaff = weapon.category === "Glintstone Staff";
   const isSeal = weapon.category === "Sacred Seal";
   if (!isStaff && !isSeal) return null;
-  const scalingStats: Stat[] = isStaff ? ["intelligence", "arcane"] : ["faith", "arcane"];
+  // Spell-scaling stats are anything other than Str / Dex in the catalyst's
+  // own scaling table. Most staves scale Int (+/- Arc); seals scale Faith
+  // (+/- Arc); but a few catalysts break the mold — Staff of the Guilty is
+  // a Glintstone Staff that scales **Faith** for Thorn sorceries — and the
+  // calc has to follow whichever spell-driving stats the weapon actually
+  // has, not the category default.
+  const baseMap = weapon.scalingTable?.base ?? weapon.scaling;
+  const maxMap = weapon.scalingTable?.max?.["Standard"] ?? weapon.scaling;
+  const spellStatPool: Stat[] = ["intelligence", "faith", "arcane"];
+  const scalingStats: Stat[] = spellStatPool.filter(
+    (s) => baseMap[s] !== undefined || maxMap[s] !== undefined,
+  );
   const computeFor = (level: "base" | "max"): number => {
-    const scalingMap = level === "base"
-      ? (weapon.scalingTable?.base ?? weapon.scaling)
-      : (weapon.scalingTable?.max?.["Standard"] ?? weapon.scaling);
+    const scalingMap = level === "base" ? baseMap : maxMap;
     let total = 0;
     for (const stat of scalingStats) {
       const entry = scalingMap[stat];

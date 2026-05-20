@@ -21981,9 +21981,9 @@ export const WEAPON_EXTRAS: Partial<Record<string, Extras>> = {
       },
       "max": {
         "Standard": {
-          "strength": "E",
-          "dexterity": "E",
-          "intelligence": "A"
+          "strength": "D",
+          "dexterity": "D",
+          "intelligence": "S"
         }
       }
     }
@@ -22099,8 +22099,8 @@ export const WEAPON_EXTRAS: Partial<Record<string, Extras>> = {
       },
       "max": {
         "Standard": {
-          "strength": "D",
-          "faith": "B"
+          "strength": "C",
+          "faith": "S"
         }
       }
     }
