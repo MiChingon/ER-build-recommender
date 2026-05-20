@@ -130,6 +130,68 @@ export default function App() {
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Outlet />
       </Container>
+      <Box
+        component="footer"
+        sx={{
+          py: 2,
+          px: 2,
+          textAlign: "center",
+          bgcolor: "transparent",
+        }}
+      >
+        <Typography
+          variant="caption"
+          sx={{ color: "rgba(255,255,255,0.55)", letterSpacing: 0.3, fontSize: "0.9rem" }}
+        >
+          Powered by the{" "}
+          <Box
+            component="a"
+            href="https://eldenring.wiki.fextralife.com/Elden+Ring+Wiki"
+            target="_blank"
+            rel="noopener noreferrer"
+            sx={{
+              color: "primary.main",
+              textDecoration: "none",
+              "&:hover": { textDecoration: "underline" },
+            }}
+          >
+            Fextralife Elden Ring Wiki
+          </Box>
+        </Typography>
+        <Typography
+          variant="caption"
+          sx={{
+            color: "rgba(255,255,255,0.55)",
+            letterSpacing: 0.3,
+            fontSize: "0.9rem",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: 0.6,
+            mt: 0.5,
+          }}
+        >
+          <Box
+            component="svg"
+            viewBox="0 0 64 64"
+            aria-hidden
+            sx={{ width: "0.95em", height: "0.95em", flexShrink: 0 }}
+          >
+            {/* Stylized Claude mark — eight petals radiating from a center */}
+            <g fill="#D97757">
+              <path d="M32 4 C34 18 34 22 32 32 C30 22 30 18 32 4 Z" />
+              <path d="M32 60 C30 46 30 42 32 32 C34 42 34 46 32 60 Z" />
+              <path d="M4 32 C18 30 22 30 32 32 C22 34 18 34 4 32 Z" />
+              <path d="M60 32 C46 34 42 34 32 32 C42 30 46 30 60 32 Z" />
+              <path d="M12 12 C22 20 25 23 32 32 C23 25 20 22 12 12 Z" />
+              <path d="M52 52 C42 44 39 41 32 32 C41 39 44 42 52 52 Z" />
+              <path d="M52 12 C44 22 41 25 32 32 C39 23 42 20 52 12 Z" />
+              <path d="M12 52 C20 42 23 39 32 32 C25 41 22 44 12 52 Z" />
+            </g>
+          </Box>
+          Built with Claude AI
+        </Typography>
+      </Box>
     </Box>
   );
 }
