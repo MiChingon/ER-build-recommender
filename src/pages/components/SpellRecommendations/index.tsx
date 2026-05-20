@@ -3,9 +3,12 @@ import { spellImageUrl } from "../../../data/spells";
 
 const SpellRecommendations = ({
   suggestions,
+  loadoutWeaponIds,
 }: {
   suggestions: import("../../../lib/types").SpellSuggestion[];
+  loadoutWeaponIds: string[];
 }) => {
+  const loadoutIdSet = new Set(loadoutWeaponIds);
   const hasSorceries = suggestions.some((s) => s.spell.type === "sorcery");
   const hasIncantations = suggestions.some((s) => s.spell.type === "incantation");
   const label =
@@ -25,7 +28,7 @@ const SpellRecommendations = ({
         <Chip size="small" variant="outlined" label={`${slotsUsed} / 10 memory slots`} />
       </Stack>
       <Stack spacing={1}>
-        {suggestions.map(({ spell, boosted }) => {
+        {suggestions.map(({ spell }) => {
           const reqs = [
             spell.requirements.intelligence ? `Int ${spell.requirements.intelligence}` : null,
             spell.requirements.faith ? `Fai ${spell.requirements.faith}` : null,
@@ -33,15 +36,20 @@ const SpellRecommendations = ({
           ]
             .filter(Boolean)
             .join(" · ");
+          // Highlight when any catalyst id wired into spell.boosted_by_catalyst
+          // is actually present in the loadout. The legacy school-based
+          // `boosted` flag is now ignored in favor of this explicit per-spell
+          // catalyst whitelist.
+          const highlight = spell.boosted_by_catalyst?.some((id) => loadoutIdSet.has(id)) ?? false;
           return (
             <Paper
               key={spell.id}
               variant="outlined"
               sx={{
                 p: 1.25,
-                borderColor: boosted ? "primary.main" : undefined,
-                borderWidth: boosted ? 2 : 1,
-                bgcolor: boosted ? "rgba(212,175,55,0.08)" : undefined,
+                borderColor: highlight ? "primary.main" : undefined,
+                borderWidth: highlight ? 2 : 1,
+                bgcolor: highlight ? "rgba(212,175,55,0.08)" : undefined,
               }}
             >
               <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
@@ -70,7 +78,7 @@ const SpellRecommendations = ({
                       }}
                     />
                     <Chip size="small" variant="outlined" label={spell.category} />
-                    {boosted && (
+                    {highlight && (
                       <Chip size="small" color="primary" label="Boosted by this catalyst" />
                     )}
                   </Stack>

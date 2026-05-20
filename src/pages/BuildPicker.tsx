@@ -619,7 +619,10 @@ const BuildPicker = () => {
                   />
 
                   {rec.spellSuggestions.length > 0 && (
-                    <SpellRecommendations suggestions={rec.spellSuggestions} />
+                    <SpellRecommendations
+                      suggestions={rec.spellSuggestions}
+                      loadoutWeaponIds={loadout.map((i) => i.weapon.id)}
+                    />
                   )}
 
                   <Rationale rationale={rec.rationale} />
