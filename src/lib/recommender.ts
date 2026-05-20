@@ -276,10 +276,17 @@ export type SpellScalingEstimate = {
 // of 100 (no-investment) plus the catalyst's per-stat numeric scaling times
 // the elemental correction curve for the relevant stat (Int for staves, Faith
 // for seals; Arcane also contributes when the catalyst has Arc scaling).
+// Non-catalyst weapons that still show a Sorcery Scaling number on their
+// status panel because their heavy / weapon-art attacks act as a glintstone
+// catalyst. They're picker-grouped under their melee category but the AP
+// panel should still surface the spell-scaling number.
+const SORCERY_CAPABLE_WEAPONS = new Set<string>(["carian-sorcery-sword"]);
+
 export function estimateSpellScaling(weapon: Weapon, stats: StatVector): SpellScalingEstimate | null {
   const isStaff = weapon.category === "Glintstone Staff";
   const isSeal = weapon.category === "Sacred Seal";
-  if (!isStaff && !isSeal) return null;
+  const isSorceryCapable = SORCERY_CAPABLE_WEAPONS.has(weapon.id);
+  if (!isStaff && !isSeal && !isSorceryCapable) return null;
   // Spell-scaling stats are anything other than Str / Dex in the catalyst's
   // own scaling table. Most staves scale Int (+/- Arc); seals scale Faith
   // (+/- Arc); but a few catalysts break the mold — Staff of the Guilty is
@@ -313,7 +320,9 @@ export function estimateSpellScaling(weapon: Weapon, stats: StatVector): SpellSc
   return {
     base: computeFor("base"),
     max: computeFor("max"),
-    type: isStaff ? "sorcery" : "incantation",
+    // Staves and sorcery-capable weapons display "Sorcery Scaling"; seals
+    // (the only remaining category here) display "Incant Scaling".
+    type: isSeal ? "incantation" : "sorcery",
   };
 }
 
@@ -323,6 +332,21 @@ export function isInfusable(weapon: Weapon): boolean {
 
 export function isCatalyst(weapon: Weapon): boolean {
   return weapon.category === "Glintstone Staff" || weapon.category === "Sacred Seal";
+}
+
+// Catalysts that cast BOTH sorceries and incantations. Staff of the Great
+// Beyond is the canonical SOTE example — it's categorised as a Glintstone
+// Staff for picker/grouping purposes but the in-game weapon also accepts
+// incantations. Add future hybrids here so recommendSpells offers both
+// spell types when one of these is in the loadout.
+const HYBRID_CATALYSTS = new Set<string>(["staff-of-the-great-beyond"]);
+
+export function catalystCastsSorceries(weapon: Weapon): boolean {
+  return weapon.category === "Glintstone Staff" || HYBRID_CATALYSTS.has(weapon.id);
+}
+
+export function catalystCastsIncantations(weapon: Weapon): boolean {
+  return weapon.category === "Sacred Seal" || HYBRID_CATALYSTS.has(weapon.id);
 }
 
 // Shields contribute requirement floors and equip-load weight but their scaling
@@ -1110,8 +1134,8 @@ export function recommendSpells(
 ): SpellSuggestion[] {
   const catalysts = loadout.filter((i) => isCatalyst(i.weapon));
   if (catalysts.length === 0) return [];
-  const hasStaff = catalysts.some((i) => i.weapon.category === "Glintstone Staff");
-  const hasSeal = catalysts.some((i) => i.weapon.category === "Sacred Seal");
+  const hasStaff = catalysts.some((i) => catalystCastsSorceries(i.weapon));
+  const hasSeal = catalysts.some((i) => catalystCastsIncantations(i.weapon));
 
   const boostedCategories = new Set<string>();
   for (const item of catalysts) {

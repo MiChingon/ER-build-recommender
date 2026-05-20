@@ -6109,7 +6109,7 @@ export const WEAPON_EXTRAS: Partial<Record<string, Extras>> = {
         "Standard": {
           "strength": "E",
           "dexterity": "D",
-          "intelligence": "B"
+          "intelligence": "S"
         }
       }
     }
