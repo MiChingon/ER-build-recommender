@@ -4,6 +4,8 @@ A single-page web app that turns a weapon loadout + a starting class + a target 
 
 Live site: _add deployment URL when published._
 
+![Screenshot of the build picker with a Hero + Banished Knight's Greatsword (Flame Art) + Erdtree Seal loadout](docs/media/screenshot.png)
+
 ## Features
 
 - **Loadout-driven recommendations.** Pick up to 6 weapons (3 per hand), an infusion / affinity per slot, armor, talismans, and the recommender computes hard requirements, scaling soft caps, vigor / mind / endurance floors, equip-load fit, and budget-fits everything to the slider's target Soul Level.
