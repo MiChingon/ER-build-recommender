@@ -14,6 +14,18 @@ const theme = createTheme({
     primary: { main: "#d4af37" },
     background: { default: "#0f0e0c", paper: "#1a1815" },
   },
+  components: {
+    // Touch devices have no hover, so tooltips would only fire on long-press
+    // with MUI's default 700ms delay — feels unresponsive. Drop the delay
+    // to near-zero and hold the tooltip open for 5 seconds so users actually
+    // have time to read it.
+    MuiTooltip: {
+      defaultProps: {
+        enterTouchDelay: 50,
+        leaveTouchDelay: 5000,
+      },
+    },
+  },
 });
 
 ReactDOM.createRoot(document.getElementById("root")!).render(

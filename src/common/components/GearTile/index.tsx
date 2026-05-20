@@ -66,9 +66,12 @@ const GearTile = ({
               e.stopPropagation();
               onClear();
             }}
-            sx={{ position: "absolute", top: 0, right: 0, p: 0.25 }}
+            sx={{ position: "absolute", top: 0, right: 0, p: { xs: 0.75, sm: 0.25 } }}
           >
-            <Typography variant="caption" sx={{ fontSize: "0.85rem", lineHeight: 1 }}>
+            <Typography
+              variant="caption"
+              sx={{ fontSize: { xs: "1rem", sm: "0.85rem" }, lineHeight: 1 }}
+            >
               ×
             </Typography>
           </IconButton>

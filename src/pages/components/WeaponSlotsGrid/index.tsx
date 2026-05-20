@@ -150,9 +150,14 @@ const WeaponSlotsGrid = ({
                         size="small"
                         aria-label="Change weapon"
                         onClick={(e) => { e.stopPropagation(); onPickWeapon({ hand, idx }); }}
-                        sx={{ position: "absolute", top: 0, right: 18, p: 0.25 }}
+                        sx={{
+                          position: "absolute",
+                          top: 0,
+                          right: { xs: 30, sm: 18 },
+                          p: { xs: 0.75, sm: 0.25 },
+                        }}
                       >
-                        <Typography variant="caption" sx={{ fontSize: "0.8rem", lineHeight: 1 }}>↻</Typography>
+                        <Typography variant="caption" sx={{ fontSize: { xs: "1rem", sm: "0.8rem" }, lineHeight: 1 }}>↻</Typography>
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Clear slot">
@@ -160,9 +165,9 @@ const WeaponSlotsGrid = ({
                         size="small"
                         aria-label="Clear slot"
                         onClick={(e) => { e.stopPropagation(); onClear({ hand, idx }); }}
-                        sx={{ position: "absolute", top: 0, right: 0, p: 0.25 }}
+                        sx={{ position: "absolute", top: 0, right: 0, p: { xs: 0.75, sm: 0.25 } }}
                       >
-                        <Typography variant="caption" sx={{ fontSize: "0.85rem", lineHeight: 1 }}>×</Typography>
+                        <Typography variant="caption" sx={{ fontSize: { xs: "1rem", sm: "0.85rem" }, lineHeight: 1 }}>×</Typography>
                       </IconButton>
                     </Tooltip>
                   </>
