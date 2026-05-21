@@ -86,3 +86,7 @@ The app has no backend, no auth, no cookies / local storage, and ships a defensi
 ## Contributing
 
 This is a personal project and not currently accepting PRs, but feel free to fork — the recommender is pure functions, well-typed, and easy to extend with new affinities, starting classes, or events.
+
+## License
+
+[MIT](./LICENSE) — applies to the source code only. Weapon / armor / spell data and images are sourced from the Elden Ring fextralife wiki and the game's regulation file under their own terms; "Elden Ring" is a trademark of FromSoftware / Bandai Namco. See the LICENSE file for the full attribution note.
