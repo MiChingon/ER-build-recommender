@@ -1,5 +1,6 @@
 import { Link as RouterLink, Outlet } from "react-router-dom";
 import { AppBar, Box, Container, Stack, Toolbar, Typography } from "@mui/material";
+import LinkIcon from "@mui/icons-material/Link";
 
 const BACKGROUND_IMAGE =
   "https://eldenring.wiki.fextralife.com/file/Elden-Ring/erdtree.jpg";
@@ -113,6 +114,8 @@ export default function App() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          gap: { xs: 1, md: 2 },
+          flexWrap: "wrap",
           textAlign: "center",
           px: 2,
           bgcolor: "rgba(212,175,55,0.12)",
@@ -125,7 +128,31 @@ export default function App() {
           fontSize: { xs: "0.85rem", md: "1rem" },
         }}
       >
-        Available for adds, contact the owner
+        <Box component="span">Available for adds, contact</Box>
+        <Box
+          component="a"
+          href="https://fabianalmaraz.dev/"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Owner contact page (opens in new tab)"
+          sx={{
+            color: "primary.main",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 28,
+            height: 28,
+            borderRadius: "50%",
+            border: "1px solid rgba(212,175,55,0.6)",
+            transition: "background-color 120ms ease, border-color 120ms ease",
+            "&:hover": {
+              bgcolor: "rgba(212,175,55,0.2)",
+              borderColor: "primary.main",
+            },
+          }}
+        >
+          <LinkIcon sx={{ fontSize: "1rem" }} />
+        </Box>
       </Box>
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Outlet />
