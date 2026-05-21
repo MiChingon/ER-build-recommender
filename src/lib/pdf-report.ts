@@ -413,7 +413,7 @@ export function buildBuildPdfDoc(opts: PdfOpts) {
   doc.setFontSize(8);
   doc.setTextColor(150);
   const today = new Date().toLocaleDateString();
-  doc.text(`Generated ${today} — Elden Ring Build Recommender`, 40, 800);
+  doc.text(`Generated ${today} — Tarnished Builds`, 40, 800);
 
   const filename = `elden-ring-build-${classData.id}-${weapon.id}-lv${rec.options.targetLevel}.pdf`;
   return { doc, filename };

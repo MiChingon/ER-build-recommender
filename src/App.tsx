@@ -76,7 +76,7 @@ export default function App() {
                     lineHeight: 1.1,
                   }}
                 >
-                  Elden Ring Build Recommender
+                  Tarnished Builds
                 </Typography>
                 <Typography
                   component="span"

@@ -1,8 +1,8 @@
-# Elden Ring Build Recommender
+# Tarnished Builds
 
 A single-page web app that turns a weapon loadout + a starting class + a target Soul Level into an optimal stat spread, an attack-power breakdown per weapon, suggested spells, and a downloadable PDF level-up plan.
 
-Live site: _add deployment URL when published._
+Live site: **[tarnishedbuilds.com](https://tarnishedbuilds.com/)**
 
 ![Screenshot of the build picker with a Hero + Banished Knight's Greatsword (Flame Art) + Erdtree Seal loadout](docs/media/screenshot.png)
 
