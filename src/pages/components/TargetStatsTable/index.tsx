@@ -16,7 +16,8 @@ const TargetStatsTable = ({
       <Typography variant="subtitle2" gutterBottom>
         Target stats vs {classBaseLabel}
       </Typography>
-      <Table size="small">
+      <Box sx={{ overflowX: "auto" }}>
+        <Table size="small" sx={{ minWidth: 400 }}>
         <TableHead>
           <TableRow>
             <TableCell>Stat</TableCell>
@@ -71,7 +72,8 @@ const TargetStatsTable = ({
             );
           })}
         </TableBody>
-      </Table>
+        </Table>
+      </Box>
     </Box>
   );
 }

@@ -20,16 +20,17 @@ const ClassRanking = ({
         needed" is the minimum Soul Level that class would need to reach all targets — green
         if it fits within your target of {targetLevel}, red if it goes over.
       </Typography>
-      <Table size="small">
-        <TableHead>
-          <TableRow>
-            <TableCell>Class</TableCell>
-            <TableCell align="right">Start Lv</TableCell>
-            <TableCell align="right">Waste</TableCell>
-            <TableCell align="right">Deficit</TableCell>
-            <TableCell align="right">Lv needed</TableCell>
-          </TableRow>
-        </TableHead>
+      <Box sx={{ overflowX: "auto" }}>
+        <Table size="small" sx={{ minWidth: 460 }}>
+          <TableHead>
+            <TableRow>
+              <TableCell>Class</TableCell>
+              <TableCell align="right">Start Lv</TableCell>
+              <TableCell align="right">Waste</TableCell>
+              <TableCell align="right">Deficit</TableCell>
+              <TableCell align="right">Lv needed</TableCell>
+            </TableRow>
+          </TableHead>
         <TableBody>
           {matches.map(({ cls, waste, deficit, finalLevel }) => {
             const highlight = cls.id === highlightId;
@@ -53,8 +54,9 @@ const ClassRanking = ({
               </TableRow>
             );
           })}
-        </TableBody>
-      </Table>
+          </TableBody>
+        </Table>
+      </Box>
       <Divider sx={{ mt: 2 }} />
     </Box>
   );
