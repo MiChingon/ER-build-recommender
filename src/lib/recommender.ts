@@ -349,30 +349,12 @@ export function catalystCastsIncantations(weapon: Weapon): boolean {
   return weapon.category === "Sacred Seal" || HYBRID_CATALYSTS.has(weapon.id);
 }
 
-// Shields contribute requirement floors and equip-load weight but their scaling
-// is too minor to justify pushing the player's primary stat to its soft cap by
-// default. A shield IS included in the scaling push when one of these holds:
-//   1) it is the only thing in the loadout (no other items at all);
-//   2) every other non-shield item is a catalyst (so the shield is the only
-//      melee/physical option and its AP actually matters);
-//   3) some other damaging weapon in the loadout already drives the same
-//      scaling stat as the shield — in that case including the shield is a
-//      free win since the stat is already being pushed.
+// Shields contribute requirement floors and equip-load weight but their
+// scaling NEVER feeds the leftover-points push — shield AP isn't a goal
+// the recommender chases. Wield requirements still apply, so the player
+// can actually equip the shield; the AP-driving stat is just kept out of
+// `primaryScalingStats` regardless of which other items are in the loadout.
 const SHIELD_CATEGORIES = new Set(["Small Shield", "Medium Shield", "Greatshield"]);
-
-function shouldIncludeShieldScaling(shield: LoadoutItem, loadout: LoadoutItem[]): boolean {
-  const damagers = loadout.filter(
-    (i) =>
-      i !== shield &&
-      !SHIELD_CATEGORIES.has(i.weapon.category) &&
-      !isCatalyst(i.weapon),
-  );
-  if (damagers.length === 0) return true;
-  const shieldPrimaries = new Set(getPrimaryStats(shield.weapon, shield.affinity));
-  return damagers.some((d) =>
-    getPrimaryStats(d.weapon, d.affinity).some((s) => shieldPrimaries.has(s)),
-  );
-}
 
 function affinityAddsSpellScaling(affinity: Affinity): boolean {
   return (
@@ -500,7 +482,12 @@ const EQUIP_LOAD_ANCHORS: ReadonlyArray<readonly [number, number]> = [
   [99, 160],
 ];
 
-const TARGET_LOAD_RATIO = 0.99;
+// Aim for medium roll (< 70 % load) rather than just dodging overload.
+// Heavy roll is functional but cripples roll speed; pushing Endurance up
+// front to avoid it is more valuable than another point of scaling stat
+// — so this ratio is a mandatory floor that gets baked in BEFORE the
+// budget-fit step cuts scaling overage to size.
+const TARGET_LOAD_RATIO = 0.69;
 
 export function getMaxEquipLoad(endurance: number): number {
   return interpolateAnchors(endurance, EQUIP_LOAD_ANCHORS);
@@ -628,13 +615,16 @@ function getPrimaryStats(weapon: Weapon, affinity: Affinity): Stat[] {
   const scalingStats = STAT_ORDER.filter((s) => gradeRank(s) > 0);
 
   // Catalysts are a special case: a staff or seal's "primary" stats are every
-  // stat it scales with, not just the top-grade letter. Dragon Communion Seal
-  // has Arc B and Faith C; both deserve investment because Faith governs
-  // incant-casting requirements and Faith + Arc together drive Sorcery /
-  // Incant Scaling on the catalyst's status sheet.
+  // spell-driving stat it scales with (Int / Faith / Arcane), not just the
+  // top-grade letter. Dragon Communion Seal has Arc B and Faith C; both
+  // deserve investment because Faith governs incant-casting requirements and
+  // Faith + Arc together drive Incant Scaling on the catalyst's status sheet.
+  // Str / Dex scaling on a catalyst only affects its melee AP — never the
+  // goal here, so it's deliberately filtered out.
+  const CATALYST_SPELL_STATS = new Set<Stat>(["intelligence", "faith", "arcane"]);
   let primaries: Stat[] = [];
   if (isCatalyst(weapon) && scalingStats.length > 0) {
-    primaries = scalingStats.slice();
+    primaries = scalingStats.filter((s) => CATALYST_SPELL_STATS.has(s));
   } else if (scalingStats.length > 0) {
     const bestRank = Math.max(...scalingStats.map(gradeRank));
     primaries = scalingStats.filter((s) => gradeRank(s) === bestRank);
@@ -684,7 +674,15 @@ function getSecondaryStats(weapon: Weapon, affinity: Affinity): Stat[] {
     .filter((x) => x.rank > 0);
   if (ranked.length === 0) return [];
   const topRank = Math.max(...ranked.map((x) => x.rank));
-  return ranked.filter((x) => x.rank < topRank).map((x) => x.s);
+  const result = ranked.filter((x) => x.rank < topRank).map((x) => x.s);
+  // Same rule as getPrimaryStats: catalysts only care about spell-driving
+  // stats — Str / Dex tiers on a staff or seal are melee-only and never
+  // belong in the leftover-points push.
+  if (isCatalyst(weapon)) {
+    const CATALYST_SPELL_STATS = new Set<Stat>(["intelligence", "faith", "arcane"]);
+    return result.filter((s) => CATALYST_SPELL_STATS.has(s));
+  }
+  return result;
 }
 
 // True when every non-shield item in the loadout is Standard-infused AND
@@ -760,12 +758,7 @@ export function getTargetStats(
 
   if (!internal?.noScalingPush) {
     for (const item of loadoutItems) {
-      if (
-        SHIELD_CATEGORIES.has(item.weapon.category) &&
-        !shouldIncludeShieldScaling(item, loadoutItems)
-      ) {
-        continue;
-      }
+      if (SHIELD_CATEGORIES.has(item.weapon.category)) continue;
       const wpnPrimaries = getPrimaryStats(item.weapon, item.affinity);
       for (const stat of wpnPrimaries) {
         const reqRaw = item.weapon.requirements[stat] ?? 0;
@@ -971,12 +964,7 @@ export function getTargetStats(
     // Str is C and Dex is D) is added to the rotation as well.
     const primaryScalingStats: Stat[] = [];
     for (const item of loadoutItems) {
-      if (
-        SHIELD_CATEGORIES.has(item.weapon.category) &&
-        !shouldIncludeShieldScaling(item, loadoutItems)
-      ) {
-        continue;
-      }
+      if (SHIELD_CATEGORIES.has(item.weapon.category)) continue;
       for (const stat of getPrimaryStats(item.weapon, item.affinity)) {
         if (!primaryScalingStats.includes(stat)) primaryScalingStats.push(stat);
       }
