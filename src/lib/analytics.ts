@@ -5,25 +5,11 @@ declare global {
   }
 }
 
+// gtag.js itself is injected into <head> by src/components/GoogleAnalytics.tsx
+// via react-helmet-async — this module only exposes named event helpers so
+// product code never reaches for window.gtag directly.
+
 const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
-
-export function initAnalytics(): void {
-  if (!measurementId) return;
-  if (typeof window === "undefined") return;
-
-  const script = document.createElement("script");
-  script.async = true;
-  script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
-  document.head.appendChild(script);
-
-  window.dataLayer = window.dataLayer ?? [];
-  function gtag(...args: unknown[]) {
-    window.dataLayer!.push(args);
-  }
-  window.gtag = gtag;
-  gtag("js", new Date());
-  gtag("config", measurementId);
-}
 
 export function trackPdfDownload(startingClass: string): void {
   if (!measurementId) return;

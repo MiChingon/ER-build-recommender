@@ -1,6 +1,7 @@
 import { Link as RouterLink, Outlet } from "react-router-dom";
 import { AppBar, Box, Container, Stack, Toolbar, Typography } from "@mui/material";
 import LinkIcon from "@mui/icons-material/Link";
+import GoogleAnalytics from "./components/GoogleAnalytics";
 
 const BACKGROUND_IMAGE =
   "https://eldenring.wiki.fextralife.com/file/Elden-Ring/erdtree.jpg";
@@ -43,6 +44,7 @@ export default function App() {
         backgroundRepeat: "no-repeat",
       }}
     >
+      <GoogleAnalytics />
       <AppBar
         position="static"
         sx={{
