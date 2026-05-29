@@ -1,15 +1,15 @@
 ---
-name: close-requirement
-description: Turn a rough task or idea into a decision-closed, senior-reviewable requirement by asking structured questions grounded in the existing codebase. Only draft the final artifact after all key decisions are resolved and the user confirms.
+name: enrich-user-story
+description: Use when the user wants to turn a vague feature idea or rough request into a decision-closed, senior-reviewable user story ready for SDD planning. Triggers include the slash command `/enrich-user-story`, phrases like "turn this into a story", "spec this out", "I have an idea for X, help me structure it", "close decisions for X", or "make a requirement for X". Asks structured clarifying questions grounded in the actual codebase, drafts the requirement only after the user confirms, and persists it to `ai-specs/requirements/<slug>.md` so the planning workflow can consume it.
 ---
 
-# Close Requirement
+# Enrich User Story
 
 ## Purpose
 
-Help the user transform a vague task or idea into a **decision-closed, technically clear requirement**.
+Help the user transform a vague idea into a **decision-closed, technically clear user story**.
 
-This artifact must be understandable by a senior engineer and serve as input for Spec-Driven Development (SDD) planning.
+This artifact must be understandable by a senior engineer and serve as input for [Spec-Driven Development (SDD) planning](../../../docs/doc_ai_planning_mode.md).
 
 Do not optimize for wording.
 Optimize for **clarity, completeness, and closed decisions**.
@@ -18,11 +18,14 @@ Optimize for **clarity, completeness, and closed decisions**.
 
 ## Context
 
-You MUST read the following file before asking any questions:
+You MUST read the following files before asking any questions:
 
-docs/doc_architecture.md
+- [`docs/doc_architecture.md`](../../../docs/doc_architecture.md) — layer responsibilities, conventions, anti-patterns
+- [`CLAUDE.md`](../../../CLAUDE.md) — the day-to-day codebase guide
 
-If you cannot access or read this file, stop and inform the user.
+If you cannot access or read these files, stop and inform the user.
+
+Once read, ground every suggested default in the actual code (file paths, component names, recommender helpers, data files). Generic suggestions are forbidden when code-based evidence is available.
 
 ---
 
@@ -49,7 +52,7 @@ Rules:
 - each question must resolve a concrete decision
 - avoid redundant or overlapping questions
 - prefer trade-off questions (A vs B) over open-ended ones
-- whenever possible, include a suggested default
+- whenever possible, include a suggested default grounded in the codebase
 
 ---
 
@@ -57,23 +60,23 @@ Rules:
 
 Your questions MUST collectively cover these dimensions:
 
-1. Solution shape
-   (e.g. new endpoint vs extending existing behavior)
+1. **Solution shape**
+   (e.g. new component under `src/pages/components/<Name>/` vs extending an existing component, new field in the `Recommendation` shape vs deriving inline, new data row in a hand-curated `src/data/*.ts` vs regenerating a machine-generated file)
 
-2. Expected output
-   (what must be returned and in what form)
+2. **Expected output**
+   (what the user sees in the UI, what the recommender returns, what gets written to `Recommendation` / `Weapon` / new types, what the PDF report shows)
 
-3. Behavior
-   (normal flow, edge cases, and failure scenarios)
+3. **Behavior**
+   (normal flow, edge cases, failure scenarios — including empty loadout, missing data, slider hitting min/max level, two-hand toggle interactions)
 
-4. Actor and usage context
-   (who uses this and why)
+4. **Actor and usage context**
+   (who triggers this, from where in the UI, why)
 
-5. Scope boundaries
-   (what is in scope vs out of scope)
+5. **Scope boundaries**
+   (what is in scope vs out of scope — in particular: no backend changes, no machine-generated file edits, no test runner additions, no removal of the ads banner)
 
-6. Success criteria
-   (how we know this is correctly implemented)
+6. **Success criteria**
+   (how we know this is correctly implemented — `tsc -b` clean, `npm run doctor` no new regressions, specific manual-browser flow passes)
 
 If any of these is unclear, you MUST ask about it.
 
@@ -84,22 +87,23 @@ If any of these is unclear, you MUST ask about it.
 Before proposing any suggested default:
 
 - inspect the existing codebase when relevant
-- identify current patterns, endpoints, naming conventions, and data structures
-- align with the architecture described in `docs/doc_architecture.md`
+- identify current patterns, file paths, component splits, hooks, data shapes
+- align with the architecture described in [`docs/doc_architecture.md`](../../../docs/doc_architecture.md)
 
 Suggested defaults must be grounded in:
 
-- existing endpoints or API structure
-- current request/response contracts
-- existing services or flows
-- real constraints visible in the codebase
+- existing per-component files under `src/pages/components/<Name>/index.tsx`
+- existing shared primitives under `src/common/components/`
+- the `useBuildPickerState` hook and the shape of `BuildPickerProps`
+- the recommender's loadout-driven contract (`recommend(weapon, opts)` and `getTargetStats`)
+- existing data shapes in `src/data/*.ts`
+- the MUI v9 `sx` prop pattern and theme tokens (`primary.main`, `action.hover`, `STAT_COLORS`)
 
-Avoid generic suggestions if code-based evidence is available.
+Avoid generic suggestions when code-based evidence is available.
 
 When suggesting defaults:
-
 - explain briefly why the recommendation fits the current system
-- when possible, reference specific files, routes, or components
+- reference specific files, components, or helpers (e.g. "extend `LoadoutDamagePanel` rather than a new card — it already owns the AP breakdown layout")
 
 ---
 
@@ -115,7 +119,7 @@ When suggesting defaults:
 
 When all key decisions are resolved, ask:
 
-"Everything looks clear now. Do you want me to draft the final requirement?"
+"Everything looks clear now. Do you want me to draft the final user story?"
 
 Do not write it yet.
 
@@ -123,7 +127,12 @@ Do not write it yet.
 
 ### 5. Draft only after confirmation
 
-Only if the user explicitly confirms, write the final artifact.
+Only if the user explicitly confirms:
+
+1. Render the user story inline in chat (so the user can read it immediately) using the **`# User Story`** template below.
+2. Persist the same content to `ai-specs/requirements/<slug>.md` where `<slug>` is a short kebab-case derivation of the title (e.g. "Add dark-mode toggle to BuildPicker" → `add-dark-mode-toggle-to-buildpicker.md`).
+3. If `ai-specs/requirements/` does not exist, create it.
+4. Report the final file path to the user so the SDD planning step can pick it up.
 
 ---
 
@@ -133,6 +142,7 @@ Only if the user explicitly confirms, write the final artifact.
 
 Respond in the same language as the user:
 
+```markdown
 ## Understanding
 
 <what you believe the user wants>
@@ -148,6 +158,7 @@ Respond in the same language as the user:
 
    Suggested default:
    <recommended option grounded in code and architecture>
+```
 
 ---
 
@@ -155,21 +166,24 @@ Respond in the same language as the user:
 
 Respond in the same language as the user:
 
+```markdown
 ## Status
 
 All key decisions are clear and no relevant ambiguity remains.
 
 ## Confirmation
 
-Do you want me to draft the final requirement?
+Do you want me to draft the final user story?
+```
 
 ---
 
-### If confirmed
+### If confirmed — `# User Story` template
 
-Respond in the same language as the user:
+Render this BOTH in chat and at `ai-specs/requirements/<slug>.md`:
 
-# Requirement: <clear title>
+```markdown
+# User Story: <clear title>
 
 ## Story
 
@@ -179,11 +193,11 @@ so that <outcome>.
 
 ## Objective
 
-<what this enables>
+<what this enables for the user>
 
 ## Context
 
-<problem and why it matters>
+<problem and why it matters; cite the existing code paths affected>
 
 ## Scope
 
@@ -210,12 +224,26 @@ so that <outcome>.
 
 ## Expected output
 
-- <what is returned and in what shape>
+- <what the user sees / what the recommender returns / what shape changes>
+
+## Affected files (anticipated)
+
+- `src/pages/components/<Name>/index.tsx` — <reason>
+- `src/lib/recommender.ts` — <reason>
+- `src/data/<file>.ts` — <reason>
+- <etc>
 
 ## Success criteria
 
-- <observable condition>
-- <validation outcome>
+- `tsc -b` and `npm run build` clean
+- `npm run doctor` no new regressions
+- <specific manual-browser flow that passes>
+- <specific observable behavior in the UI>
+```
+
+After rendering, end the chat message with:
+
+> Saved to `ai-specs/requirements/<slug>.md`. Hand off to the SDD planning step ([`docs/doc_ai_planning_mode.md`](../../../docs/doc_ai_planning_mode.md)) to generate a High-Level Technical Contract.
 
 ---
 
@@ -226,3 +254,5 @@ so that <outcome>.
 - Do not draft if decisions remain open
 - Always respond in the user's language
 - Optimize for clarity, not verbosity
+- Never propose changes outside this project's architecture (no backend, no test runner, no hand-edits to machine-generated data files, no removal of the `src/App.tsx` ads banner)
+- Always persist the final story to `ai-specs/requirements/<slug>.md` after drafting
