@@ -16,7 +16,6 @@ export const DEFAULT_TARGET_LEVEL = 125;
 export type WeaponUpgrade = "base" | "max";
 
 export const MAX_UPGRADE_MULTIPLIER = 2.45;
-export const SOFT_CAP_STAT_VALUE = 80;
 
 export const SCALING_FACTOR: Record<ScaleGrade, number> = {
   S: 1.75, A: 1.30, B: 0.95, C: 0.70, D: 0.45, E: 0.18,

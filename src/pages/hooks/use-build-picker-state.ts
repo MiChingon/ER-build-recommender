@@ -1,7 +1,25 @@
 import { useState } from "react";
-import { BuildPickerProps } from "../BuildPicker";
-import { WeaponCategory } from "../../data/weapons";
+import { Weapon, WeaponCategory } from "../../data/weapons";
+import { Affinity } from "../../lib/types";
+import { ArmorSelection } from "../../data/armor";
+import { SlotPos } from "../../common/types";
 import { getClass } from "../../data/classes";
+
+type WeaponSlot = { weapon: Weapon | null; affinity: Affinity };
+
+export interface BuildPickerProps {
+  category: WeaponCategory | "all";
+  rightHand: WeaponSlot[];
+  leftHand: WeaponSlot[];
+  active: SlotPos;
+  weaponPickerOpen: boolean;
+  affinityPickerPos: SlotPos | null;
+  classId: string;
+  targetLevel: number;
+  twoHand: boolean;
+  talismanIds: (string | null)[];
+  armorSelection: ArmorSelection;
+}
 
 const useBuildPickerState = (initialState: BuildPickerProps) => {
   const [state, setState] = useState<BuildPickerProps>(initialState);
@@ -28,4 +46,3 @@ const useBuildPickerState = (initialState: BuildPickerProps) => {
 }
 
 export default useBuildPickerState;
-

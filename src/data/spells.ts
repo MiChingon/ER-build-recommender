@@ -287,10 +287,6 @@ export const catalystBoosts: Record<string, string[]> = {
   "dryleaf-seal": ["Bestial"],
 };
 
-export function getSpellById(id: string): Spell | undefined {
-  return spells.find((s) => s.id === id);
-}
-
 function spellImageSlug(name: string): string {
   return name
     .toLowerCase()

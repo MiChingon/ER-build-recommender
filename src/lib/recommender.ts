@@ -110,11 +110,12 @@ export function estimateAttackPower(
   // Build per-damage-type breakdown when we have regulation data
   const breakdown: DamageBreakdown[] = [];
   if (dmgInfo && aec) {
-    for (const dt of DAMAGE_TYPE_ORDER) {
+    for (let dtIdx = 0; dtIdx < DAMAGE_TYPE_ORDER.length; dtIdx++) {
+      const dt = DAMAGE_TYPE_ORDER[dtIdx];
       const baseAtZero = dmgInfo.attack[dt];
       if (!baseAtZero) continue;
       const attackMult = upgrade === "max" && reinforce
-        ? reinforce.attack[String(DAMAGE_TYPE_ORDER.indexOf(dt))] ?? 1
+        ? reinforce.attack[String(dtIdx)] ?? 1
         : 1;
       const scalingMult = upgrade === "max" && reinforce ? 1 : 1; // numeric already includes reinforce in max
       const applicableStats = aec[dt] ?? [];
@@ -341,11 +342,11 @@ export function isCatalyst(weapon: Weapon): boolean {
 // spell types when one of these is in the loadout.
 const HYBRID_CATALYSTS = new Set<string>(["staff-of-the-great-beyond"]);
 
-export function catalystCastsSorceries(weapon: Weapon): boolean {
+function catalystCastsSorceries(weapon: Weapon): boolean {
   return weapon.category === "Glintstone Staff" || HYBRID_CATALYSTS.has(weapon.id);
 }
 
-export function catalystCastsIncantations(weapon: Weapon): boolean {
+function catalystCastsIncantations(weapon: Weapon): boolean {
   return weapon.category === "Sacred Seal" || HYBRID_CATALYSTS.has(weapon.id);
 }
 
@@ -458,11 +459,11 @@ function scalingCorrection(stat: Stat, value: number): number {
   return interpolateGameGraph(value, anchors);
 }
 
-export function getVigorTarget(level: number): number {
+function getVigorTarget(level: number): number {
   return interpolateAnchors(level, VIGOR_ANCHORS);
 }
 
-export function getEnduranceTarget(level: number): number {
+function getEnduranceTarget(level: number): number {
   return interpolateAnchors(level, ENDURANCE_ANCHORS);
 }
 
@@ -493,7 +494,7 @@ export function getMaxEquipLoad(endurance: number): number {
   return interpolateAnchors(endurance, EQUIP_LOAD_ANCHORS);
 }
 
-export function classifyLoad(percent: number): RollCategory {
+function classifyLoad(percent: number): RollCategory {
   if (percent >= 100) return "overloaded";
   if (percent >= 70) return "heavy";
   if (percent > 30) return "medium";
@@ -509,7 +510,7 @@ function enduranceNeededFor(weight: number, ratio: number): number {
 
 export type MindProfile = "melee" | "spellblade" | "caster";
 
-export function getMindTarget(level: number, profile: MindProfile): number {
+function getMindTarget(level: number, profile: MindProfile): number {
   const anchors =
     profile === "caster"
       ? MIND_ANCHORS_CASTER
@@ -519,7 +520,7 @@ export function getMindTarget(level: number, profile: MindProfile): number {
   return interpolateAnchors(level, anchors);
 }
 
-export function getScalingTarget(
+function getScalingTarget(
   req: number,
   isElemental: boolean,
   level: number,
@@ -544,7 +545,7 @@ export function getScalingTarget(
   );
 }
 
-export function getMinLevelForClassAndWeapon(
+function getMinLevelForClassAndWeapon(
   cls: StartingClass,
   weapon: Weapon,
   twoHand: boolean,
@@ -701,12 +702,12 @@ function shouldIncludeSecondaryScaling(loadout: LoadoutItem[]): boolean {
   return primarySets.every((p) => p[0] === first);
 }
 
-export function getEffectiveStrRequirement(weapon: Weapon, twoHand: boolean, strengthStartingValue: number): number {
+function getEffectiveStrRequirement(weapon: Weapon, twoHand: boolean, strengthStartingValue: number): number {
   const req = weapon.requirements.strength ?? 0;
   return adjustStrForTwoHand(req, twoHand, strengthStartingValue);
 }
 
-export function getTargetStats(
+function getTargetStats(
   weapon: Weapon,
   opts: RecommendOptions,
   internal?: { noScalingPush?: boolean; noBudgetFit?: boolean },
@@ -1069,7 +1070,7 @@ export function getTargetStats(
   return { target, rationale };
 }
 
-export function computeWaste(classBase: StatVector, target: StatVector): number {
+function computeWaste(classBase: StatVector, target: StatVector): number {
   let waste = 0;
   for (const stat of STAT_ORDER) {
     const excess = classBase[stat] - target[stat];
@@ -1078,7 +1079,7 @@ export function computeWaste(classBase: StatVector, target: StatVector): number 
   return waste;
 }
 
-export function computeDeficit(classBase: StatVector, target: StatVector): number {
+function computeDeficit(classBase: StatVector, target: StatVector): number {
   let deficit = 0;
   for (const stat of STAT_ORDER) {
     const gap = target[stat] - classBase[stat];
@@ -1087,7 +1088,7 @@ export function computeDeficit(classBase: StatVector, target: StatVector): numbe
   return deficit;
 }
 
-export function rankClasses(target: StatVector): ClassMatch[] {
+function rankClasses(target: StatVector): ClassMatch[] {
   return classes
     .map((cls) => {
       const waste = computeWaste(cls.stats, target);
@@ -1102,7 +1103,7 @@ export function rankClasses(target: StatVector): ClassMatch[] {
     });
 }
 
-export function buildLevelingPlan(classBase: StatVector, target: StatVector): LevelingStep[] {
+function buildLevelingPlan(classBase: StatVector, target: StatVector): LevelingStep[] {
   const steps: LevelingStep[] = [];
   for (const stat of STAT_ORDER) {
     const from = classBase[stat];
@@ -1113,9 +1114,9 @@ export function buildLevelingPlan(classBase: StatVector, target: StatVector): Le
   return steps.sort((a, b) => b.points - a.points);
 }
 
-export const MAX_MEMORY_SLOTS = 10;
+const MAX_MEMORY_SLOTS = 10;
 
-export function recommendSpells(
+function recommendSpells(
   target: StatVector,
   loadout: LoadoutItem[],
   maxMemorySlots = MAX_MEMORY_SLOTS,

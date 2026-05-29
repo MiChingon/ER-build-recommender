@@ -99,7 +99,7 @@ const WeaponSlotsGrid = ({
           const isActive = active.hand === hand && active.idx === idx;
           const w = slot.weapon;
           return (
-            <Stack key={idx} spacing={0.5} sx={{ flex: "1 1 0", minWidth: 0 }}>
+            <Stack key={`${hand}-${idx}`} spacing={0.5} sx={{ flex: "1 1 0", minWidth: 0 }}>
               <Paper
                 variant="outlined"
                 onClick={() => (slot.weapon ? onActivate({ hand, idx }) : onPickWeapon({ hand, idx }))}

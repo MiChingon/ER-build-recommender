@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "doctor": "npx react-doctor@latest"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -25,6 +26,7 @@
     "@types/react": "^18.3.10",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
+    "react-doctor": "^0.2.11",
     "typescript": "^5.5.4",
     "vite": "^5.4.8"
   }
