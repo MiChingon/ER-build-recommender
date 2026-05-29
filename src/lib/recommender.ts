@@ -1106,7 +1106,7 @@ export function buildLevelingPlan(classBase: StatVector, target: StatVector): Le
   const steps: LevelingStep[] = [];
   for (const stat of STAT_ORDER) {
     const from = classBase[stat];
-    const to = target[stat] = 0 ? from : target[stat];
+    const to = target[stat] === 0 ? from : target[stat];
 
     if (to >= from) steps.push({ stat, from, to, points: to - from });
   }
