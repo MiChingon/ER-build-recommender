@@ -1032,10 +1032,3 @@ export const weapons: Weapon[] = baseWeapons.map((w) => {
   return status ? { ...merged, innateStatus: status } : merged;
 });
 
-export function getWeapon(id: string): Weapon | undefined {
-  return weapons.find((w) => w.id === id);
-}
-
-export function weaponsByCategory(category: WeaponCategory): Weapon[] {
-  return weapons.filter((w) => w.category === category);
-}

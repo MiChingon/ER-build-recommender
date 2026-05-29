@@ -1250,7 +1250,7 @@ export const talismans: Talisman[] = [
   }
 ];
 
-export const MAX_TALISMAN_SLOTS = 4;
+const talismansById = new Map(talismans.map((t) => [t.id, t]));
 
 export function talismanBaseName(name: string): string {
   return name.replace(/\s*\+\d+$/, "").trim();
@@ -1260,7 +1260,7 @@ export function totalTalismanWeight(ids: (string | null)[]): number {
   let sum = 0;
   for (const id of ids) {
     if (!id) continue;
-    const t = talismans.find((x) => x.id === id);
+    const t = talismansById.get(id);
     if (t) sum += t.weight;
   }
   return Math.round(sum * 10) / 10;
