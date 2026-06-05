@@ -51,25 +51,11 @@ import { generateBuildPdf } from "../lib/pdf-report";
 import { trackPdfDownload } from "../lib/analytics";
 import ClassRanking from "./components/ClassRanking";
 import TargetStatsTable from "./components/TargetStatsTable";
-import useBuildPickerState from "./hooks/use-build-picker-state";
+import useBuildPickerState, { BuildPickerProps } from "./hooks/use-build-picker-state";
 
 type WeaponSlot = { weapon: Weapon | null; affinity: Affinity };
 
 const emptySlot = (): WeaponSlot => ({ weapon: null, affinity: "Standard" });
-
-export interface BuildPickerProps {
-  category: WeaponCategory | "all"
-  rightHand: WeaponSlot[]
-  leftHand: WeaponSlot[]
-  active: SlotPos
-  weaponPickerOpen: boolean
-  affinityPickerPos: SlotPos | null
-  classId: string
-  targetLevel: number
-  twoHand: boolean
-  talismanIds: (string | null)[]
-  armorSelection: ArmorSelection
-}
 
 const initialBuildPickerState: BuildPickerProps = {
   category: "all",
@@ -100,7 +86,7 @@ const BuildPicker = () => {
       return out;
     };
     return { right: build(cls.starting?.right), left: build(cls.starting?.left) };
-  }, []);
+  }, [cls.starting?.right, cls.starting?.left]);
 
   const initialArmor = cls.armor
 
@@ -140,7 +126,7 @@ const BuildPicker = () => {
 
   const loadout = useMemo<LoadoutItem[]>(
     () =>
-      allSlots
+      [...rightHand, ...leftHand]
         .filter((s): s is { weapon: Weapon; affinity: Affinity } => s.weapon !== null)
         .map((s) => ({
           weapon: s.weapon,

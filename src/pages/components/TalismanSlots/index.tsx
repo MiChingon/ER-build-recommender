@@ -13,14 +13,14 @@ const TalismanSlots = ({
   onChange: (slot: number, value: Talisman | null) => void;
 }) => {
   const [openSlot, setOpenSlot] = useState<number | null>(null);
-  const selectedBaseNames = new Set(
-    talismanIds
-      .map((id) => (id ? talismans.find((t) => t.id === id) : null))
-      .filter((t): t is Talisman => Boolean(t))
-      .map((t) => talismanBaseName(t.name)),
-  );
   const pickerOptions = useMemo(() => {
     if (openSlot === null) return [] as Talisman[];
+    const selectedBaseNames = new Set(
+      talismanIds
+        .map((id) => (id ? talismans.find((t) => t.id === id) : null))
+        .filter((t): t is Talisman => Boolean(t))
+        .map((t) => talismanBaseName(t.name)),
+    );
     const currentId = talismanIds[openSlot];
     const current = currentId ? talismans.find((t) => t.id === currentId) ?? null : null;
     const currentBase = current ? talismanBaseName(current.name) : null;
@@ -30,7 +30,7 @@ const TalismanSlots = ({
         !selectedBaseNames.has(talismanBaseName(t.name)) ||
         talismanBaseName(t.name) === currentBase,
     );
-  }, [openSlot, talismanIds, selectedBaseNames]);
+  }, [openSlot, talismanIds]);
 
   return (
     <Box>

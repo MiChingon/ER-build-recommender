@@ -64,7 +64,7 @@ const TargetStatsTable = ({
                     </Typography>
                   ) : (
                     <Typography variant="caption" color="text.secondary">
-                      —
+                      -
                     </Typography>
                   )}
                 </TableCell>

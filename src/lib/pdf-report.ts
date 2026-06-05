@@ -50,7 +50,7 @@ const MAX_SL = 200;
 // used before walked stat-by-stat through the final target, which produced
 // "all of Vigor, then all of Str, then all of Dex" instead of the interleaved
 // order the slider actually uses.
-export function buildSliderLevelPlan(
+function buildSliderLevelPlan(
   weapon: import("../data/weapons").Weapon,
   options: import("./types").RecommendOptions,
   classBase: StatVector,
@@ -94,7 +94,7 @@ export function generateBuildPdf(opts: PdfOpts) {
 // it would have been saved as, WITHOUT triggering a browser download. Useful
 // for headless rendering — pages can be read via `doc.output("arraybuffer")`
 // and rasterised into an image pipeline outside the app.
-export function buildBuildPdfDoc(opts: PdfOpts) {
+function buildBuildPdfDoc(opts: PdfOpts) {
   const { weapon, rec, loadout, classData } = opts;
   const doc = new jsPDF({ unit: "pt" });
 

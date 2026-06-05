@@ -17,7 +17,7 @@ const ClassRanking = ({
       </Typography>
       <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1 }}>
         Waste = starting points stuck above the target. Deficit = points still to invest. "Lv
-        needed" is the minimum Soul Level that class would need to reach all targets — green
+        needed" is the minimum Soul Level that class would need to reach all targets; green
         if it fits within your target of {targetLevel}, red if it goes over.
       </Typography>
       <Box sx={{ overflowX: "auto" }}>
