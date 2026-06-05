@@ -1,15 +1,17 @@
 import { Box, LinearProgress, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
-import { Stat, STAT_LABELS, STAT_ORDER } from "../../../data/classes";
+import { Stat, StatVector, STAT_LABELS, STAT_ORDER } from "../../../data/classes";
 import { STAT_COLORS } from "../../../common/types";
 
 const TargetStatsTable = ({
   target,
   classBase,
   classBaseLabel,
+  armorBoosts,
 }: {
   target: Record<Stat, number>;
   classBase: Record<Stat, number>;
   classBaseLabel: string;
+  armorBoosts?: Partial<StatVector>;
 }) => {
   return (
     <Box>
@@ -30,6 +32,7 @@ const TargetStatsTable = ({
           {STAT_ORDER.map((stat) => {
             const base = classBase[stat];
             const t = target[stat];
+            const armorBoost = armorBoosts?.[stat] ?? 0;
             const delta = t - base;
             const pct = t > 0 ? Math.min(100, (base / t) * 100) : 100;
             return (
@@ -45,6 +48,11 @@ const TargetStatsTable = ({
                 <TableCell align="right">{base}</TableCell>
                 <TableCell align="right">
                   <b>{t}</b>
+                  {armorBoost > 0 && (
+                    <Typography component="span" variant="caption" color="info.main" sx={{ ml: 0.5 }}>
+                      +{armorBoost} (armor)
+                    </Typography>
+                  )}
                 </TableCell>
                 <TableCell sx={{ width: "40%" }}>
                   {delta > 0 ? (

@@ -26,6 +26,7 @@ import {
   type ArmorSelection,
   type ArmorSlot,
   EMPTY_ARMOR_SELECTION,
+  totalArmorStatBoosts,
 } from "../data/armor";
 import {
   compareClassToTarget,
@@ -197,6 +198,8 @@ const BuildPicker = () => {
         : null,
     [anchorWeapon, anchorAffinity, clampedTargetLevel, twoHand, talismanIds, armorSelection, selectedClass?.id, anchorExtraWeight, loadout],
   );
+
+  const armorBoosts = useMemo(() => totalArmorStatBoosts(armorSelection), [armorSelection]);
 
   const selectedClassMatch =
     rec && selectedClass ? compareClassToTarget(selectedClass, rec.target) : null;
@@ -599,6 +602,7 @@ const BuildPicker = () => {
                     classBaseLabel={
                       selectedClass ? `${selectedClass.name} base` : `${rec.best.cls.name} base (best)`
                     }
+                    armorBoosts={armorBoosts}
                   />
 
                   <LoadoutDamagePanel
