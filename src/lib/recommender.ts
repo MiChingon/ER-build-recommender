@@ -1062,7 +1062,7 @@ function getTargetStats(
     target[stat] = Math.max(floor, target[stat] - bonus);
     if (target[stat] < before) {
       rationale.push(
-        `${stat} → ${target[stat]} (helm grants +${bonus}, saves ${before - target[stat]} pts; requirement still met without helm)`,
+        `${stat} → ${target[stat]} (armor grants +${bonus}, saves ${before - target[stat]} pts; requirement still met without armor)`,
       );
     }
   }

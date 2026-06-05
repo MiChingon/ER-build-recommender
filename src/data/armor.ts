@@ -14705,3 +14705,10 @@ export function totalArmorStatBoosts(sel: ArmorSelection): Partial<StatVector> {
   }
   return out;
 }
+
+import { ARMOR_STAT_BOOSTS_OVERLAY } from './armor-stat-boosts';
+for (const piece of armor) {
+  if (ARMOR_STAT_BOOSTS_OVERLAY[piece.id]) {
+    piece.statBoosts = ARMOR_STAT_BOOSTS_OVERLAY[piece.id];
+  }
+}

@@ -12,7 +12,7 @@ import {
 } from "./recommender";
 import type { LoadoutItem, Recommendation } from "./types";
 import type { Weapon } from "../data/weapons";
-import { ARMOR_SLOTS, ARMOR_SLOT_LABELS, findArmor } from "../data/armor";
+import { ARMOR_SLOTS, ARMOR_SLOT_LABELS, findArmor, totalArmorStatBoosts } from "../data/armor";
 import { talismans as ALL_TALISMANS } from "../data/talismans";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -269,6 +269,7 @@ function buildBuildPdfDoc(opts: PdfOpts) {
 
   // Stats table
   y += 16;
+  const pdfArmorBoosts = totalArmorStatBoosts(rec.options.armorSelection);
   autoTable(doc, {
     startY: y,
     head: [["Stat", "Class base", "Target", "Invest"]],
@@ -276,7 +277,9 @@ function buildBuildPdfDoc(opts: PdfOpts) {
       const base = classData.stats[s];
       const tgt = rec.target[s];
       const delta = tgt - base;
-      return [STAT_LABELS[s], base, tgt, delta > 0 ? `+${delta}` : delta < 0 ? `${delta} (wasted)` : "-"];
+      const boost = pdfArmorBoosts[s] ?? 0;
+      const tgtCell = boost > 0 ? `${tgt} +${boost} (armor)` : `${tgt}`;
+      return [STAT_LABELS[s], base, tgtCell, delta > 0 ? `+${delta}` : delta < 0 ? `${delta} (wasted)` : "-"];
     }),
     theme: "striped",
     headStyles: { fillColor: [180, 144, 50] },
