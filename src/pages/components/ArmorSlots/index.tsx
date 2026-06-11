@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { ARMOR_SLOT_LABELS, ARMOR_SLOTS, armorBySlot, ArmorPiece, ArmorSelection, ArmorSlot, findArmor } from "../../../data/armor";
-import { Box, Stack, Typography } from "@mui/material";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import { Info } from "lucide-react";
 import GearTile from "../../../common/components/GearTile";
 import GearPicker from "../../../common/components/GearPicker";
 
@@ -14,11 +13,11 @@ const ArmorSlots = ({
 }) => {
   const [openSlot, setOpenSlot] = useState<ArmorSlot | null>(null);
   return (
-    <Box>
-      <Typography variant="subtitle2" gutterBottom>
+    <div>
+      <h3 className="panel-heading mb-2">
         Armor
-      </Typography>
-      <Stack direction="row" spacing={1}>
+      </h3>
+      <div className="flex gap-2">
         {ARMOR_SLOTS.map((slot) => {
           const current = findArmor(selection[slot]) ?? null;
           return (
@@ -32,13 +31,13 @@ const ArmorSlots = ({
             />
           );
         })}
-      </Stack>
-      <Stack direction="row" spacing={0.5} sx={{ alignItems: "flex-start", mt: 1 }}>
-        <InfoOutlinedIcon sx={{ fontSize: "0.875rem", mt: "1px", flexShrink: 0, color: "info.light" }} />
-        <Typography variant="caption" sx={{ fontSize: "0.625rem", lineHeight: 1.4, color: "common.white" }}>
+      </div>
+      <div className="mt-2 flex items-start gap-1.5">
+        <Info className="mt-px size-3.5 shrink-0 text-sky-300" />
+        <p className="text-[0.625rem] leading-snug text-white">
           Bonus stats and bonus AP from armor is not computed against the recommended stats nor the AP of a given weapon.
-        </Typography>
-      </Stack>
+        </p>
+      </div>
       <GearPicker
         open={openSlot !== null}
         title={openSlot ? `Select ${ARMOR_SLOT_LABELS[openSlot]}` : ""}
@@ -47,8 +46,8 @@ const ArmorSlots = ({
         onClose={() => setOpenSlot(null)}
         secondary={(o) => `Phy ${o.phy} · Poise ${o.poise} · Wgt ${o.weight}`}
       />
-    </Box>
+    </div>
   );
-}
+};
 
-export default ArmorSlots
+export default ArmorSlots;

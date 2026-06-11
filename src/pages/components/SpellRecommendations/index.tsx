@@ -1,5 +1,8 @@
-import { Box, Chip, Paper, Stack, Typography } from "@mui/material";
+import { motion } from "motion/react";
 import { spellImageUrl } from "../../../data/spells";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { fadeRise, staggerContainer } from "@/components/er/motion";
 
 const SpellRecommendations = ({
   suggestions,
@@ -19,15 +22,21 @@ const SpellRecommendations = ({
       : "Suggested incantations";
   const slotsUsed = suggestions.reduce((sum, s) => sum + s.spell.slots, 0);
   return (
-    <Box>
-      <Stack direction="row" spacing={1} sx={{ alignItems: "baseline", mb: 1, flexWrap: "wrap" }} useFlexGap>
-        <Typography variant="subtitle2">{label}</Typography>
-        <Typography variant="caption" color="text.secondary">
+    <div>
+      <div className="mb-2 flex flex-wrap items-baseline gap-2">
+        <h3 className="panel-heading">{label}</h3>
+        <span className="text-xs text-muted-foreground">
           castable with the recommended stats, fit within 10 memory slots
-        </Typography>
-        <Chip size="small" variant="outlined" label={`${slotsUsed} / 10 memory slots`} />
-      </Stack>
-      <Stack spacing={1}>
+        </span>
+        <Badge variant="outline">{slotsUsed} / 10 memory slots</Badge>
+      </div>
+      <motion.div
+        className="space-y-2"
+        variants={staggerContainer}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-40px" }}
+      >
         {suggestions.map(({ spell }) => {
           const reqs = [
             spell.requirements.intelligence ? `Int ${spell.requirements.intelligence}` : null,
@@ -42,65 +51,57 @@ const SpellRecommendations = ({
           // catalyst whitelist.
           const highlight = spell.boosted_by_catalyst?.some((id) => loadoutIdSet.has(id)) ?? false;
           return (
-            <Paper
+            <motion.div
               key={spell.id}
-              variant="outlined"
-              sx={{
-                p: 1.25,
-                borderColor: highlight ? "primary.main" : undefined,
-                borderWidth: highlight ? 2 : 1,
-                bgcolor: highlight ? "rgba(212,175,55,0.08)" : undefined,
-              }}
+              variants={fadeRise}
+              className={cn(
+                "rounded-lg border border-gold-500/20 bg-night-900/50 p-3 backdrop-blur-sm",
+                highlight && "border-2 border-gold-500 bg-gold-500/10 shadow-[0_0_14px_rgba(212,175,55,0.15)]",
+              )}
             >
-              <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
-                <Box
-                  component="img"
+              <div className="flex items-center gap-3">
+                <img
                   src={spellImageUrl(spell)}
                   alt=""
                   loading="lazy"
                   onError={(e) => {
                     (e.currentTarget as HTMLImageElement).style.visibility = "hidden";
                   }}
-                  sx={{ width: 40, height: 40, objectFit: "contain", bgcolor: "action.hover", borderRadius: 0.5, flexShrink: 0 }}
+                  className="size-10 shrink-0 rounded-sm bg-white/5 object-contain"
                 />
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }} useFlexGap>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                      {spell.name}
-                    </Typography>
-                    <Chip
-                      size="small"
-                      label={spell.type === "sorcery" ? "Sorcery" : "Incantation"}
-                      sx={{
-                        bgcolor: spell.type === "sorcery" ? "rgba(79,195,247,0.15)" : "rgba(255,176,32,0.15)",
-                        color: spell.type === "sorcery" ? "#4fc3f7" : "#ffb020",
-                        fontWeight: 600,
-                      }}
-                    />
-                    <Chip size="small" variant="outlined" label={spell.category} />
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm font-semibold">{spell.name}</span>
+                    <Badge
+                      className="font-semibold"
+                      style={
+                        spell.type === "sorcery"
+                          ? { backgroundColor: "rgba(79,195,247,0.15)", color: "#4fc3f7" }
+                          : { backgroundColor: "rgba(255,176,32,0.15)", color: "#ffb020" }
+                      }
+                    >
+                      {spell.type === "sorcery" ? "Sorcery" : "Incantation"}
+                    </Badge>
+                    <Badge variant="outline">{spell.category}</Badge>
                     {highlight && (
-                      <Chip size="small" color="primary" label="Boosted by this catalyst" />
+                      <Badge className="bg-gold-500 text-night-950">Boosted by this catalyst</Badge>
                     )}
-                  </Stack>
-                  <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.25 }}>
-                    {spell.effect}
-                  </Typography>
-                </Box>
-                <Box sx={{ textAlign: "right", flexShrink: 0, minWidth: 90 }}>
-                  <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
-                    {reqs || "—"}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
+                  </div>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{spell.effect}</p>
+                </div>
+                <div className="min-w-[90px] shrink-0 text-right">
+                  <span className="block text-xs text-muted-foreground">{reqs || "—"}</span>
+                  <span className="block text-xs text-muted-foreground">
                     FP {spell.fpCost} · {spell.slots} slot{spell.slots === 1 ? "" : "s"}
-                  </Typography>
-                </Box>
-              </Stack>
-            </Paper>
+                  </span>
+                </div>
+              </div>
+            </motion.div>
           );
         })}
-      </Stack>
-    </Box>
+      </motion.div>
+    </div>
   );
-}
+};
 
-export default SpellRecommendations
+export default SpellRecommendations;

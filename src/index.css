@@ -1,0 +1,143 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@fontsource/cinzel/400.css";
+@import "@fontsource/cinzel/600.css";
+@import "@fontsource/cinzel/700.css";
+
+/* ── shadcn semantic variables (single dark theme) ─────────────────── */
+:root {
+  --radius: 0.5rem;
+
+  --background: #0f0e0c;
+  --foreground: #e7e5e4;
+  --card: #1a1815;
+  --card-foreground: #e7e5e4;
+  --popover: #1a1815;
+  --popover-foreground: #e7e5e4;
+  --primary: #d4af37;
+  --primary-foreground: #1a1410;
+  --secondary: #242019;
+  --secondary-foreground: #e7e5e4;
+  --muted: #242019;
+  --muted-foreground: #a8a29e;
+  --accent: #2c2516;
+  --accent-foreground: #f4d670;
+  --destructive: #dc2626;
+  --destructive-foreground: #fef2f2;
+  --border: rgba(212, 175, 55, 0.22);
+  --input: rgba(212, 175, 55, 0.3);
+  --ring: #d4af37;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* ── Elden Ring design tokens ──────────────────────────────────────── */
+@theme {
+  --color-gold-300: #f4d670;
+  --color-gold-400: #e9c64a;
+  --color-gold-500: #d4af37;
+  --color-gold-600: #c4942b;
+  --color-gold-700: #9a7420;
+
+  --color-night-950: #0f0e0c;
+  --color-night-900: #1a1815;
+  --color-night-800: #242019;
+
+  --font-display: "Cinzel", "Times New Roman", serif;
+
+  --animate-shimmer: shimmer 6s ease-in-out infinite;
+  --animate-grace-pulse: grace-pulse 9s ease-in-out infinite;
+
+  @keyframes shimmer {
+    0%,
+    100% {
+      background-position: -200% 0;
+    }
+    50% {
+      background-position: 200% 0;
+    }
+  }
+  @keyframes grace-pulse {
+    0%,
+    100% {
+      opacity: 0.5;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.9;
+      transform: scale(1.08);
+    }
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-night-950 text-stone-200 antialiased;
+  }
+  ::selection {
+    background-color: rgba(212, 175, 55, 0.35);
+    color: #fff;
+  }
+  /* thin gold scrollbars for internal scroll areas */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(212, 175, 55, 0.35) transparent;
+  }
+}
+
+/* Mini heading used at the top of every panel section. */
+@utility panel-heading {
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-gold-300);
+}
+
+@utility glass-card {
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  background-color: rgba(26, 24, 21, 0.6);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 0 24px rgba(0, 0, 0, 0.45);
+}
+
+@utility text-glow {
+  text-shadow: 0 0 18px rgba(212, 175, 55, 0.45);
+}
+
+@utility gold-rule {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(212, 175, 55, 0.5),
+    transparent
+  );
+  height: 1px;
+}
