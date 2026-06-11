@@ -1,20 +1,18 @@
-import { Box, Stack, Typography } from "@mui/material";
-
 const Rationale = ({ rationale }: { rationale: string[] }) => {
   return (
-    <Box>
-      <Typography variant="subtitle2" gutterBottom>
+    <div>
+      <h3 className="panel-heading mb-2">
         Why these targets
-      </Typography>
-      <Stack component="ul" sx={{ pl: 2, m: 0 }} spacing={0.5}>
+      </h3>
+      <ul className="m-0 list-disc space-y-1 pl-5 marker:text-gold-500/60">
         {rationale.map((r) => (
-          <Typography key={r} component="li" variant="body2" color="text.secondary">
+          <li key={r} className="text-sm text-muted-foreground">
             {r}
-          </Typography>
+          </li>
         ))}
-      </Stack>
-    </Box>
+      </ul>
+    </div>
   );
-}
+};
 
-export default Rationale
+export default Rationale;

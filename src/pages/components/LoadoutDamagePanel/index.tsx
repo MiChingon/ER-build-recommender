@@ -1,4 +1,3 @@
-import { Box, Stack, Typography } from "@mui/material";
 import { Stat } from "../../../data/classes";
 import { Weapon } from "../../../data/weapons";
 import { Affinity } from "../../../lib/types";
@@ -17,19 +16,19 @@ const LoadoutDamagePanel = ({
   twoHand: boolean;
 }) => {
   return (
-    <Box>
-      <Stack direction="row" spacing={1} sx={{ alignItems: "baseline", mb: 1 }}>
-        <Typography variant="subtitle2">Estimated Attack Power</Typography>
-        <Typography variant="caption" color="text.secondary">
+    <div>
+      <div className="mb-2 flex items-baseline gap-2">
+        <h3 className="panel-heading">
+          Estimated Attack Power
+        </h3>
+        <span className="text-xs text-muted-foreground">
           at target stats{twoHand ? ", two-handed" : ""}
-        </Typography>
-      </Stack>
+        </span>
+      </div>
       {loadout.length === 0 ? (
-        <Typography variant="body2" color="text.secondary">
-          No weapons selected.
-        </Typography>
+        <p className="text-sm text-muted-foreground">No weapons selected.</p>
       ) : (
-        <Stack spacing={1}>
+        <div className="space-y-2">
           {loadout.map(({ pos, weapon, affinity }) => (
             <WeaponDamageRow
               key={`${pos.hand}-${pos.idx}`}
@@ -41,10 +40,10 @@ const LoadoutDamagePanel = ({
               isActive={pos.hand === active.hand && pos.idx === active.idx}
             />
           ))}
-        </Stack>
+        </div>
       )}
-    </Box>
+    </div>
   );
-}
+};
 
-export default LoadoutDamagePanel
+export default LoadoutDamagePanel;

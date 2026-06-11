@@ -7,14 +7,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run dev` — Vite dev server. `.claude/launch.json` pins it to port **5179** (with `--strictPort`) so the Preview tool can reuse a known port; another vite from a different repo grabbed 5173 in past sessions, hence the pin.
 - `npm run build` — type-checks (`tsc -b`) and builds the production bundle.
 - `npm run preview` — serves the production build.
+- `npm test` — Vitest (jsdom) unit tests for the design-system and interaction components. Setup/mocks live in `src/test/setup.ts` (matchMedia / ResizeObserver / IntersectionObserver / pointer-capture stubs; flip `globalThis.__mockReducedMotion` to test reduced-motion paths).
 
-There is no test runner and no lint script configured. The only quality gate is `tsc -b`, which `npm run build` runs. TypeScript options worth knowing: `strict`, `noUnusedLocals`, `noUnusedParameters` are all on, and `noEmit: true` — tsc is purely a type checker; Vite does the actual transpile.
+The quality gates are `tsc -b` (run by `npm run build`) and `npm test`. There is no lint script. TypeScript options worth knowing: `strict`, `noUnusedLocals`, `noUnusedParameters` are all on, and `noEmit: true` — tsc is purely a type checker; Vite does the actual transpile.
 
 ## Architecture
 
-Single-page SPA: Vite + React 18 + TypeScript + MUI v9. One route (`/`) rendered by `src/pages/BuildPicker.tsx`. The MUI dark theme (gold primary `#d4af37` on near-black background) and an Erdtree image hotlinked from the fextralife wiki are applied in `src/App.tsx` / `src/main.tsx`.
+Single-page SPA: Vite + React 18 + TypeScript + **Tailwind CSS v4 + shadcn/ui (Radix) + `motion` (framer-motion)**. One route (`/`) rendered by `src/pages/BuildPicker.tsx`. MUI was fully removed in the 2026 "Site of Grace" redesign.
 
-`src/App.tsx` also contains a deliberate "AVAILABLE FOR ADS, CONTACT THE OWNER" banner under the header — it is intentional; do not remove unless asked.
+### UI stack (post-redesign)
+
+- **Design tokens** live in `src/index.css` (Tailwind v4 CSS-first `@theme`): gold palette (`gold-300..700`, base `#d4af37`), night surfaces (`night-950/900/800`), `--font-display` (Cinzel via @fontsource, self-hosted to satisfy the CSP `font-src 'self'`), shadcn semantic vars mapped to the dark theme, and the `panel-heading` / `glass-card` / `gold-rule` / `text-glow` utilities.
+- **`src/components/ui/`** — shadcn-generated primitives (button, badge, dialog, input, select, slider, switch, tooltip, table). **They are patched by hand — do NOT regenerate with `shadcn add --overwrite`:** (1) `React.forwardRef` was added to Badge, Button, Input, DialogOverlay, DialogContent, TooltipContent, SelectContent because React 18 function components drop refs and Radix Presence/Slot/focus management silently breaks (stuck-open dialogs, dead tooltips, un-focusable search input); (2) exit animations (`data-[state=closed]:animate-out…`) were removed from dialog/tooltip/select because Radix Presence defers unmount until `animationend`, which never fires in animation-suppressed environments (jsdom, screenshot browsers).
+- **`src/components/er/`** — the Elden Ring design system: `BackgroundLayer` (erdtree scrim + vignette + grace pulse), `EmberCanvas` (sprite-based ember particles; null under reduced motion, rAF paused on hidden tab), `GlassCard`, `SectionHeading`, `AnimatedNumber` (spring counter, plain value under reduced motion), `InfoTip` (tooltip that also opens on touch tap and holds 5 s — replaces the old MUI `enterTouchDelay`/`leaveTouchDelay`; self-contained `TooltipProvider`), `StatChip`, and `motion.ts` (fadeRise / staggerContainer / viewportOnce presets).
+- **`src/theme/colors.ts`** — single home for STAT_COLORS, INFUSION_COLORS, DAMAGE_TYPE_COLORS, STATUS_COLORS, STATUS_LABELS (consumed via inline `style` with hex-alpha suffixes; only the static gold/night palette lives in `@theme`). `src/common/types` re-exports STAT_COLORS for legacy importers.
+- The Radix Slider has no marks; the Soul Level slider's mark labels are positioned with the pure helper `src/lib/slider-marks.ts` (unit-tested, handles the minLevel ≥ 125 collision cases).
+- The old "AVAILABLE FOR ADS" banner was replaced by the gold **Contact** link at the right of the header (same `https://fabianalmaraz.dev/` target) — intentional; keep it elegant and non-intrusive.
 
 ### Data layer (`src/data/`)
 
