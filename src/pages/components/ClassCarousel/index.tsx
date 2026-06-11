@@ -1,7 +1,15 @@
-import { Box, Chip, FormHelperText, IconButton, Paper, Stack, Typography } from "@mui/material";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import { useRef } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { classes } from "../../../data/classes";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+
+const slideVariants = {
+  enter: (dir: number) => ({ x: dir * 64, opacity: 0, scale: 0.96 }),
+  center: { x: 0, opacity: 1, scale: 1 },
+  exit: (dir: number) => ({ x: dir * -64, opacity: 0, scale: 0.96 }),
+};
 
 const ClassCarousel = ({
   classId,
@@ -15,61 +23,81 @@ const ClassCarousel = ({
     classes.findIndex((c) => c.id === classId),
   );
   const current = classes[currentIndex];
+  const dirRef = useRef(1);
 
   const go = (delta: number) => {
+    dirRef.current = delta > 0 ? 1 : -1;
     const next = (currentIndex + delta + classes.length) % classes.length;
     onChange(classes[next].id);
   };
 
   return (
-    <Box>
-      <Typography variant="h6" gutterBottom>
+    <div>
+      <h3 className="panel-heading mb-2">
         Starting Class
-      </Typography>
-      <Paper variant="outlined" sx={{ p: 2 }}>
-        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-          <IconButton
+      </h3>
+      <div className="glass-card relative overflow-hidden p-4">
+        {/* halo behind the portrait */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 50% 60% at 50% 45%, rgba(212,175,55,0.12), transparent 70%)",
+          }}
+        />
+        <div className="relative flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
             aria-label="Previous class"
             onClick={() => go(-1)}
-            size="large"
+            className="shrink-0 text-gold-300 hover:bg-gold-500/10 hover:text-gold-300"
           >
-            <ChevronLeftIcon />
-          </IconButton>
-          <Stack
-            spacing={1}
-            sx={{ flex: 1, alignItems: "center", textAlign: "center" }}
-          >
-            <Box
-              component="img"
-              src={current.image}
-              alt={`${current.name} portrait`}
-              loading="lazy"
-              sx={{
-                width: 160,
-                height: 260,
-                objectFit: "contain",
-                objectPosition: "center bottom",
-                borderRadius: 1,
-                bgcolor: "action.hover",
-                pt: 1,
-              }}
-            />
-            <Chip size="small" label={`Lv ${current.level}`} />
-          </Stack>
-          <IconButton
+            <ChevronLeft className="size-6" />
+          </Button>
+          <div className="min-w-0 flex-1 overflow-hidden">
+            <AnimatePresence mode="popLayout" custom={dirRef.current} initial={false}>
+              <motion.div
+                key={current.id}
+                custom={dirRef.current}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                className="flex flex-col items-center gap-2 text-center"
+              >
+                <img
+                  src={current.image}
+                  alt={`${current.name} portrait`}
+                  loading="lazy"
+                  width={160}
+                  height={260}
+                  className="rounded-md bg-white/5 object-contain object-bottom pt-2 drop-shadow-[0_0_18px_rgba(212,175,55,0.25)]"
+                />
+                <Badge variant="outline" className="border-gold-500/50 text-gold-300">
+                  Lv {current.level}
+                </Badge>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
             aria-label="Next class"
             onClick={() => go(1)}
-            size="large"
+            className="shrink-0 text-gold-300 hover:bg-gold-500/10 hover:text-gold-300"
           >
-            <ChevronRightIcon />
-          </IconButton>
-        </Stack>
-      </Paper>
-      <FormHelperText sx={{ mx: 1.75 }}>
+            <ChevronRight className="size-6" />
+          </Button>
+        </div>
+      </div>
+      <p className="mx-2 mt-1 text-xs text-muted-foreground">
         Build is computed against this class's starting stats.
-      </FormHelperText>
-    </Box>
+      </p>
+    </div>
   );
-}
+};
 
-export default ClassCarousel
+export default ClassCarousel;

@@ -1,6 +1,8 @@
-import { Box, Dialog, DialogContent, DialogTitle, List, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Weapon } from "../../../data/weapons";
 import { Affinity, AFFINITIES } from "../../../lib/types";
+import { INFUSION_COLORS } from "../../../theme/colors";
+import { cn } from "@/lib/utils";
 
 const AffinityPicker = ({
   open,
@@ -16,46 +18,59 @@ const AffinityPicker = ({
   onClose: () => void;
 }) => {
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-      <DialogTitle>Change infusion</DialogTitle>
-      <DialogContent dividers>
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent
+        className="glass-card max-w-[calc(100%-2rem)] gap-3 border-gold-500/30 sm:max-w-sm"
+        aria-describedby={undefined}
+      >
+        <DialogTitle className="font-display tracking-wide text-gold-300">
+          Change infusion
+        </DialogTitle>
         {weapon && (
-          <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", mb: 2 }}>
+          <div className="flex items-center gap-3">
             {weapon.image ? (
-              <Box
-                component="img"
+              <img
                 src={weapon.image}
                 alt=""
                 loading="lazy"
-                sx={{ width: 48, height: 48, objectFit: "contain", bgcolor: "action.hover", borderRadius: 0.5, flexShrink: 0 }}
+                className="size-12 shrink-0 rounded-sm bg-white/5 object-contain"
               />
             ) : (
-              <Box sx={{ width: 48, height: 48, bgcolor: "action.hover", borderRadius: 0.5, flexShrink: 0 }} />
+              <span className="size-12 shrink-0 rounded-sm bg-white/5" />
             )}
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography variant="body2" sx={{ fontWeight: 600 }} noWrap>
-                {weapon.name}
-              </Typography>
-              <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>
-                {weapon.category}
-              </Typography>
-            </Box>
-          </Stack>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold">{weapon.name}</p>
+              <p className="truncate text-xs text-muted-foreground">{weapon.category}</p>
+            </div>
+          </div>
         )}
-        <List dense sx={{ maxHeight: 420, overflow: "auto" }}>
-          {AFFINITIES.map((a) => (
-            <ListItemButton
-              key={a}
-              selected={a === currentAffinity}
-              onClick={() => {
-                onSelect(a);
-                onClose();
-              }}
-            >
-              <ListItemText primary={a} />
-            </ListItemButton>
-          ))}
-        </List>
+        <ul className="max-h-[420px] overflow-y-auto">
+          {AFFINITIES.map((a) => {
+            const color = INFUSION_COLORS[a] ?? INFUSION_COLORS.Standard;
+            const selected = a === currentAffinity;
+            return (
+              <li key={a}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onSelect(a);
+                    onClose();
+                  }}
+                  className={cn(
+                    "flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left text-sm transition-colors hover:bg-gold-500/10 focus-visible:bg-gold-500/10 focus-visible:outline-none",
+                    selected && "bg-gold-500/15 ring-1 ring-gold-500/60",
+                  )}
+                >
+                  <span
+                    className="size-2.5 shrink-0 rounded-full"
+                    style={{ backgroundColor: color, boxShadow: `0 0 6px ${color}` }}
+                  />
+                  {a}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
       </DialogContent>
     </Dialog>
   );

@@ -1,4 +1,9 @@
-import { Box, Button, Chip, Stack, Tooltip, Typography } from "@mui/material";
+import { FileDown } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import AnimatedNumber from "@/components/er/AnimatedNumber";
+import InfoTip from "@/components/er/InfoTip";
+import { cn } from "@/lib/utils";
 
 const RecommendationHeader = ({
   bestClassName,
@@ -11,42 +16,47 @@ const RecommendationHeader = ({
   equipLoad: import("../../../lib/types").EquipLoadSummary;
   onDownloadPdf?: () => void;
 }) => {
-  const loadColor =
+  const loadClasses =
     equipLoad.rollCategory === "overloaded"
-      ? "error"
+      ? "border-red-500/60 text-red-400"
       : equipLoad.rollCategory === "heavy"
-      ? "warning"
+      ? "border-amber-500/60 text-amber-400"
       : equipLoad.rollCategory === "medium"
-      ? "primary"
-      : "success";
+      ? "border-gold-500/60 text-gold-300"
+      : "border-green-500/60 text-green-400";
   return (
-    <Box>
-      <Stack direction="row" spacing={2} sx={{ alignItems: "center", justifyContent: "space-between", mb: 2.5, flexWrap: "wrap" }} useFlexGap>
-        <Typography variant="h6">
-          Recommended build
-        </Typography>
+    <div>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="font-display text-glow bg-gradient-to-b from-gold-300 to-gold-600 bg-clip-text text-xl font-bold tracking-wide text-transparent">
+          Recommended Build
+        </h2>
         {onDownloadPdf && (
-          <Button size="small" variant="outlined" onClick={onDownloadPdf}>
+          <Button
+            onClick={onDownloadPdf}
+            className="bg-gradient-to-b from-gold-400 to-gold-600 font-semibold text-night-950 shadow-[0_0_14px_rgba(212,175,55,0.35)] transition-shadow hover:from-gold-300 hover:to-gold-500 hover:shadow-[0_0_22px_rgba(212,175,55,0.55)]"
+          >
+            <FileDown />
             Download PDF
           </Button>
         )}
-      </Stack>
-      <Stack direction="row" spacing={2} useFlexGap sx={{ flexWrap: "wrap" }}>
-        <Chip color="primary" label={`Best class: ${bestClassName}`} />
-        <Chip label={`Target Soul Level: ${targetLevel}`} variant="outlined" />
-        <Tooltip
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge className="bg-gold-500 px-2.5 py-1 text-night-950">
+          Best class: {bestClassName}
+        </Badge>
+        <Badge variant="outline" className="gap-1 px-2.5 py-1">
+          Target Soul Level: <AnimatedNumber value={targetLevel} className="font-bold" />
+        </Badge>
+        <InfoTip
           title={`Weapon ${equipLoad.weaponWeight} + Talismans ${equipLoad.talismanWeight} = ${equipLoad.totalWeight} / ${equipLoad.maxLoad} max equip load. Roll: ${equipLoad.rollCategory}.`}
         >
-          <Chip
-            color={loadColor}
-            variant="outlined"
-            label={`Equip Load: ${equipLoad.totalWeight} / ${equipLoad.maxLoad} (${equipLoad.percent.toFixed(0)}%)`}
-          />
-        </Tooltip>
-      </Stack>
-    </Box>
+          <Badge variant="outline" className={cn("px-2.5 py-1", loadClasses)}>
+            Equip Load: {equipLoad.totalWeight} / {equipLoad.maxLoad} ({equipLoad.percent.toFixed(0)}%)
+          </Badge>
+        </InfoTip>
+      </div>
+    </div>
   );
-}
+};
 
-export default RecommendationHeader
-
+export default RecommendationHeader;

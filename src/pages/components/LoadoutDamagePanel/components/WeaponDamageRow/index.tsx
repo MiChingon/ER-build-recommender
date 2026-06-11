@@ -1,37 +1,12 @@
-import { Box, Chip, Paper, Stack, Typography } from "@mui/material";
 import { DAMAGE_TYPE_LABELS, estimateAttackPower, estimateSpellScaling, estimateStatusBuildup, getMaxUpgradeLevel } from "../../../../../lib/recommender";
 import { Affinity } from "../../../../../lib/types";
 import { Weapon } from "../../../../../data/weapons";
 import { Stat } from "../../../../../data/classes";
-import { Hand, STAT_COLORS } from "../../../../../common/types";
-
-type SlotPos = { hand: Hand; idx: number };
-
-const DAMAGE_TYPE_COLORS: Record<string, string> = {
-  phy: "#ffffff",
-  mag: "#3fbddd",
-  fir: "#ff9900",
-  lit: "#ffff00",
-  hol: "#ffcc99",
-};
-
-const STATUS_COLORS: Record<string, string> = {
-  bleed: "#e53935",
-  poison: "#9ccc65",
-  frost: "#81d4fa",
-  rot: "#ec407a",
-  sleep: "#b39ddb",
-  madness: "#ff7043",
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  bleed: "Hemorrhage",
-  poison: "Poison",
-  frost: "Frostbite",
-  rot: "Scarlet Rot",
-  sleep: "Sleep",
-  madness: "Madness",
-};
+import { SlotPos } from "../../../../../common/types";
+import { DAMAGE_TYPE_COLORS, GOLD, STAT_COLORS, STATUS_COLORS, STATUS_LABELS } from "../../../../../theme/colors";
+import AnimatedNumber from "@/components/er/AnimatedNumber";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 const WeaponDamageRow = ({
   pos,
@@ -55,94 +30,83 @@ const WeaponDamageRow = ({
   const statuses = estimateStatusBuildup(weapon, target as never, affinity);
   const slotLabel = `${pos.hand === "right" ? "R" : "L"}${pos.idx + 1}`;
   return (
-    <Paper
-      variant="outlined"
-      sx={{
-        p: 1.5,
-        borderColor: isActive ? "primary.main" : undefined,
-        borderWidth: isActive ? 2 : 1,
-        bgcolor: isActive ? "rgba(212,175,55,0.08)" : undefined,
-      }}
+    <div
+      className={cn(
+        "rounded-lg border border-gold-500/20 bg-night-900/50 p-3 backdrop-blur-sm transition-shadow",
+        isActive && "border-2 border-gold-500 bg-gold-500/10 shadow-[0_0_16px_rgba(212,175,55,0.2)]",
+      )}
     >
-      <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
-        <Chip size="small" label={slotLabel} variant={isActive ? "filled" : "outlined"} color={isActive ? "primary" : "default"} />
+      <div className="flex items-center gap-3">
+        <Badge
+          variant={isActive ? "default" : "outline"}
+          className={cn(isActive && "bg-gold-500 text-night-950")}
+        >
+          {slotLabel}
+        </Badge>
         {weapon.image ? (
-          <Box
-            component="img"
+          <img
             src={weapon.image}
             alt=""
             loading="lazy"
-            sx={{ width: 40, height: 40, objectFit: "contain", bgcolor: "action.hover", borderRadius: 0.5, flexShrink: 0 }}
+            className="size-10 shrink-0 rounded-sm bg-white/5 object-contain"
           />
         ) : (
-          <Box sx={{ width: 40, height: 40, bgcolor: "action.hover", borderRadius: 0.5, flexShrink: 0 }} />
+          <span className="size-10 shrink-0 rounded-sm bg-white/5" />
         )}
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography variant="body2" noWrap sx={{ fontWeight: 600 }}>
-            {weapon.name}
-          </Typography>
-          <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold">{weapon.name}</p>
+          <p className="truncate text-xs text-muted-foreground">
             {weapon.category} · {affinity}
-          </Typography>
-        </Box>
-        <Box sx={{ textAlign: "right", flexShrink: 0, minWidth: 90 }}>
-          <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
-            +0 · {baseEstimate.total}
-          </Typography>
-          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-            {maxLabel} · {maxEstimate.total}
-          </Typography>
-        </Box>
-      </Stack>
-      <Stack direction="row" spacing={1} useFlexGap sx={{ mt: 1, flexWrap: "wrap" }}>
+          </p>
+        </div>
+        <div className="min-w-[90px] shrink-0 text-right">
+          <span className="block text-xs text-muted-foreground">+0 · {baseEstimate.total}</span>
+          <span className="block text-sm font-semibold">
+            {maxLabel} · <AnimatedNumber value={maxEstimate.total} />
+          </span>
+        </div>
+      </div>
+      <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
         {maxEstimate.breakdown.map((b) => (
-          <Stack key={b.type} direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
-            <Box
-              sx={{
-                width: 8, height: 8, borderRadius: "50%",
-                bgcolor: DAMAGE_TYPE_COLORS[b.type] ?? "text.secondary",
-                flexShrink: 0,
-              }}
+          <span key={b.type} className="flex items-center gap-1.5">
+            <span
+              className="size-2 shrink-0 rounded-full"
+              style={{ backgroundColor: DAMAGE_TYPE_COLORS[b.type] ?? "#a8a29e" }}
             />
-            <Typography variant="caption" color="text.secondary">
+            <span className="text-xs text-muted-foreground">
               {DAMAGE_TYPE_LABELS[b.type]} {b.total}
-            </Typography>
-          </Stack>
+            </span>
+          </span>
         ))}
         {spellScaling && (() => {
-          const spellColor = spellScaling.type === "sorcery" ? STAT_COLORS.intelligence : "primary.main";
+          const spellColor = spellScaling.type === "sorcery" ? STAT_COLORS.intelligence : GOLD;
           return (
-            <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
-              <Box
-                sx={{
-                  width: 8, height: 8, borderRadius: "50%",
-                  bgcolor: spellColor,
-                  flexShrink: 0,
-                }}
+            <span className="flex items-center gap-1.5">
+              <span
+                className="size-2 shrink-0 rounded-full"
+                style={{ backgroundColor: spellColor }}
               />
-              <Typography variant="caption" sx={{ color: spellColor, fontWeight: 600 }}>
-                {spellScaling.type === "sorcery" ? "Sorcery Scaling" : "Incant Scaling"} {spellScaling.max} (+0: {spellScaling.base})
-              </Typography>
-            </Stack>
+              <span className="text-xs font-semibold" style={{ color: spellColor }}>
+                {spellScaling.type === "sorcery" ? "Sorcery Scaling" : "Incant Scaling"}{" "}
+                {spellScaling.max} (+0: {spellScaling.base})
+              </span>
+            </span>
           );
         })()}
         {statuses.map((status) => (
-          <Stack key={status.type} direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
-            <Box
-              sx={{
-                width: 8, height: 8, borderRadius: "50%",
-                bgcolor: STATUS_COLORS[status.type],
-                flexShrink: 0,
-              }}
+          <span key={status.type} className="flex items-center gap-1.5">
+            <span
+              className="size-2 shrink-0 rounded-full"
+              style={{ backgroundColor: STATUS_COLORS[status.type] }}
             />
-            <Typography variant="caption" sx={{ color: STATUS_COLORS[status.type], fontWeight: 600 }}>
+            <span className="text-xs font-semibold" style={{ color: STATUS_COLORS[status.type] }}>
               {STATUS_LABELS[status.type]} {status.max} (+0: {status.base})
-            </Typography>
-          </Stack>
+            </span>
+          </span>
         ))}
-      </Stack>
-    </Paper>
+      </div>
+    </div>
   );
-}
+};
 
-export default WeaponDamageRow
+export default WeaponDamageRow;
