@@ -1,23 +1,6 @@
 import { useMemo } from "react";
-import {
-  Alert,
-  Box,
-  Card,
-  CardContent,
-  FormControl,
-  FormControlLabel,
-  FormHelperText,
-  Grid,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  Slider,
-  Stack,
-  Switch,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { motion } from "motion/react";
+import { Info } from "lucide-react";
 import { classes, STAT_LABELS, STAT_ORDER, type Stat } from "../data/classes";
 import { CATEGORIES, weapons, gradeOf, valueOf, type Weapon, type WeaponCategory } from "../data/weapons";
 import { type Talisman } from "../data/talismans";
@@ -37,6 +20,7 @@ import {
   recommend,
 } from "../lib/recommender";
 import { Affinity, DEFAULT_TARGET_LEVEL, LoadoutItem, MAX_TARGET_LEVEL } from "../lib/types";
+import { sliderMarks } from "../lib/slider-marks";
 import SpellRecommendations from "./components/SpellRecommendations";
 import Rationale from "./components/Rationale";
 import ClassCarousel from "./components/ClassCarousel";
@@ -46,13 +30,22 @@ import AffinityPicker from "../common/components/AffinityPicker";
 import ArmorSlots from "./components/ArmorSlots";
 import TalismanSlots from "./components/TalismanSlots";
 import LoadoutDamagePanel from "./components/LoadoutDamagePanel";
-import { Hand, SlotPos, STAT_COLORS } from "../common/types";
+import { Hand, SlotPos } from "../common/types";
 import RecommendationHeader from "./components/RecommendationHeader";
 import { generateBuildPdf } from "../lib/pdf-report";
 import { trackPdfDownload } from "../lib/analytics";
 import ClassRanking from "./components/ClassRanking";
 import TargetStatsTable from "./components/TargetStatsTable";
 import useBuildPickerState, { BuildPickerProps } from "./hooks/use-build-picker-state";
+import GlassCard from "@/components/er/GlassCard";
+import SectionHeading from "@/components/er/SectionHeading";
+import StatChip from "@/components/er/StatChip";
+import InfoTip from "@/components/er/InfoTip";
+import AnimatedNumber from "@/components/er/AnimatedNumber";
+import { fadeRise, viewportOnce } from "@/components/er/motion";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 
 type WeaponSlot = { weapon: Weapon | null; affinity: Affinity };
 
@@ -92,7 +85,7 @@ const BuildPicker = () => {
   const initialArmor = cls.armor
 
   const { state, actions } = useBuildPickerState({ ...initialBuildPickerState, rightHand: initialHands.right, leftHand: initialHands.left, armorSelection: initialArmor });
- 
+
   const { category, classId, targetLevel, twoHand, talismanIds, armorSelection, rightHand, leftHand, active, weaponPickerOpen, affinityPickerPos } = state;
   const { setCategory, setClassId, setTargetLevel, setTwoHand, setTalismanIds, setArmorSelection, setRightHand, setLeftHand, setActive, setWeaponPickerOpen, setAffinityPickerPos } = actions;
 
@@ -302,250 +295,180 @@ const BuildPicker = () => {
     const nextMin = getMinFeasibleLevel(nextCls, activeWeapon, twoHand, "Standard", talismanIds, armorSelection, nextLoadout);
     if (targetLevel < nextMin) setTargetLevel(nextMin);
   };
-  return (
-    <Stack spacing={3}>
-      <Box>
-        <Typography variant="body1" color="text.secondary">
-          Pick weapons to see the recommended stat spread and starting class.
-          Download a PDF file with your level-up plan.
-        </Typography>
-      </Box>
 
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 12, md: 5 }}>
-          <Card>
-            <CardContent>
-              <Stack spacing={3}>
-                <ClassCarousel classId={classId} onChange={handleClassChange} />
+  const marks = sliderMarks(minLevel, MAX_TARGET_LEVEL);
 
-                <WeaponSlotsGrid
-                  rightHand={rightHand}
-                  leftHand={leftHand}
-                  active={active}
-                  onActivate={(pos) => setActive(pos)}
-                  onPickWeapon={(pos) => {
-                    setActive(pos);
-                    // Reset the category filter to "all" each time the picker
-                    // opens so the user isn't stuck inside whichever category
-                    // they last browsed.
-                    setCategory("all");
-                    setWeaponPickerOpen(true);
-                  }}
-                  onChangeAffinity={(pos) => setAffinityPickerPos(pos)}
-                  onClear={(pos) => updateSlot(pos, { weapon: null, affinity: "Standard" })}
-                />
-
-                <GearPicker
-                  open={weaponPickerOpen}
-                  title={`Select weapon — ${active.hand === "right" ? "R" : "L"}${active.idx + 1}`}
-                  options={filteredWeapons}
-                  onSelect={(w) => handleWeaponChange(w)}
-                  onClose={() => setWeaponPickerOpen(false)}
-                  secondary={(w) => `${w.category} · ${w.weight} wgt`}
-                  header={
-                    <FormControl fullWidth size="small">
-                      <InputLabel id="category-label">Weapon category</InputLabel>
-                      <Select
-                        labelId="category-label"
-                        label="Weapon category"
-                        value={category}
-                        onChange={(e) =>
-                          handleCategoryChange(e.target.value as WeaponCategory | "all")
-                        }
-                      >
-                        <MenuItem value="all">All categories</MenuItem>
-                        {CATEGORIES.map((c) => (
-                          <MenuItem key={c} value={c}>
-                            {c}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  }
-                />
-
-                <AffinityPicker
-                  open={affinityPickerPos !== null}
-                  weapon={affinityPickerPos ? slotsFor(affinityPickerPos.hand)[affinityPickerPos.idx].weapon : null}
-                  currentAffinity={affinityPickerPos ? slotsFor(affinityPickerPos.hand)[affinityPickerPos.idx].affinity : "Standard"}
-                  onSelect={(a) => {
-                    if (affinityPickerPos) updateSlot(affinityPickerPos, { affinity: a });
-                  }}
-                  onClose={() => setAffinityPickerPos(null)}
-                />
-
-                {weapon && (
-                  <Paper variant="outlined" sx={{ p: 2 }}>
-                    <Stack direction="row" spacing={2} sx={{ alignItems: "flex-start" }}>
-                      {weapon.image && (
-                        <Box
-                          component="img"
-                          src={weapon.image}
-                          alt={`${weapon.name} icon`}
-                          loading="lazy"
-                          sx={{ width: 72, height: 72, objectFit: "contain", bgcolor: "action.hover", borderRadius: 0.5, flexShrink: 0 }}
-                        />
-                      )}
-                      <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Typography variant="subtitle2" gutterBottom>
-                          {weapon.name}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" gutterBottom>
-                          {weapon.category} · {weapon.weight} weight · Skill: {weapon.skill}
-                        </Typography>
-                        {(() => {
-                          const maxScaling = weapon.scalingTable?.max[effectiveAffinity] ?? weapon.scaling;
-                          const baseScaling = weapon.scalingTable?.base;
-                          const allStats = new Set<Stat>([
-                            ...(Object.keys(weapon.requirements) as Stat[]),
-                            ...(Object.keys(maxScaling) as Stat[]),
-                            ...(baseScaling ? (Object.keys(baseScaling) as Stat[]) : []),
-                          ]);
-                          const upgradeLabel = weaponInfusable ? "+25" : "+10";
-                          return (
-                            <Stack direction="row" spacing={1} useFlexGap sx={{ mt: 1, flexWrap: "wrap" }}>
-                              {STAT_ORDER.filter((s) => allStats.has(s)).map((s) => {
-                                const req = weapon.requirements[s];
-                                const baseG = gradeOf(baseScaling?.[s]);
-                                const maxG = gradeOf(maxScaling[s]);
-                                const maxN = valueOf(maxScaling[s]);
-                                const maxLabel = maxG ? (maxN !== undefined ? `${maxG}(${maxN})` : maxG) : null;
-                                const color = STAT_COLORS[s];
-                                return (
-                                  <Tooltip
-                                    key={s}
-                                    title={
-                                      baseG && maxLabel
-                                        ? `${STAT_LABELS[s]} scaling — +0: ${baseG}, ${upgradeLabel} ${effectiveAffinity}: ${maxLabel}`
-                                        : `${STAT_LABELS[s]} scaling at ${upgradeLabel}: ${maxLabel ?? "—"}`
-                                    }
-                                  >
-                                    <Box
-                                      sx={{
-                                        display: "inline-flex",
-                                        alignItems: "center",
-                                        gap: 0.75,
-                                        px: 1.1,
-                                        py: 0.4,
-                                        borderRadius: 999,
-                                        bgcolor: `${color}1f`,
-                                        border: `1px solid ${color}66`,
-                                        boxShadow: `0 0 10px ${color}22, inset 0 0 0 1px rgba(0,0,0,0.25)`,
-                                      }}
-                                    >
-                                      <Box
-                                        sx={{
-                                          width: 8,
-                                          height: 8,
-                                          borderRadius: "50%",
-                                          bgcolor: color,
-                                          boxShadow: `0 0 6px ${color}`,
-                                          flexShrink: 0,
-                                        }}
-                                      />
-                                      <Typography
-                                        component="span"
-                                        sx={{
-                                          color,
-                                          fontWeight: 700,
-                                          fontSize: "0.7rem",
-                                          letterSpacing: 0.6,
-                                          textTransform: "uppercase",
-                                        }}
-                                      >
-                                        {STAT_LABELS[s].slice(0, 3)}
-                                      </Typography>
-                                      <Typography
-                                        component="span"
-                                        sx={{ color, fontWeight: 700, fontSize: "0.78rem" }}
-                                      >
-                                        {req ?? "—"}
-                                      </Typography>
-                                      {maxLabel && (
-                                        <Box
-                                          sx={{
-                                            display: "inline-flex",
-                                            alignItems: "center",
-                                            gap: 0.4,
-                                            pl: 0.85,
-                                            ml: 0.15,
-                                            borderLeft: `1px solid ${color}55`,
-                                          }}
-                                        >
-                                          <Typography
-                                            component="span"
-                                            sx={{
-                                              color: "rgba(255,255,255,0.55)",
-                                              fontSize: "0.7rem",
-                                              fontWeight: 600,
-                                            }}
-                                          >
-                                            {baseG ?? "—"}
-                                          </Typography>
-                                          <Typography
-                                            component="span"
-                                            sx={{ color: "rgba(255,255,255,0.4)", fontSize: "0.65rem" }}
-                                          >
-                                            →
-                                          </Typography>
-                                          <Typography
-                                            component="span"
-                                            sx={{ color, fontWeight: 700, fontSize: "0.72rem" }}
-                                          >
-                                            {maxLabel}
-                                          </Typography>
-                                        </Box>
-                                      )}
-                                    </Box>
-                                  </Tooltip>
-                                );
-                              })}
-                            </Stack>
-                          );
-                        })()}
-                      </Box>
-                    </Stack>
-                  </Paper>
-                )}
-
-                <Tooltip title="Two-handing multiplies effective Strength by ×1.5, lowering both the Str requirement and the base Str needed to hit AP breakpoints. Applies to every weapon in the loadout.">
-                  <FormControlLabel
-                    control={<Switch checked={twoHand} onChange={(e) => handleTwoHandToggle(e.target.checked)} />}
-                    label="Two-hand weapons (×1.5 Str)"
+  const weaponDetail = weapon && (() => {
+    const maxScaling = weapon.scalingTable?.max[effectiveAffinity] ?? weapon.scaling;
+    const baseScaling = weapon.scalingTable?.base;
+    const allStats = new Set<Stat>([
+      ...(Object.keys(weapon.requirements) as Stat[]),
+      ...(Object.keys(maxScaling) as Stat[]),
+      ...(baseScaling ? (Object.keys(baseScaling) as Stat[]) : []),
+    ]);
+    const upgradeLabel = weaponInfusable ? "+25" : "+10";
+    return (
+      <GlassCard>
+        <div className="flex items-start gap-4">
+          {weapon.image && (
+            <img
+              src={weapon.image}
+              alt={`${weapon.name} icon`}
+              loading="lazy"
+              className="size-18 shrink-0 rounded-sm bg-white/5 object-contain"
+            />
+          )}
+          <div className="min-w-0 flex-1">
+            <p className="font-display text-sm font-semibold tracking-wide text-gold-300">{weapon.name}</p>
+            <p className="mb-2 text-sm text-muted-foreground">
+              {weapon.category} · {weapon.weight} weight · Skill: {weapon.skill}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {STAT_ORDER.filter((s) => allStats.has(s)).map((s) => {
+                const req = weapon.requirements[s];
+                const baseG = gradeOf(baseScaling?.[s]);
+                const maxG = gradeOf(maxScaling[s]);
+                const maxN = valueOf(maxScaling[s]);
+                const maxLabel = maxG ? (maxN !== undefined ? `${maxG}(${maxN})` : maxG) : null;
+                return (
+                  <StatChip
+                    key={s}
+                    stat={s}
+                    requirement={req}
+                    baseGrade={baseG}
+                    maxLabel={maxLabel}
+                    tooltip={
+                      baseG && maxLabel
+                        ? `${STAT_LABELS[s]} scaling — +0: ${baseG}, ${upgradeLabel} ${effectiveAffinity}: ${maxLabel}`
+                        : `${STAT_LABELS[s]} scaling at ${upgradeLabel}: ${maxLabel ?? "—"}`
+                    }
                   />
-                </Tooltip>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </GlassCard>
+    );
+  })();
 
-                <ArmorSlots
-                  selection={armorSelection}
-                  onChange={handleArmorChange}
-                />
+  const emptyStateMessage =
+    !selectedClass && !rec
+      ? "Pick a starting class and a weapon to see the recommended build."
+      : !selectedClass
+      ? "Pick a starting class to see the recommended build."
+      : "Pick a weapon to see the recommended build.";
 
-                <TalismanSlots
-                  talismanIds={talismanIds}
-                  onChange={handleTalismanChange}
-                />
-              </Stack>
-            </CardContent>
-          </Card>
-        </Grid>
+  return (
+    <div className="space-y-10">
+      {/* ── Hero ─────────────────────────────────────────────────────── */}
+      <section className="mx-auto max-w-2xl space-y-6 text-center">
+        <motion.div initial="hidden" animate="visible" variants={fadeRise}>
+          <h1 className="font-display text-glow bg-gradient-to-b from-gold-300 via-gold-400 to-gold-700 bg-clip-text text-3xl font-bold tracking-[0.08em] text-transparent sm:text-4xl">
+            Forge Your Legend
+          </h1>
+          <p className="mt-3 text-sm text-muted-foreground sm:text-base">
+            Pick weapons to see the recommended stat spread and starting class.
+            Download a PDF file with your level-up plan.
+          </p>
+        </motion.div>
+        <motion.div initial="hidden" animate="visible" variants={fadeRise}>
+          <ClassCarousel classId={classId} onChange={handleClassChange} />
+        </motion.div>
+      </section>
 
-        <Grid size={{ xs: 12, md: 7 }}>
+      <div className="lg:grid lg:grid-cols-12 lg:items-start lg:gap-6">
+        {/* ── The Arsenal (sticky builder column) ──────────────────────── */}
+        <aside className="space-y-5 lg:sticky lg:top-20 lg:col-span-5 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto lg:pr-1 lg:pb-4">
+          <SectionHeading>The Arsenal</SectionHeading>
+
+          <GlassCard>
+            <WeaponSlotsGrid
+              rightHand={rightHand}
+              leftHand={leftHand}
+              active={active}
+              onActivate={(pos) => setActive(pos)}
+              onPickWeapon={(pos) => {
+                setActive(pos);
+                // Reset the category filter to "all" each time the picker
+                // opens so the user isn't stuck inside whichever category
+                // they last browsed.
+                setCategory("all");
+                setWeaponPickerOpen(true);
+              }}
+              onChangeAffinity={(pos) => setAffinityPickerPos(pos)}
+              onClear={(pos) => updateSlot(pos, { weapon: null, affinity: "Standard" })}
+            />
+          </GlassCard>
+
+          <GearPicker
+            open={weaponPickerOpen}
+            title={`Select weapon — ${active.hand === "right" ? "R" : "L"}${active.idx + 1}`}
+            options={filteredWeapons}
+            onSelect={(w) => handleWeaponChange(w)}
+            onClose={() => setWeaponPickerOpen(false)}
+            secondary={(w) => `${w.category} · ${w.weight} wgt`}
+            header={
+              <Select
+                value={category}
+                onValueChange={(v) => handleCategoryChange(v as WeaponCategory | "all")}
+              >
+                <SelectTrigger className="w-full" aria-label="Weapon category">
+                  <SelectValue placeholder="Weapon category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All categories</SelectItem>
+                  {CATEGORIES.map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            }
+          />
+
+          <AffinityPicker
+            open={affinityPickerPos !== null}
+            weapon={affinityPickerPos ? slotsFor(affinityPickerPos.hand)[affinityPickerPos.idx].weapon : null}
+            currentAffinity={affinityPickerPos ? slotsFor(affinityPickerPos.hand)[affinityPickerPos.idx].affinity : "Standard"}
+            onSelect={(a) => {
+              if (affinityPickerPos) updateSlot(affinityPickerPos, { affinity: a });
+            }}
+            onClose={() => setAffinityPickerPos(null)}
+          />
+
+          {weaponDetail}
+
+          <InfoTip title="Two-handing multiplies effective Strength by ×1.5, lowering both the Str requirement and the base Str needed to hit AP breakpoints. Applies to every weapon in the loadout.">
+            <label className="flex w-fit cursor-pointer items-center gap-3">
+              <Switch checked={twoHand} onCheckedChange={handleTwoHandToggle} />
+              <span className="text-sm">Two-hand weapons (×1.5 Str)</span>
+            </label>
+          </InfoTip>
+
+          <GlassCard>
+            <ArmorSlots selection={armorSelection} onChange={handleArmorChange} />
+          </GlassCard>
+
+          <GlassCard>
+            <TalismanSlots talismanIds={talismanIds} onChange={handleTalismanChange} />
+          </GlassCard>
+        </aside>
+
+        {/* ── The Verdict (recommendation panel) ───────────────────────── */}
+        <section className="mt-10 space-y-5 lg:col-span-7 lg:mt-0">
+          <SectionHeading>The Verdict</SectionHeading>
+
           {!rec || !selectedClass ? (
-            <Card>
-              <CardContent>
-                <Alert severity="info">
-                  {!selectedClass && !rec
-                    ? "Pick a starting class and a weapon to see the recommended build."
-                    : !selectedClass
-                    ? "Pick a starting class to see the recommended build."
-                    : "Pick a weapon to see the recommended build."}
-                </Alert>
-              </CardContent>
-            </Card>
+            <GlassCard className="flex items-center gap-3 p-6">
+              <Info className="size-5 shrink-0 text-gold-400" />
+              <p className="text-sm text-muted-foreground">{emptyStateMessage}</p>
+            </GlassCard>
           ) : (
-            <Card>
-              <CardContent>
-                <Stack spacing={3}>
+            <>
+              <motion.div variants={fadeRise} initial="hidden" whileInView="visible" viewport={viewportOnce}>
+                <GlassCard glow>
                   <RecommendationHeader
                     bestClassName={rec.best.cls.name}
                     targetLevel={clampedTargetLevel}
@@ -564,38 +487,50 @@ const BuildPicker = () => {
                         : undefined
                     }
                   />
+                </GlassCard>
+              </motion.div>
 
-                  <Box>
-                    <Stack direction="row" spacing={2} sx={{ alignItems: "baseline", mb: 1 }}>
-                      <Typography variant="subtitle2">Target Soul Level</Typography>
-                      <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                        {clampedTargetLevel}
-                      </Typography>
-                    </Stack>
-                    <Box sx={{ px: 1 }}>
-                      <Slider
-                        value={clampedTargetLevel}
-                        onChange={(_, v) => handleLevelChange(Array.isArray(v) ? v[0] : v)}
-                        min={minLevel}
-                        max={MAX_TARGET_LEVEL}
-                        step={1}
-                        marks={[
-                          { value: minLevel, label: `${minLevel}` },
-                          { value: 125, label: "125" },
-                          { value: MAX_TARGET_LEVEL, label: `${MAX_TARGET_LEVEL}` },
-                        ]}
-                        valueLabelDisplay="auto"
-                      />
-                    </Box>
-                    <FormHelperText>
-                      Minimum is the level{" "}
-                      {selectedClass ? `${selectedClass.name} needs` : "the best-fit class needs"}{" "}
-                      to wield {anchorWeapon ? anchorWeapon.name : "the weapon"}
-                      {twoHand && anchorWeapon ? " (two-handed, ×1.5 Str)" : ""}. Vigor target scales:
-                      50→30, 80→40, 100→50, 125+→60 (interpolated).
-                    </FormHelperText>
-                  </Box>
+              <motion.div variants={fadeRise} initial="hidden" whileInView="visible" viewport={viewportOnce}>
+                <GlassCard>
+                  <div className="mb-3 flex items-baseline gap-3">
+                    <h3 className="panel-heading">
+                      Target Soul Level
+                    </h3>
+                    <AnimatedNumber value={clampedTargetLevel} className="text-xl font-bold text-gold-300" />
+                  </div>
+                  <div className="px-1">
+                    <Slider
+                      value={[clampedTargetLevel]}
+                      onValueChange={([v]) => handleLevelChange(v)}
+                      min={minLevel}
+                      max={MAX_TARGET_LEVEL}
+                      step={1}
+                      aria-label="Target Soul Level"
+                    />
+                    <div className="relative mt-1.5 h-4 text-[0.65rem] text-muted-foreground">
+                      {marks.map((m) => (
+                        <span
+                          key={m.value}
+                          className="absolute -translate-x-1/2"
+                          style={{ left: `${m.pct}%` }}
+                        >
+                          {m.value}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Minimum is the level{" "}
+                    {selectedClass ? `${selectedClass.name} needs` : "the best-fit class needs"}{" "}
+                    to wield {anchorWeapon ? anchorWeapon.name : "the weapon"}
+                    {twoHand && anchorWeapon ? " (two-handed, ×1.5 Str)" : ""}. Vigor target scales:
+                    50→30, 80→40, 100→50, 125+→60 (interpolated).
+                  </p>
+                </GlassCard>
+              </motion.div>
 
+              <motion.div variants={fadeRise} initial="hidden" whileInView="visible" viewport={viewportOnce}>
+                <GlassCard>
                   <TargetStatsTable
                     target={rec.target}
                     classBase={selectedClass ? selectedClass.stats : rec.best.cls.stats}
@@ -604,44 +539,60 @@ const BuildPicker = () => {
                     }
                     armorBoosts={armorBoosts}
                   />
+                </GlassCard>
+              </motion.div>
 
+              <motion.div variants={fadeRise} initial="hidden" whileInView="visible" viewport={viewportOnce}>
+                <GlassCard>
                   <LoadoutDamagePanel
                     loadout={displayLoadout}
                     active={active}
                     target={rec.target}
                     twoHand={twoHand}
                   />
+                </GlassCard>
+              </motion.div>
 
-                  {rec.spellSuggestions.length > 0 && (
+              {rec.spellSuggestions.length > 0 && (
+                <motion.div variants={fadeRise} initial="hidden" whileInView="visible" viewport={viewportOnce}>
+                  <GlassCard>
                     <SpellRecommendations
                       suggestions={rec.spellSuggestions}
                       loadoutWeaponIds={loadout.map((i) => i.weapon.id)}
                     />
-                  )}
+                  </GlassCard>
+                </motion.div>
+              )}
 
-                  <Rationale rationale={rec.rationale} />
+              <motion.div variants={fadeRise} initial="hidden" whileInView="visible" viewport={viewportOnce}>
+                <GlassCard>
+                  <div className="space-y-5">
+                    <Rationale rationale={rec.rationale} />
+                    <ClassRanking
+                      matches={rec.ranking}
+                      highlightId={selectedClass?.id ?? rec.best.cls.id}
+                      targetLevel={clampedTargetLevel}
+                    />
+                  </div>
+                </GlassCard>
+              </motion.div>
 
-                  <ClassRanking
-                    matches={rec.ranking}
-                    highlightId={selectedClass?.id ?? rec.best.cls.id}
-                    targetLevel={clampedTargetLevel}
-                  />
-
-                  {selectedClassMatch && selectedClass?.id !== rec.best.cls.id && (
-                    <Alert severity="info">
-                      You're using <b>{selectedClass!.name}</b> ({selectedClassMatch.waste}{" "}
-                      wasted points; this build needs Lv {selectedClassMatch.finalLevel} on
-                      that class). The optimal pick is <b>{rec.best.cls.name}</b> (
-                      {rec.best.waste} wasted, needs Lv {rec.best.finalLevel}).
-                    </Alert>
-                  )}
-                </Stack>
-              </CardContent>
-            </Card>
+              {selectedClassMatch && selectedClass?.id !== rec.best.cls.id && (
+                <GlassCard className="flex items-start gap-3 border-gold-500/40">
+                  <Info className="mt-0.5 size-5 shrink-0 text-gold-400" />
+                  <p className="text-sm text-muted-foreground">
+                    You're using <b className="text-foreground">{selectedClass!.name}</b> ({selectedClassMatch.waste}{" "}
+                    wasted points; this build needs Lv {selectedClassMatch.finalLevel} on
+                    that class). The optimal pick is <b className="text-foreground">{rec.best.cls.name}</b> (
+                    {rec.best.waste} wasted, needs Lv {rec.best.finalLevel}).
+                  </p>
+                </GlassCard>
+              )}
+            </>
           )}
-        </Grid>
-      </Grid>
-    </Stack>
+        </section>
+      </div>
+    </div>
   );
 }
 

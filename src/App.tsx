@@ -1,25 +1,20 @@
 import { Link as RouterLink, Outlet } from "react-router-dom";
-import { AppBar, Box, Container, Stack, Toolbar, Typography } from "@mui/material";
-import LinkIcon from "@mui/icons-material/Link";
+import { Mail } from "lucide-react";
 import GoogleAnalytics from "./components/GoogleAnalytics";
-
-const BACKGROUND_IMAGE =
-  "https://eldenring.wiki.fextralife.com/file/Elden-Ring/erdtree.jpg";
+import BackgroundLayer from "@/components/er/BackgroundLayer";
+import InfoTip from "@/components/er/InfoTip";
 
 // Inline SVG used as the masthead emblem — a gold runic 8-point star inside
 // a dark circle. Matches the favicon so the brand identity reads across tab
 // and page.
 const Emblem = ({ size = 36 }: { size?: number }) => (
-  <Box
-    component="svg"
+  <svg
     viewBox="0 0 64 64"
     aria-hidden
-    sx={{
-      width: size,
-      height: size,
-      filter: "drop-shadow(0 0 6px rgba(212,175,55,0.45))",
-      flexShrink: 0,
-    }}
+    width={size}
+    height={size}
+    className="shrink-0"
+    style={{ filter: "drop-shadow(0 0 6px rgba(212,175,55,0.45))" }}
   >
     <circle cx="32" cy="32" r="28" fill="#1a1714" stroke="#d4af37" strokeWidth="3" />
     <path
@@ -28,184 +23,63 @@ const Emblem = ({ size = 36 }: { size?: number }) => (
       strokeWidth="2.5"
       strokeLinecap="round"
     />
-  </Box>
+  </svg>
 );
 
 export default function App() {
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        bgcolor: "background.default",
-        backgroundImage: `linear-gradient(rgba(15,14,12,0.82), rgba(15,14,12,0.94)), url(${BACKGROUND_IMAGE})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center top",
-        backgroundAttachment: "fixed",
-        backgroundRepeat: "no-repeat",
-      }}
-    >
+    <div className="relative min-h-screen">
+      <BackgroundLayer />
       <GoogleAnalytics />
-      <AppBar
-        position="static"
-        sx={{
-          bgcolor: "rgba(20,18,15,0.92)",
-          backdropFilter: "blur(8px)",
-          borderBottom: "1px solid rgba(212,175,55,0.35)",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
-        }}
-      >
-        <Toolbar sx={{ py: 1.5 }}>
-          <Stack
-            direction="row"
-            spacing={2}
-            component={RouterLink}
-            to="/"
-            sx={{ color: "inherit", textDecoration: "none", alignItems: "center" }}
-          >
+      <header className="sticky top-0 z-40 border-b border-gold-500/35 bg-[rgba(20,18,15,0.88)] shadow-[0_4px_20px_rgba(0,0,0,0.5)] backdrop-blur-md">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
+          <RouterLink to="/" className="flex items-center gap-3 text-inherit no-underline">
             <Emblem />
-            <Box>
-              <Stack direction="row" spacing={1} sx={{ alignItems: "baseline" }}>
-                <Typography
-                  variant="h5"
-                  component="div"
-                  sx={{
-                    fontWeight: 700,
-                    letterSpacing: 1.5,
-                    textTransform: "uppercase",
-                    background: "linear-gradient(180deg, #f4d670 0%, #c4942b 100%)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                    lineHeight: 1.1,
-                  }}
-                >
+            <div>
+              <div className="flex items-baseline gap-2">
+                <span className="font-display bg-gradient-to-b from-gold-300 to-gold-600 bg-clip-text text-lg leading-tight font-bold tracking-[0.1em] whitespace-nowrap text-transparent uppercase sm:text-2xl">
                   Tarnished Builds
-                </Typography>
-                <Typography
-                  component="span"
-                  sx={{
-                    color: "rgba(212,175,55,0.75)",
-                    fontWeight: 600,
-                    fontSize: "0.75rem",
-                    letterSpacing: 0.5,
-                    border: "1px solid rgba(212,175,55,0.4)",
-                    borderRadius: 999,
-                    px: 0.85,
-                    py: 0.05,
-                    lineHeight: 1.2,
-                  }}
-                >
+                </span>
+                <span className="rounded-full border border-gold-500/40 px-2 py-px text-xs leading-tight font-semibold tracking-wide text-gold-500/75">
                   v{__APP_VERSION__}
-                </Typography>
-              </Stack>
-              <Typography
-                variant="caption"
-                sx={{ color: "rgba(212,175,55,0.7)", letterSpacing: 1, textTransform: "uppercase" }}
-              >
+                </span>
+              </div>
+              <span className="hidden text-[0.7rem] tracking-[0.1em] text-gold-500/70 uppercase sm:block">
                 Optimal stats · AP · status · spells
-              </Typography>
-            </Box>
-          </Stack>
-        </Toolbar>
-      </AppBar>
-      <Box
-        component="aside"
-        aria-label="Advertisement availability"
-        sx={{
-          width: "100%",
-          height: "calc(100vh / 12)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: { xs: 1, md: 2 },
-          flexWrap: "wrap",
-          textAlign: "center",
-          px: 2,
-          bgcolor: "rgba(212,175,55,0.12)",
-          borderTop: "1px solid rgba(212,175,55,0.4)",
-          borderBottom: "1px solid rgba(212,175,55,0.4)",
-          color: "primary.main",
-          fontWeight: 600,
-          letterSpacing: 0.5,
-          textTransform: "uppercase",
-          fontSize: { xs: "0.85rem", md: "1rem" },
-        }}
-      >
-        <Box component="span">Available for adds, contact</Box>
-        <Box
-          component="a"
-          href="https://fabianalmaraz.dev/"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Owner contact page (opens in new tab)"
-          sx={{
-            color: "primary.main",
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: 28,
-            height: 28,
-            borderRadius: "50%",
-            border: "1px solid rgba(212,175,55,0.6)",
-            transition: "background-color 120ms ease, border-color 120ms ease",
-            "&:hover": {
-              bgcolor: "rgba(212,175,55,0.2)",
-              borderColor: "primary.main",
-            },
-          }}
-        >
-          <LinkIcon sx={{ fontSize: "1rem" }} />
-        </Box>
-      </Box>
-      <Container maxWidth="lg" sx={{ py: 4 }}>
+              </span>
+            </div>
+          </RouterLink>
+          <InfoTip title="Available for ads — contact the owner" side="bottom">
+            <a
+              href="https://fabianalmaraz.dev/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Contact the owner (opens in new tab)"
+              className="flex shrink-0 items-center gap-2 rounded-full border border-gold-500/40 px-3 py-1.5 text-sm font-medium text-gold-300 transition-all hover:border-gold-500 hover:bg-gold-500/10 hover:shadow-[0_0_12px_rgba(212,175,55,0.3)]"
+            >
+              <Mail className="size-4" />
+              <span className="hidden sm:inline">Contact</span>
+            </a>
+          </InfoTip>
+        </div>
+      </header>
+      <main className="mx-auto max-w-7xl px-4 py-8">
         <Outlet />
-      </Container>
-      <Box
-        component="footer"
-        sx={{
-          py: 2,
-          px: 2,
-          textAlign: "center",
-          bgcolor: "transparent",
-        }}
-      >
-        <Typography
-          variant="caption"
-          sx={{ color: "rgba(255,255,255,0.55)", letterSpacing: 0.3, fontSize: "0.9rem" }}
-        >
+      </main>
+      <footer className="px-4 py-4 text-center">
+        <p className="text-sm tracking-wide text-white/55">
           Powered by the{" "}
-          <Box
-            component="a"
+          <a
             href="https://eldenring.wiki.fextralife.com/Elden+Ring+Wiki"
             target="_blank"
             rel="noopener noreferrer"
-            sx={{
-              color: "primary.main",
-              textDecoration: "none",
-              "&:hover": { textDecoration: "underline" },
-            }}
+            className="text-gold-500 no-underline hover:underline"
           >
             Fextralife Elden Ring Wiki
-          </Box>
-        </Typography>
-        <Typography
-          variant="caption"
-          sx={{
-            color: "rgba(255,255,255,0.55)",
-            letterSpacing: 0.3,
-            fontSize: "0.9rem",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: 0.6,
-            mt: 0.5,
-          }}
-        >
-          <Box
-            component="svg"
-            viewBox="0 0 64 64"
-            aria-hidden
-            sx={{ width: "0.95em", height: "0.95em", flexShrink: 0 }}
-          >
+          </a>
+        </p>
+        <p className="mt-1 flex items-center justify-center gap-1.5 text-sm tracking-wide text-white/55">
+          <svg viewBox="0 0 64 64" aria-hidden className="size-[0.95em] shrink-0">
             {/* Stylized Claude mark — eight petals radiating from a center */}
             <g fill="#D97757">
               <path d="M32 4 C34 18 34 22 32 32 C30 22 30 18 32 4 Z" />
@@ -217,10 +91,10 @@ export default function App() {
               <path d="M52 12 C44 22 41 25 32 32 C39 23 42 20 52 12 Z" />
               <path d="M12 52 C20 42 23 39 32 32 C25 41 22 44 12 52 Z" />
             </g>
-          </Box>
+          </svg>
           Built with Claude AI
-        </Typography>
-      </Box>
-    </Box>
+        </p>
+      </footer>
+    </div>
   );
 }

@@ -1,5 +1,6 @@
-import { Box, Divider, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { recommend } from "../../../lib/recommender";
+import { cn } from "@/lib/utils";
 
 const ClassRanking = ({
   matches,
@@ -11,55 +12,58 @@ const ClassRanking = ({
   targetLevel: number;
 }) => {
   return (
-    <Box>
-      <Typography variant="subtitle2" gutterBottom>
+    <div>
+      <h3 className="panel-heading mb-1">
         Class ranking
-      </Typography>
-      <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1 }}>
+      </h3>
+      <p className="mb-2 text-xs text-muted-foreground">
         Waste = starting points stuck above the target. Deficit = points still to invest. "Lv
         needed" is the minimum Soul Level that class would need to reach all targets; green
         if it fits within your target of {targetLevel}, red if it goes over.
-      </Typography>
-      <Box sx={{ overflowX: "auto" }}>
-        <Table size="small" sx={{ minWidth: 460 }}>
-          <TableHead>
-            <TableRow>
-              <TableCell>Class</TableCell>
-              <TableCell align="right">Start Lv</TableCell>
-              <TableCell align="right">Waste</TableCell>
-              <TableCell align="right">Deficit</TableCell>
-              <TableCell align="right">Lv needed</TableCell>
+      </p>
+      <div className="overflow-x-auto">
+        <Table className="min-w-[460px]">
+          <TableHeader>
+            <TableRow className="border-gold-500/20 hover:bg-transparent">
+              <TableHead>Class</TableHead>
+              <TableHead className="text-right">Start Lv</TableHead>
+              <TableHead className="text-right">Waste</TableHead>
+              <TableHead className="text-right">Deficit</TableHead>
+              <TableHead className="text-right">Lv needed</TableHead>
             </TableRow>
-          </TableHead>
-        <TableBody>
-          {matches.map(({ cls, waste, deficit, finalLevel }) => {
-            const highlight = cls.id === highlightId;
-            const fits = finalLevel <= targetLevel;
-            return (
-              <TableRow
-                key={cls.id}
-                sx={{
-                  bgcolor: highlight ? "action.selected" : undefined,
-                  "& td": { fontWeight: highlight ? 600 : undefined },
-                }}
-              >
-                <TableCell>{cls.name}</TableCell>
-                <TableCell align="right">{cls.level}</TableCell>
-                <TableCell align="right">{waste}</TableCell>
-                <TableCell align="right">{deficit}</TableCell>
-                <TableCell align="right" sx={{ color: fits ? "success.main" : "error.main" }}>
-                  {finalLevel}
-                  {fits ? "" : ` (+${finalLevel - targetLevel})`}
-                </TableCell>
-              </TableRow>
-            );
-          })}
+          </TableHeader>
+          <TableBody>
+            {matches.map(({ cls, waste, deficit, finalLevel }) => {
+              const highlight = cls.id === highlightId;
+              const fits = finalLevel <= targetLevel;
+              return (
+                <TableRow
+                  key={cls.id}
+                  className={cn(
+                    "border-gold-500/10",
+                    highlight &&
+                      "border-l-2 border-l-gold-500 bg-gold-500/10 font-semibold hover:bg-gold-500/15",
+                  )}
+                >
+                  <TableCell>{cls.name}</TableCell>
+                  <TableCell className="text-right">{cls.level}</TableCell>
+                  <TableCell className="text-right">{waste}</TableCell>
+                  <TableCell className="text-right">{deficit}</TableCell>
+                  <TableCell
+                    className={cn("text-right", fits ? "text-green-400" : "text-red-400")}
+                  >
+                    {finalLevel}
+                    {fits ? "" : ` (+${finalLevel - targetLevel})`}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
-      </Box>
-      <Divider sx={{ mt: 2 }} />
-    </Box>
+      </div>
+      <div className="gold-rule mt-4" />
+    </div>
   );
-}
+};
 
-export default ClassRanking
+export default ClassRanking;

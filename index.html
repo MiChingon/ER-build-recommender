@@ -10,10 +10,10 @@
       - script-src whitelists Google Tag Manager (gtag.js loader) and the
         Cloudflare Web Analytics beacon — Cloudflare auto-injects the
         latter at the edge when Web Analytics is enabled. 'unsafe-inline'
-        is a practical concession for inline JSON-LD + MUI / Emotion
-        runtime; the codebase has no eval / Function /
-        dangerouslySetInnerHTML.
-      - style-src 'unsafe-inline' is required by MUI / Emotion CSS-in-JS.
+        is a practical concession for inline JSON-LD; the codebase has no
+        eval / Function / dangerouslySetInnerHTML.
+      - style-src 'unsafe-inline' is required by Motion (framer-motion),
+        which animates via inline style attributes.
       - img-src whitelists the fextralife wiki host where weapon, armor,
         talisman, and spell icons are hotlinked from.
       - connect-src covers Google Analytics beacons, Cloudflare Web
