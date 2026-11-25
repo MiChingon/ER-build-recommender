@@ -213,6 +213,40 @@ export const classes: StartingClass[] = [
       legs: "l-wretch's-trousers"
     }
   },
+  // Tarnished Edition / Tarnished Pack classes. Portraits are only hosted on
+  // static0.fextralifeimages.com (no 200px class file exists for them).
+  {
+    id: "idus-knight",
+    name: "Idus Knight",
+    level: 7,
+    stats: { vigor: 10, mind: 12, endurance: 11, strength: 13, dexterity: 15, intelligence: 8, faith: 11, arcane: 6 },
+    description: "Agile Dexterity knight with a light greatsword and a sturdy medium shield. Efficient start for Dex or Quality builds.",
+    startingEquipment: ["Idus Sword", "Silver Grooved Shield", "Silver Grooved set"],
+    image: "https://static0.fextralifeimages.com/file/eldenring/f/f5/Idusknight3270px-classes-eldenring-wiki-guide.png",
+    starting: { right: ["idus-sword"], left: ["silver-grooved-shield"] },
+    armor: {
+      helm: "h-silver-grooved-helm",
+      chest: "c-silver-grooved-armor",
+      gauntlets: "g-silver-grooved-gauntlets",
+      legs: "l-silver-grooved-greaves",
+    }
+  },
+  {
+    id: "heavy-knight",
+    name: "Heavy Knight",
+    level: 10,
+    stats: { vigor: 14, mind: 8, endurance: 17, strength: 15, dexterity: 11, intelligence: 7, faith: 8, arcane: 9 },
+    description: "Armored Strength bruiser with the highest starting Endurance. Starts in heavy steel plate (heavy roll) wielding a curved greatsword.",
+    startingEquipment: ["Hefty Scimitar", "Steel set"],
+    image: "https://static0.fextralifeimages.com/file/eldenring/7/74/Heavyknight4270px-classes-eldenring-wiki-guide.png",
+    starting: { right: ["hefty-scimitar"] },
+    armor: {
+      helm: "h-steel-helm",
+      chest: "c-steel-armor",
+      gauntlets: "g-steel-gauntlets",
+      legs: "l-steel-greaves",
+    }
+  },
 ];
 
 export function getClass(id: string): StartingClass | undefined {

@@ -14,8 +14,9 @@
         eval / Function / dangerouslySetInnerHTML.
       - style-src 'unsafe-inline' is required by Motion (framer-motion),
         which animates via inline style attributes.
-      - img-src whitelists the fextralife wiki host where weapon, armor,
-        talisman, and spell icons are hotlinked from.
+      - img-src whitelists the fextralife wiki hosts where weapon, armor,
+        talisman, and spell icons are hotlinked from (static0.fextralifeimages.com
+        serves the newer Tarnished Edition item images).
       - connect-src covers Google Analytics beacons, Cloudflare Web
         Analytics, and the Vite dev HMR websocket. ws: is harmless in
         production (no dev server) but lets local development continue
@@ -27,7 +28,7 @@
     -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; img-src 'self' data: https://eldenring.wiki.fextralife.com; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://static.cloudflareinsights.com; connect-src 'self' ws: wss: https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://cloudflareinsights.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:;"
+      content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; img-src 'self' data: https://eldenring.wiki.fextralife.com https://static0.fextralifeimages.com; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://static.cloudflareinsights.com; connect-src 'self' ws: wss: https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://cloudflareinsights.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:;"
     />
 
     <!-- Favicon: inline SVG so no extra file is needed; matches the in-app emblem. -->

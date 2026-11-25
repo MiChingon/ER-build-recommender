@@ -1,6 +1,7 @@
 import type { Stat } from "./classes";
 import type { Affinity } from "../lib/types";
 import { WEAPON_EXTRAS } from "./weapons-extras";
+import { TARNISHED_WEAPON_EXTRAS } from "./tarnished-edition";
 
 export type ScaleGrade = "S" | "A" | "B" | "C" | "D" | "E";
 
@@ -43,6 +44,9 @@ export type Weapon = {
   // Innate status effect carried by this weapon at +0 (overridden if a status-
   // bearing affinity like Cold / Poison / Blood is applied via infusion).
   innateStatus?: { type: StatusEffect; base: number };
+  // Explicit somber (+10) marker for hand-added weapons whose scaling table
+  // only carries letter grades (see tarnished-edition.ts / getUpgradeType).
+  somber?: boolean;
 };
 
 export type WeaponCategory =
@@ -82,7 +86,8 @@ export type WeaponCategory =
   | "Bow"
   | "Small Shield"
   | "Medium Shield"
-  | "Greatshield";
+  | "Greatshield"
+  | "Thrusting Shield";
 
 export const CATEGORIES: WeaponCategory[] = [
   "Dagger", "Straight Sword", "Greatsword", "Colossal Sword",
@@ -94,6 +99,7 @@ export const CATEGORIES: WeaponCategory[] = [
   "Hand-to-Hand Art", "Beast Claw", "Perfume Bottle",
   "Glintstone Staff", "Sacred Seal",
   "Light Bow", "Bow", "Small Shield", "Medium Shield", "Greatshield",
+  "Thrusting Shield",
 ];
 
 export const CATEGORY_BASE_AP: Record<WeaponCategory, number> = {
@@ -134,6 +140,7 @@ export const CATEGORY_BASE_AP: Record<WeaponCategory, number> = {
   "Small Shield": 70,
   "Medium Shield": 77,
   "Greatshield": 85,
+  "Thrusting Shield": 135,
 };
 
 // Per-weapon base attack power at +0, summing all damage types (physical +
@@ -474,6 +481,15 @@ const BASE_AP_BY_ID: Record<string, number> = {
   "watchdogs-staff": 165,
   "rotten-staff": 165,
   "envoys-greathorn": 121,
+  // Tarnished Edition
+  "idus-sword": 124,
+  "hefty-scimitar": 135,
+  "leontiels-greatsword": 130,
+  "golden-order-flail": 167,
+  "reverse-bladed-sword": 115,
+  "reed-great-katana": 158,
+  "ritual-thrusting-shield": 135,
+  "silver-grooved-shield": 61,
 };
 
 const w = (
@@ -981,6 +997,17 @@ const baseWeapons: Weapon[] = [
   w("erdtree-bow", "Erdtree Bow", "Bow", 4, { strength: 9, dexterity: 12, faith: 7 }, { strength: "E", dexterity: "D" }, "Mighty Shot"),
   w("pulley-bow", "Pulley Bow", "Bow", 5, { strength: 11, dexterity: 11 }, { strength: "E", dexterity: "D" }, "Mighty Shot"),
   w("ansbachs-longbow", "Ansbach's Longbow", "Bow", 4.5, { strength: 9, dexterity: 18 }, { strength: "E", dexterity: "D" }, "Fan Shot", true),
+
+  // Tarnished Edition / Tarnished Pack — image, per-affinity scaling and
+  // damage data live in tarnished-edition.ts.
+  w("idus-sword", "Idus Sword", "Light Greatsword", 7, { strength: 10, dexterity: 15 }, { strength: "D", dexterity: "D" }, "Impaling Thrust"),
+  w("hefty-scimitar", "Hefty Scimitar", "Curved Greatsword", 9.5, { strength: 13, dexterity: 11 }, { strength: "D", dexterity: "D" }, "Spinning Slash"),
+  { ...w("leontiels-greatsword", "Leontiel's Greatsword", "Greatsword", 9.5, { strength: 13, dexterity: 26 }, { strength: "E", dexterity: "C" }, "Muleta"), somber: true },
+  { ...w("golden-order-flail", "Golden Order Flail", "Flail", 5, { strength: 9, dexterity: 16, faith: 26 }, { strength: "E", dexterity: "E", faith: "C" }, "Causality's Wrath"), somber: true },
+  w("reverse-bladed-sword", "Reverse-Bladed Sword", "Backhand Blade", 3, { strength: 9, dexterity: 11 }, { strength: "D", dexterity: "D" }, "Blind Spot"),
+  w("reed-great-katana", "Reed Great Katana", "Great Katana", 10, { strength: 11, dexterity: 16 }, { strength: "D", dexterity: "D" }, "Overhead Stance"),
+  w("ritual-thrusting-shield", "Ritual Thrusting Shield", "Thrusting Shield", 10, { strength: 13, dexterity: 12 }, { strength: "D", dexterity: "D" }, "Shield Strike"),
+  w("silver-grooved-shield", "Silver Grooved Shield", "Medium Shield", 3, { strength: 9, dexterity: 12 }, { strength: "D" }, "No Skill"),
 ];
 
 
@@ -1023,10 +1050,12 @@ const STATUS_OVERRIDES: Record<string, { type: StatusEffect; base: number }> = {
   "frozen-needle": { type: "frost", base: 60 },
   // Madness
   "fingerprint-stone-shield": { type: "madness", base: 70 },
+  // Tarnished Edition
+  "reed-great-katana": { type: "bleed", base: 55 },
 };
 
 export const weapons: Weapon[] = baseWeapons.map((w) => {
-  const extra = WEAPON_EXTRAS[w.id];
+  const extra = WEAPON_EXTRAS[w.id] ?? TARNISHED_WEAPON_EXTRAS[w.id];
   const merged = extra ? { ...w, ...extra } : w;
   const status = STATUS_OVERRIDES[w.id];
   return status ? { ...merged, innateStatus: status } : merged;

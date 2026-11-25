@@ -63,4 +63,9 @@ export const ARMOR_STAT_BOOSTS_OVERLAY: Record<string, Partial<StatVector>> = {
   "c-commoners-garb-altered": { faith: 1 },
   "c-commoners-simple-garb": { faith: 1 },
   "c-commoners-simple-garb-altered": { faith: 1 },
+
+  // Tarnished Edition: Gold Tattoo set (+4 Faith total)
+  "c-gold-tattoo-chest": { faith: 2 },
+  "g-gold-tattoo-arm": { faith: 1 },
+  "l-gold-tattoo-leg": { faith: 1 },
 };
