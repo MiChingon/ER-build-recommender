@@ -3,7 +3,7 @@ import { Mail } from "lucide-react";
 import GoogleAnalytics from "./components/GoogleAnalytics";
 import BackgroundLayer from "@/components/er/BackgroundLayer";
 import InfoTip from "@/components/er/InfoTip";
-import WhatsNewBanner from "./common/components/WhatsNewBanner";
+import WhatsNewDialog from "./common/components/WhatsNewDialog";
 
 // Inline SVG used as the masthead emblem — a gold runic 8-point star inside
 // a dark circle. Matches the favicon so the brand identity reads across tab
@@ -65,7 +65,7 @@ export default function App() {
         </div>
       </header>
       <main className="mx-auto max-w-7xl px-4 py-8">
-        <WhatsNewBanner />
+        <WhatsNewDialog />
         <Outlet />
       </main>
       <footer className="px-4 py-4 text-center">
