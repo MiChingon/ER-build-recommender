@@ -1,0 +1,13 @@
+{
+  "name": "Tarnished Builds — Elden Ring Build Planner",
+  "short_name": "Tarnished Builds",
+  "description": "Elden Ring build planner and stat calculator: optimal stats, attack power, status build-up and spells.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#14120f",
+  "theme_color": "#d4af37",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

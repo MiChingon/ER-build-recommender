@@ -36,6 +36,7 @@ import { generateBuildPdf } from "../lib/pdf-report";
 import { trackPdfDownload } from "../lib/analytics";
 import ClassRanking from "./components/ClassRanking";
 import TargetStatsTable from "./components/TargetStatsTable";
+import AboutPlanner from "./components/AboutPlanner";
 import useBuildPickerState, { BuildPickerProps } from "./hooks/use-build-picker-state";
 import GlassCard from "@/components/er/GlassCard";
 import SectionHeading from "@/components/er/SectionHeading";
@@ -364,9 +365,14 @@ const BuildPicker = () => {
       {/* ── Hero ─────────────────────────────────────────────────────── */}
       <section className="mx-auto max-w-2xl space-y-6 text-center">
         <motion.div initial="hidden" animate="visible" variants={fadeRise}>
-          <h1 className="font-display text-glow bg-gradient-to-b from-gold-300 via-gold-400 to-gold-700 bg-clip-text text-3xl font-bold tracking-[0.08em] text-transparent sm:text-4xl">
-            Forge Your Legend
+          {/* The h1 carries the search terms; "Forge Your Legend" stays as the
+              big decorative line but is no longer the page's main heading. */}
+          <h1 className="mb-2 text-xs font-semibold tracking-[0.22em] text-gold-500/85 uppercase sm:text-sm">
+            Elden Ring Build Planner &amp; Stat Calculator
           </h1>
+          <p className="font-display text-glow bg-gradient-to-b from-gold-300 via-gold-400 to-gold-700 bg-clip-text text-3xl font-bold tracking-[0.08em] text-transparent sm:text-4xl">
+            Forge Your Legend
+          </p>
           <p className="mt-3 text-sm text-muted-foreground sm:text-base">
             Pick weapons to see the recommended stat spread and starting class.
             Download a PDF file with your level-up plan.
@@ -592,6 +598,8 @@ const BuildPicker = () => {
           )}
         </section>
       </div>
+
+      <AboutPlanner />
     </div>
   );
 }

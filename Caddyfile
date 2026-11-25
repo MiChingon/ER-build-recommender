@@ -1,0 +1,61 @@
+# Production web server config for Railway.
+#
+# Railway builds this repo with Railpack, which serves the Vite build (dist/)
+# with Caddy. A `Caddyfile` at the repo root replaces Railpack's default one
+# (core/providers/node/Caddyfile.template in railwayapp/railpack).
+#
+# This file mirrors that default — same port, /health check, security
+# headers, compression and dist root — with ONE change: unknown paths are no
+# longer rewritten to /index.html (the SPA fallback). The app only has the "/"
+# route, so instead they get public/404.html with a real 404 status, which
+# stops crawlers from seeing every made-up URL as a 200 copy of the home page.
+#
+# Railpack copies the build to /app and runs:
+#   caddy run --config /Caddyfile --adapter caddyfile
+# so the root below is absolute. No Go template placeholders are used, so the
+# file behaves the same whether or not Railpack renders it as a template.
+
+{
+	admin off
+	persist_config off
+	auto_https off
+	log {
+		format json
+	}
+	servers {
+		# trust Railway's proxy
+		trusted_proxies static private_ranges 100.0.0.0/8
+	}
+}
+
+# Railway assigns $PORT.
+:{$PORT:80} {
+	log {
+		format json
+	}
+
+	respond /health 200
+
+	header {
+		X-Content-Type-Options "nosniff"
+		-Server
+	}
+
+	root * /app/dist
+
+	encode gzip zstd
+
+	# Real files and folder-level index.html only. "/" resolves to
+	# dist/index.html; there is deliberately no /index.html fallback.
+	try_files {path} {path}/index.html
+
+	file_server {
+		hide .git .env*
+	}
+
+	# Anything not found: branded 404 page, keeping the 404 status code.
+	handle_errors 404 {
+		rewrite * /404.html
+		file_server
+	}
+}

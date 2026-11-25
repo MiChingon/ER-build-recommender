@@ -1,6 +1,7 @@
 import { classes, STAT_ORDER, type Stat, type StatVector, type StartingClass, getClass } from "../data/classes";
 import { CATEGORY_BASE_AP, gradeOf, valueOf, type Weapon } from "../data/weapons";
 import { DAMAGE_DATA, type DamageType } from "../data/damage-types";
+import { TARNISHED_DAMAGE } from "../data/tarnished-edition";
 import { spells, catalystBoosts } from "../data/spells";
 
 export const DAMAGE_TYPE_LABELS: Record<DamageType, string> = {
@@ -38,6 +39,7 @@ const MIND_ANCHORS_CASTER: ReadonlyArray<readonly [number, number]> = [
 export type UpgradeType = "infusable" | "somber" | "standard-fixed";
 
 export function getUpgradeType(weapon: Weapon): UpgradeType {
+  if (weapon.somber) return "somber";
   const maxTable = weapon.scalingTable?.max;
   if (maxTable) {
     const keys = Object.keys(maxTable);
@@ -77,7 +79,7 @@ export function estimateAttackPower(
   twoHand: boolean,
   affinity: Affinity = "Standard",
 ): APEstimate {
-  const dmgInfo = DAMAGE_DATA.byWeaponId[weapon.id]?.[affinity];
+  const dmgInfo = (DAMAGE_DATA.byWeaponId[weapon.id] ?? TARNISHED_DAMAGE[weapon.id])?.[affinity];
   const aec = dmgInfo ? DAMAGE_DATA.aec[dmgInfo.aecId] : null;
   const reinforce = dmgInfo ? DAMAGE_DATA.reinforce[dmgInfo.reinforceId] : null;
 
