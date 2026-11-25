@@ -4,6 +4,13 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { classes } from "../../../data/classes";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { focusedPortraitStyle } from "@/lib/portrait-frame";
+
+// Portrait frame: 160px wide, 245px tall including the 8px top pad (pt-2) —
+// the size the pre-DLC 200x296 portraits have always rendered at.
+const PORTRAIT_W = 160;
+const PORTRAIT_H = 245;
+const PORTRAIT_PAD_TOP = 8;
 
 const slideVariants = {
   enter: (dir: number) => ({ x: dir * 64, opacity: 0, scale: 0.96 }),
@@ -68,14 +75,57 @@ const ClassCarousel = ({
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 className="flex flex-col items-center gap-2 text-center"
               >
-                <img
-                  src={current.image}
-                  alt={`${current.name} portrait`}
-                  loading="lazy"
-                  width={160}
-                  height={260}
-                  className="rounded-md bg-white/5 object-contain object-bottom pt-2 drop-shadow-[0_0_18px_rgba(212,175,55,0.25)]"
-                />
+                <div className="relative">
+                  {current.portraitFocus ? (
+                    // Same 160x245 frame (incl. the 8px top pad), but the image
+                    // is positioned so its figure — not its transparent canvas
+                    // — fills the frame. Only empty margin is clipped.
+                    <div className="relative h-[245px] w-40 overflow-hidden rounded-md bg-white/5">
+                      <img
+                        src={current.image}
+                        alt={`${current.name} portrait`}
+                        loading="lazy"
+                        className="absolute max-w-none drop-shadow-[0_0_18px_rgba(212,175,55,0.25)]"
+                        style={(() => {
+                          const s = focusedPortraitStyle(current.portraitFocus, {
+                            width: PORTRAIT_W,
+                            height: PORTRAIT_H - PORTRAIT_PAD_TOP,
+                          });
+                          return { width: s.width, height: s.height, left: s.left, top: s.top + PORTRAIT_PAD_TOP };
+                        })()}
+                      />
+                    </div>
+                  ) : (
+                    <img
+                      src={current.image}
+                      alt={`${current.name} portrait`}
+                      loading="lazy"
+                      width={PORTRAIT_W}
+                      height={PORTRAIT_H}
+                      // Fixed frame for every portrait: the pre-DLC files are
+                      // 200x296, so 160px wide + pt-2 renders 245px tall. Squatter
+                      // art (e.g. Heavy Knight, 270x348) would otherwise render
+                      // shorter; object-contain + object-bottom keeps it
+                      // uncropped and grounded.
+                      className="h-[245px] w-40 rounded-md bg-white/5 object-contain object-bottom pt-2 drop-shadow-[0_0_18px_rgba(212,175,55,0.25)]"
+                    />
+                  )}
+                  {current.portraitHasName === false && (
+                    // Mimics the name the older portraits carry in the artwork:
+                    // light Cinzel caps near the bottom, over a soft dark fade
+                    // so it stays legible on any armor colour. aria-hidden
+                    // because the img alt already announces the name.
+                    <div
+                      aria-hidden="true"
+                      data-testid="class-portrait-name"
+                      className="pointer-events-none absolute inset-x-0 bottom-0 flex h-20 items-end justify-center rounded-b-md bg-gradient-to-t from-black/85 via-black/45 to-transparent pb-3"
+                    >
+                      <span className="font-display text-base leading-none tracking-wide text-[#ece4d0] uppercase [text-shadow:0_1px_3px_rgba(0,0,0,0.9)]">
+                        {current.name}
+                      </span>
+                    </div>
+                  )}
+                </div>
                 <Badge variant="outline" className="border-gold-500/50 text-gold-300">
                   Lv {current.level}
                 </Badge>

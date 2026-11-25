@@ -1,4 +1,5 @@
 import { ArmorSelection } from "./armor";
+import type { PortraitFocus } from "../lib/portrait-frame";
 
 export type Stat =
   | "vigor"
@@ -20,6 +21,13 @@ export type StartingClass = {
   description: string;
   startingEquipment: string[];
   image: string;
+  // false when the portrait has no class name baked into the artwork (the
+  // pre-DLC fextralife portraits all do). The class picker then draws the
+  // name over the image itself.
+  portraitHasName?: boolean;
+  // Figure bounding box for portraits with wide transparent margins; the class
+  // picker frames on it so the figure renders as tall as the other classes.
+  portraitFocus?: PortraitFocus;
   starting?: { right?: string[]; left?: string[] };
   armor: ArmorSelection
 };
@@ -223,6 +231,10 @@ export const classes: StartingClass[] = [
     description: "Agile Dexterity knight with a light greatsword and a sturdy medium shield. Efficient start for Dex or Quality builds.",
     startingEquipment: ["Idus Sword", "Silver Grooved Shield", "Silver Grooved set"],
     image: "https://static0.fextralifeimages.com/file/eldenring/f/f5/Idusknight3270px-classes-eldenring-wiki-guide.png",
+    portraitHasName: false,
+    // The figure only fills x 35..220, y 8..287 of this 270x316 canvas (the
+    // rest is transparent), so frame on the figure to match the other classes.
+    portraitFocus: { natural: [270, 316], box: [35, 8, 220, 287] },
     starting: { right: ["idus-sword"], left: ["silver-grooved-shield"] },
     armor: {
       helm: "h-silver-grooved-helm",
@@ -239,6 +251,7 @@ export const classes: StartingClass[] = [
     description: "Armored Strength bruiser with the highest starting Endurance. Starts in heavy steel plate (heavy roll) wielding a curved greatsword.",
     startingEquipment: ["Hefty Scimitar", "Steel set"],
     image: "https://static0.fextralifeimages.com/file/eldenring/7/74/Heavyknight4270px-classes-eldenring-wiki-guide.png",
+    portraitHasName: false,
     starting: { right: ["hefty-scimitar"] },
     armor: {
       helm: "h-steel-helm",
