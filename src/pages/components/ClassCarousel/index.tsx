@@ -74,8 +74,13 @@ const ClassCarousel = ({
                     alt={`${current.name} portrait`}
                     loading="lazy"
                     width={160}
-                    height={260}
-                    className="rounded-md bg-white/5 object-contain object-bottom pt-2 drop-shadow-[0_0_18px_rgba(212,175,55,0.25)]"
+                    height={245}
+                    // Fixed frame for every portrait: the pre-DLC files are
+                    // 200x296, so 160px wide + pt-2 renders 245px tall. The
+                    // Tarnished Edition files are squatter (270x316, 270x348)
+                    // and would otherwise render shorter; object-contain +
+                    // object-bottom keeps them uncropped and grounded.
+                    className="h-[245px] w-40 rounded-md bg-white/5 object-contain object-bottom pt-2 drop-shadow-[0_0_18px_rgba(212,175,55,0.25)]"
                   />
                   {current.portraitHasName === false && (
                     // Mimics the name the older portraits carry in the artwork:
