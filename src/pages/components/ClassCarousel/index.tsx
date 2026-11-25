@@ -68,14 +68,31 @@ const ClassCarousel = ({
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 className="flex flex-col items-center gap-2 text-center"
               >
-                <img
-                  src={current.image}
-                  alt={`${current.name} portrait`}
-                  loading="lazy"
-                  width={160}
-                  height={260}
-                  className="rounded-md bg-white/5 object-contain object-bottom pt-2 drop-shadow-[0_0_18px_rgba(212,175,55,0.25)]"
-                />
+                <div className="relative">
+                  <img
+                    src={current.image}
+                    alt={`${current.name} portrait`}
+                    loading="lazy"
+                    width={160}
+                    height={260}
+                    className="rounded-md bg-white/5 object-contain object-bottom pt-2 drop-shadow-[0_0_18px_rgba(212,175,55,0.25)]"
+                  />
+                  {current.portraitHasName === false && (
+                    // Mimics the name the older portraits carry in the artwork:
+                    // light Cinzel caps near the bottom, over a soft dark fade
+                    // so it stays legible on any armor colour. aria-hidden
+                    // because the img alt already announces the name.
+                    <div
+                      aria-hidden="true"
+                      data-testid="class-portrait-name"
+                      className="pointer-events-none absolute inset-x-0 bottom-0 flex h-20 items-end justify-center rounded-b-md bg-gradient-to-t from-black/85 via-black/45 to-transparent pb-3"
+                    >
+                      <span className="font-display text-base leading-none tracking-wide text-[#ece4d0] uppercase [text-shadow:0_1px_3px_rgba(0,0,0,0.9)]">
+                        {current.name}
+                      </span>
+                    </div>
+                  )}
+                </div>
                 <Badge variant="outline" className="border-gold-500/50 text-gold-300">
                   Lv {current.level}
                 </Badge>

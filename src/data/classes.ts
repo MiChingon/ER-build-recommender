@@ -20,6 +20,10 @@ export type StartingClass = {
   description: string;
   startingEquipment: string[];
   image: string;
+  // false when the portrait has no class name baked into the artwork (the
+  // pre-DLC fextralife portraits all do). The class picker then draws the
+  // name over the image itself.
+  portraitHasName?: boolean;
   starting?: { right?: string[]; left?: string[] };
   armor: ArmorSelection
 };
@@ -223,6 +227,7 @@ export const classes: StartingClass[] = [
     description: "Agile Dexterity knight with a light greatsword and a sturdy medium shield. Efficient start for Dex or Quality builds.",
     startingEquipment: ["Idus Sword", "Silver Grooved Shield", "Silver Grooved set"],
     image: "https://static0.fextralifeimages.com/file/eldenring/f/f5/Idusknight3270px-classes-eldenring-wiki-guide.png",
+    portraitHasName: false,
     starting: { right: ["idus-sword"], left: ["silver-grooved-shield"] },
     armor: {
       helm: "h-silver-grooved-helm",
@@ -239,6 +244,7 @@ export const classes: StartingClass[] = [
     description: "Armored Strength bruiser with the highest starting Endurance. Starts in heavy steel plate (heavy roll) wielding a curved greatsword.",
     startingEquipment: ["Hefty Scimitar", "Steel set"],
     image: "https://static0.fextralifeimages.com/file/eldenring/7/74/Heavyknight4270px-classes-eldenring-wiki-guide.png",
+    portraitHasName: false,
     starting: { right: ["hefty-scimitar"] },
     armor: {
       helm: "h-steel-helm",
