@@ -7,8 +7,9 @@
 # Differences from Railpack's default:
 #   1. No SPA fallback: unknown paths get public/404.html with a real 404
 #      (the app only has the "/" route).
-#   2. Security headers (CSP with frame-ancestors, HSTS, anti-clickjacking,
-#      referrer / permissions policies).
+#   2. Security headers (CSP with frame-ancestors and a per-request nonce,
+#      HSTS, anti-clickjacking, referrer / permissions policies) on every
+#      response, including the 404 page.
 #   3. Cache-Control so Cloudflare can absorb traffic at the edge.
 #   4. Optional origin lock: when ORIGIN_SECRET is set (Railway variable),
 #      only requests carrying it in X-Origin-Verify are served — Cloudflare
@@ -33,6 +34,28 @@
 	}
 }
 
+# Security headers, shared by normal responses and the 404 error route
+# (headers set in the main route are not carried into handle_errors).
+(security_headers) {
+	header {
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()"
+		Cross-Origin-Opener-Policy "same-origin"
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		# Keep in sync with the meta CSP in index.html (this copy adds
+		# frame-ancestors + upgrade-insecure-requests and drops dev-only ws:).
+		# The per-request nonce is for Cloudflare: its bot-detection script
+		# (JavaScript Detections, injected inline at the edge) can only run under
+		# a CSP without 'unsafe-inline' if the response header carries a nonce,
+		# which Cloudflare copies onto the script it injects. Our own HTML has no
+		# inline scripts, so nothing else can use it.
+		Content-Security-Policy "default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; frame-ancestors 'none'; img-src 'self' data: https://eldenring.wiki.fextralife.com https://static0.fextralifeimages.com https://*.google-analytics.com https://*.googletagmanager.com; script-src 'self' 'nonce-{http.request.uuid}' https://www.googletagmanager.com https://static.cloudflareinsights.com; connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://cloudflareinsights.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; manifest-src 'self'; upgrade-insecure-requests"
+		-Server
+	}
+}
+
 # Railway assigns $PORT.
 :{$PORT:80} {
 	log {
@@ -51,18 +74,7 @@
 		close
 	}
 
-	header {
-		X-Content-Type-Options "nosniff"
-		X-Frame-Options "DENY"
-		Referrer-Policy "strict-origin-when-cross-origin"
-		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()"
-		Cross-Origin-Opener-Policy "same-origin"
-		Strict-Transport-Security "max-age=31536000; includeSubDomains"
-		# Keep in sync with the meta CSP in index.html (this copy adds
-		# frame-ancestors + upgrade-insecure-requests and drops dev-only ws:).
-		Content-Security-Policy "default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; frame-ancestors 'none'; img-src 'self' data: https://eldenring.wiki.fextralife.com https://static0.fextralifeimages.com https://*.google-analytics.com https://*.googletagmanager.com; script-src 'self' https://www.googletagmanager.com https://static.cloudflareinsights.com; connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://cloudflareinsights.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; manifest-src 'self'; upgrade-insecure-requests"
-		-Server
-	}
+	import security_headers
 
 	# Vite's hashed bundles never change: cache for a year.
 	@hashed path /assets/*
@@ -87,6 +99,7 @@
 
 	# Anything not found: branded 404 page, keeping the 404 status code.
 	handle_errors 404 {
+		import security_headers
 		rewrite * /404.html
 		file_server
 	}
