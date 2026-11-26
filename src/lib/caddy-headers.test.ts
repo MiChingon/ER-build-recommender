@@ -29,6 +29,16 @@ describe("production security headers (Caddyfile)", () => {
     expect(csp["default-src"]).toEqual(["'self'"]);
   });
 
+  it("CSP carries a per-request nonce (for Cloudflare's injected bot-detection script)", () => {
+    expect(csp["script-src"]).toContain("'nonce-{http.request.uuid}'");
+  });
+
+  it("the 404 error route gets the same security headers", () => {
+    const errors = caddyfile.slice(caddyfile.indexOf("handle_errors"));
+    expect(errors).toContain("import security_headers");
+    expect(caddyfile.match(/import security_headers/g)).toHaveLength(2);
+  });
+
   it("production CSP doesn't carry the dev-only websocket sources", () => {
     expect(csp["connect-src"]).not.toContain("ws:");
     expect(csp["connect-src"]).not.toContain("wss:");
