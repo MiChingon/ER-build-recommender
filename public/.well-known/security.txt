@@ -1,0 +1,7 @@
+# Security contact for tarnishedbuilds.com (RFC 9116).
+# If you found a vulnerability, please report it privately through the
+# contact page below instead of disclosing or exploiting it.
+Contact: https://fabianalmaraz.dev/
+Expires: 2027-11-26T00:00:00.000Z
+Preferred-Languages: en, es
+Canonical: https://tarnishedbuilds.com/.well-known/security.txt

@@ -4,11 +4,16 @@
 # with Caddy. A `Caddyfile` at the repo root replaces Railpack's default one
 # (core/providers/node/Caddyfile.template in railwayapp/railpack).
 #
-# This file mirrors that default — same port, /health check, security
-# headers, compression and dist root — with ONE change: unknown paths are no
-# longer rewritten to /index.html (the SPA fallback). The app only has the "/"
-# route, so instead they get public/404.html with a real 404 status, which
-# stops crawlers from seeing every made-up URL as a 200 copy of the home page.
+# Differences from Railpack's default:
+#   1. No SPA fallback: unknown paths get public/404.html with a real 404
+#      (the app only has the "/" route).
+#   2. Security headers (CSP with frame-ancestors, HSTS, anti-clickjacking,
+#      referrer / permissions policies).
+#   3. Cache-Control so Cloudflare can absorb traffic at the edge.
+#   4. Optional origin lock: when ORIGIN_SECRET is set (Railway variable),
+#      only requests carrying it in X-Origin-Verify are served — Cloudflare
+#      adds that header via a Transform Rule — so nobody can bypass
+#      Cloudflare by hitting the *.up.railway.app origin directly.
 #
 # Railpack copies the build to /app and runs:
 #   caddy run --config /Caddyfile --adapter caddyfile
@@ -36,10 +41,37 @@
 
 	respond /health 200
 
+	# Origin lock (disabled until ORIGIN_SECRET is set in Railway). Read at
+	# request time from the environment, so the secret never lives in git.
+	@direct {
+		not path /health
+		expression `{env.ORIGIN_SECRET} != "" && {http.request.header.X-Origin-Verify} != {env.ORIGIN_SECRET}`
+	}
+	respond @direct "Forbidden" 403 {
+		close
+	}
+
 	header {
 		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()"
+		Cross-Origin-Opener-Policy "same-origin"
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		# Keep in sync with the meta CSP in index.html (this copy adds
+		# frame-ancestors + upgrade-insecure-requests and drops dev-only ws:).
+		Content-Security-Policy "default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; frame-ancestors 'none'; img-src 'self' data: https://eldenring.wiki.fextralife.com https://static0.fextralifeimages.com https://*.google-analytics.com https://*.googletagmanager.com; script-src 'self' https://www.googletagmanager.com https://static.cloudflareinsights.com; connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://cloudflareinsights.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; manifest-src 'self'; upgrade-insecure-requests"
 		-Server
 	}
+
+	# Vite's hashed bundles never change: cache for a year.
+	@hashed path /assets/*
+	header @hashed Cache-Control "public, max-age=31536000, immutable"
+
+	# The HTML shell: browsers always revalidate; a shared cache (Cloudflare,
+	# once a Cache Rule makes HTML eligible) may serve it for 2 minutes.
+	@html path / /index.html
+	header @html Cache-Control "public, max-age=0, must-revalidate, s-maxage=120"
 
 	root * /app/dist
 

@@ -6,29 +6,30 @@
     <meta name="theme-color" content="#d4af37" />
 
     <!--
-      Content-Security-Policy: defensive baseline for a static SPA.
-      - script-src whitelists Google Tag Manager (gtag.js loader) and the
-        Cloudflare Web Analytics beacon — Cloudflare auto-injects the
-        latter at the edge when Web Analytics is enabled. 'unsafe-inline'
-        is a practical concession for inline JSON-LD; the codebase has no
-        eval / Function / dangerouslySetInnerHTML.
+      Content-Security-Policy.
+      Production also gets a stricter copy of this policy as an HTTP header
+      from the root Caddyfile (adds frame-ancestors, which meta tags can't
+      set, and drops the dev-only 'unsafe-inline' script and ws: / wss:).
+      Browsers enforce both, so the stricter one wins — keep the two in sync
+      when adding a host.
+      - script-src: only our own bundle, Google Tag Manager (gtag.js) and
+        the Cloudflare Web Analytics beacon. The production header has NO
+        'unsafe-inline', so no inline script can run there; it stays in this
+        meta copy only because the Vite dev server injects an inline React
+        refresh preamble. The gtag bootstrap lives in
+        src/components/GoogleAnalytics.tsx (bundled), not inline. JSON-LD
+        blocks are data, not executed, so CSP doesn't apply to them.
       - style-src 'unsafe-inline' is required by Motion (framer-motion),
         which animates via inline style attributes.
-      - img-src whitelists the fextralife wiki hosts where weapon, armor,
-        talisman, and spell icons are hotlinked from (static0.fextralifeimages.com
-        serves the newer Tarnished Edition item images).
-      - connect-src covers Google Analytics beacons, Cloudflare Web
-        Analytics, and the Vite dev HMR websocket. ws: is harmless in
-        production (no dev server) but lets local development continue
-        to work under the same policy.
-      - frame-ancestors is omitted here because browsers ignore it when
-        delivered via meta tag; set the same protection via the host's
-        X-Frame-Options / CSP HTTP header instead (Cloudflare's "Always
-        Use HTTPS" plus its security defaults already block framing).
+      - img-src: fextralife hosts for item/class art; Google Analytics
+        hosts for GA4's image-beacon fallback.
+      - connect-src: Google Analytics / Tag Manager beacons, Cloudflare Web
+        Analytics, and ws: / wss: for the Vite dev server's HMR socket
+        (meta only — the production header omits them).
     -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; img-src 'self' data: https://eldenring.wiki.fextralife.com https://static0.fextralifeimages.com; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://static.cloudflareinsights.com; connect-src 'self' ws: wss: https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://cloudflareinsights.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:;"
+      content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; img-src 'self' data: https://eldenring.wiki.fextralife.com https://static0.fextralifeimages.com https://*.google-analytics.com https://*.googletagmanager.com; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://static.cloudflareinsights.com; connect-src 'self' ws: wss: https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://cloudflareinsights.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; manifest-src 'self';"
     />
 
     <!--
